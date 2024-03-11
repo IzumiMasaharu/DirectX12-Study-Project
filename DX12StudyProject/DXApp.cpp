@@ -59,10 +59,10 @@ int DXApp::Run()
     return (int)msg.wParam;
 }
 //初始化窗口类
-bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR WindowClassName)
+bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR windowclassName)
 {
     //窗口类命名
-    WC.SetWCName(WindowClassName);
+    WC.SetWCName(windowclassName);
     //填写窗口类结构体
     WNDCLASSEX wc = { 0 };
     wc.cbSize = sizeof(wc);
@@ -99,18 +99,18 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pW
     int width = R.right - R.left;
     int height = R.bottom - R.top;
     //创建窗口
-    Wnd.WndHwnd = CreateWindowEx(0, WC.GetWCName(),
+    Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
         Wnd.pWindowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
         CW_USEDEFAULT, CW_USEDEFAULT, width, height,
         nullptr , nullptr, WC.GetInstance(),nullptr);
 
-    if (!Wnd.WndHwnd)
+    if (!Wnd.wndHwnd)
     {
         MessageBox(nullptr, L"CreateWindow Failed.", nullptr, 0);
         return false;
     }
     if (!mhWndHwnd)
-        mhWndHwnd = Wnd.WndHwnd;
+        mhWndHwnd = Wnd.wndHwnd;
 
     //展示窗口
     ShowWindow(mhWndHwnd, SW_SHOW);
@@ -126,20 +126,20 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR p
     Wnd.SetWndName(pWndName);
     Wnd.SetWndPos(x, y, wx, wy);
 
-    RECT R = { 0, 0, Wnd.win_wx, Wnd.win_wy };
+    RECT R = { 0, 0, Wnd.mWin_wx, Wnd.mWin_wy };
     AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
     //创建窗口
-    Wnd.WndHwnd = CreateWindowEx(0, WC.GetWCName(),
+    Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
         Wnd.pWindowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
-        Wnd.win_x, Wnd.win_y, Wnd.win_wx, Wnd.win_wy,nullptr, nullptr, WC.GetInstance(), nullptr);
+        Wnd.mWin_x, Wnd.mWin_y, Wnd.mWin_wx, Wnd.mWin_wy,nullptr, nullptr, WC.GetInstance(), nullptr);
     
-    if (!Wnd.WndHwnd)
+    if (!Wnd.wndHwnd)
     {
         MessageBox(nullptr, L"CreateWindow Failed.", nullptr, 0);
         return false;
     }
     if (!mhWndHwnd) 
-        mhWndHwnd = Wnd.WndHwnd;
+        mhWndHwnd = Wnd.wndHwnd;
     //展示窗口
     ShowWindow(mhWndHwnd, SW_SHOW);
     UpdateWindow(mhWndHwnd);
@@ -498,18 +498,18 @@ DXApp::WindowClass::WindowClass(HINSTANCE hInstance) :hWndClassInst(hInstance)
 //注销窗口类
 DXApp::WindowClass::~WindowClass()
 {
-    UnregisterClass(WindowClassName, GetInstance());
+    UnregisterClass(windowclassName, GetInstance());
 }
 //设置窗口类名称
 const wchar_t* DXApp::WindowClass::SetWCName(LPCTSTR WCName)
 {
-    WindowClassName = WCName;
-    return WindowClassName;
+    windowclassName = WCName;
+    return windowclassName;
 }
 //返回窗口类名称
 const wchar_t* DXApp::WindowClass::GetWCName()const
 {
-    return WindowClassName;
+    return windowclassName;
 }
 //返回窗口类实例句柄
 HINSTANCE DXApp::WindowClass::GetInstance()const
@@ -520,8 +520,8 @@ HINSTANCE DXApp::WindowClass::GetInstance()const
 //销毁窗口
 DXApp::Window::~Window()
 {
-    if (WndHwnd != nullptr)
-        DestroyWindow(WndHwnd);
+    if (wndHwnd != nullptr)
+        DestroyWindow(wndHwnd);
 }
 //设置窗口名称
 const wchar_t* DXApp::Window::SetWndName(LPCTSTR WndName)
@@ -532,13 +532,13 @@ const wchar_t* DXApp::Window::SetWndName(LPCTSTR WndName)
 //设置窗口坐标数据
 void DXApp::Window::SetWndPos(int x, int y, int wx, int wy)
 {
-    win_x = x;
-    win_y = y;
-    win_wx = wx;
-    win_wy = wy;
+    mWin_x = x;
+    mWin_y = y;
+    mWin_wx = wx;
+    mWin_wy = wy;
 }
 //获取窗口句柄
 HWND DXApp::Window::GetWndHwnd()const
 {
-    return this->WndHwnd;
+    return this->wndHwnd;
 }

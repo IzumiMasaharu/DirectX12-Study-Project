@@ -77,7 +77,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 			float x = r * cosf(theta);
 			float z = r * sinf(theta);
 
-			vertex.Position = XMFLOAT3(x, y, z);
+			vertex.position = XMFLOAT3(x, y, z);
 			vertex.Texture.x = (float)j / sliceCount;
 			vertex.Texture.y = 1.0f-(float)i / stackCount;
 
@@ -138,9 +138,9 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBall(float Radius, uint32_t
 			Vertex v;
 
 			// spherical to cartesian
-			v.Position.x = Radius * sinf(phi) * cosf(theta);
-			v.Position.y = Radius * cosf(phi);
-			v.Position.z = Radius * sinf(phi) * sinf(theta);
+			v.position.x = Radius * sinf(phi) * cosf(theta);
+			v.position.y = Radius * cosf(phi);
+			v.position.z = Radius * sinf(phi) * sinf(theta);
 
 			// Partial derivative of P with respect to theta
 			v.Tangent.x = -Radius * sinf(phi) * sinf(theta);
@@ -150,7 +150,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBall(float Radius, uint32_t
 			XMVECTOR T = XMLoadFloat3(&v.Tangent);
 			XMStoreFloat3(&v.Tangent, XMVector3Normalize(T));
 
-			XMVECTOR p = XMLoadFloat3(&v.Position);
+			XMVECTOR p = XMLoadFloat3(&v.position);
 			XMStoreFloat3(&v.Normal, XMVector3Normalize(p));
 
 			v.Texture.x = theta / XM_2PI;
@@ -171,9 +171,9 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBall(float Radius, uint32_t
 
 	uint32_t baseIndex = 1;
 	uint32_t ringVertexCount = sliceCount + 1;
-	for (uint32_t i = 0; i < stackCount - 2; ++i)
+	for (uint32_t i = 0; i < stackCount - 2; i++)
 	{
-		for (uint32_t j = 0; j < sliceCount; ++j)
+		for (uint32_t j = 0; j < sliceCount; j++)
 		{
 			MeshBallData.Indices_32.push_back(baseIndex + i * ringVertexCount + j);
 			MeshBallData.Indices_32.push_back(baseIndex + i * ringVertexCount + j + 1);
@@ -189,7 +189,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBall(float Radius, uint32_t
 
 	baseIndex = southPoleIndex - ringVertexCount;
 
-	for (uint32_t i = 0; i < sliceCount; ++i)
+	for (uint32_t i = 0; i < sliceCount; i++)
 	{
 		MeshBallData.Indices_32.push_back(southPoleIndex);
 		MeshBallData.Indices_32.push_back(baseIndex + i);
@@ -220,7 +220,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGird(float length, float wi
 		{
 			Vertex girdVertex;
 
-			girdVertex.Position = XMFLOAT3(-halfWidth + xi * deltaX, 0.0f, halfLength - zi * deltaZ);
+			girdVertex.position = XMFLOAT3(-halfWidth + xi * deltaX, 0.0f, halfLength - zi * deltaZ);
 			girdVertex.Texture.x = xi * deltaU;
 			girdVertex.Texture.y = 1.0f - zi * deltaV;
 
@@ -247,6 +247,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGird(float length, float wi
 
 	return MeshGirdData;
 }
+
 //获取存有unit16_t类型的索引vector
 std::vector<uint16_t>& GeometryGenerator::MeshData::GetIndices_16()
 {

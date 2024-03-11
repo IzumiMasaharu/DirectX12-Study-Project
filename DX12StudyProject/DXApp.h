@@ -18,7 +18,7 @@ public:
 	int Run();
 protected:
 	//初始化实现
-	bool InitWindowClass(WindowClass& WC,LPCTSTR WindowClassName);//窗口类初始化
+	bool InitWindowClass(WindowClass& WC,LPCTSTR windowclassName);//窗口类初始化
 	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);//窗口初始化重载1
 	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName,
 		int x, int y, int wx, int wy);//窗口初始化重载2
@@ -117,7 +117,7 @@ public:
 	HINSTANCE GetInstance()const;//返回窗口类实例句柄
 private:
 	HINSTANCE hWndClassInst;
-	const wchar_t* WindowClassName = nullptr;
+	const wchar_t* windowclassName = nullptr;
 };
 //类：窗口的声明
 class DXApp::Window
@@ -134,10 +134,10 @@ public:
 	void SetWndPos(int x, int y, int wx, int wy);//设置窗口坐标数据
 	HWND GetWndHwnd()const;//获取窗口句柄
 private:
-	HWND WndHwnd = nullptr;
+	HWND wndHwnd = nullptr;
 	LPCTSTR pWindowName = nullptr;
-	int win_x = 0;
-	int win_y = 0;
-	int win_wx = 0;
-	int win_wy = 0;
+	int32_t mWin_x = 0;
+	int32_t mWin_y = 0;
+	int32_t mWin_wx = 0;
+	int32_t mWin_wy = 0;
 };

@@ -4,17 +4,17 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 
 DxException::DxException(HRESULT hr, const std::wstring& function_name, const std::wstring& file_name, UINT line_num)
-	:ErrorCode(hr),FunctionName(function_name),FileName(file_name),LineNum(line_num)
+	:errorCode(hr),functionName(function_name),fileName(file_name),lineNum(line_num)
 {
 	OutputDebugString(ErrorMessageString().c_str());
 }
 //读取错误信息，并将错误信息转化为可输出的字符串
 std::wstring DxException::ErrorMessageString()const
 {
-	_com_error err(ErrorCode);
+	_com_error err(errorCode);
 	std::wstring msg = err.ErrorMessage();
 
-	return L"\n" + FunctionName + L"\n错误位于：" + FileName + L"第" + std::to_wstring(LineNum) + L"行;\n错误内容: " + msg + L"\n\n";
+	return L"\n" + functionName + L"\n错误位于：" + fileName + L"第" + std::to_wstring(lineNum) + L"行;\n错误内容: " + msg + L"\n\n";
 }
 
 //创建默认缓冲区
@@ -25,14 +25,14 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
     UINT64 byteSize,
     ComPtr<ID3D12Resource>& uploadBuffer)
 {
-    ComPtr<ID3D12Resource> DefaultBuffer;
+    ComPtr<ID3D12Resource> defaultBuffer;
 
     //创建默认缓冲区和上传缓冲区
     ThrowIfFailed(device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
         D3D12_RESOURCE_STATE_COMMON,
-        nullptr, IID_PPV_ARGS(DefaultBuffer.GetAddressOf())))
+        nullptr, IID_PPV_ARGS(defaultBuffer.GetAddressOf())))
     ThrowIfFailed(device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
@@ -44,18 +44,18 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
     subResourceData.RowPitch = byteSize;
     subResourceData.SlicePitch = subResourceData.RowPitch;
 
-    cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DefaultBuffer.Get(),
+    cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(),
         D3D12_RESOURCE_STATE_COMMON,
         D3D12_RESOURCE_STATE_COPY_DEST));
 	//将CPU内存中的资源复制到GPU的默认缓冲区中
 	//subResourceData ---> uploadBuffer ---CopyTextureRegion/CopyBufferRegion---> DefaultBuffer
-	UpdateSubresources<1>(cmdList, DefaultBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+	UpdateSubresources<1>(cmdList, defaultBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
 
-    cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DefaultBuffer.Get(),
+    cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(),
         D3D12_RESOURCE_STATE_COPY_DEST,
         D3D12_RESOURCE_STATE_GENERIC_READ));
 
-	return DefaultBuffer;
+	return defaultBuffer;
 }
 
 //将数据大小字节对齐为256b以适配常量缓冲区
@@ -82,7 +82,7 @@ ComPtr<ID3DBlob> DXBase::CompileShaderOnline(
 		Entrypoint.c_str(), TargetShaderType.c_str(), compileFlags, 0, &byteCode, &errors);
 
 	if (errors != nullptr)
-		OutputDebugString((wchar_t*)errors->GetBufferPointer());
+		OutputDebugStringA((char*)errors->GetBufferPointer());
 
 	ThrowIfFailed(hr)
 
@@ -110,7 +110,7 @@ ComPtr<ID3DBlob> DXBase::LoadBinaryToBlob(const std::wstring& Binary_filename)
 const float MathHelper::Infinity = FLT_MAX;
 const float MathHelper::Pi = 3.1415926535f;
 //将极坐标转换为直角坐标
-XMVECTOR SphericalToCartesian(float radius, float theta, float phi)
+XMVECTOR MathHelper::SphericalToCartesian(float radius, float theta, float phi)
 {
 	return XMVectorSet(
 		radius * sinf(phi) * cosf(theta),
@@ -119,7 +119,7 @@ XMVECTOR SphericalToCartesian(float radius, float theta, float phi)
 		1.0f);
 }
 //返回M的逆矩阵的转置矩阵
-XMMATRIX InverseTranspose(CXMMATRIX M)
+XMMATRIX MathHelper::InverseTranspose(CXMMATRIX M)
 {
 	XMMATRIX A = M;
 	A.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);

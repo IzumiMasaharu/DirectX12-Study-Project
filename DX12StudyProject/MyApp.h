@@ -25,6 +25,7 @@ private:
 	void BuildShaders();//着色器，启动！
 	void BuildInputLayout();//创建输入布局
 	void BuildMeshGeometry();//创建网格体
+	void BuildImportedGeometry();//创建通过文件导入的模型
 	void BuildMaterials();//创建材质
 	void BuildRenderItems();//创建渲染项
 	void BuildFrameResources();//创建帧资源
@@ -69,8 +70,6 @@ private:
 	POINT mLastMousePos;
 
 	bool mIsWireframe = false;
-
-	FLOAT RGBA[4] = { 0.0f,0.0f,0.0f,1.0f };
 
 	DirectX::XMFLOAT3 mEyePos = { 0.0f,0.0f,0.0f };
 	float mTheta = 0;//极点-原点在x-z面上投影与x轴正半轴夹角

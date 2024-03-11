@@ -69,10 +69,10 @@ public:
 public:
     std::wstring ErrorMessageString()const;//读取错误信息，并将错误信息转化为可输出的字符串
 public:
-    HRESULT ErrorCode = S_OK;
-    std::wstring FunctionName;
-    std::wstring FileName;
-    UINT LineNum = -1;
+    HRESULT errorCode = S_OK;
+    std::wstring functionName;
+    std::wstring fileName;
+    UINT lineNum = -1;
 };
 class DXBase
 {
@@ -161,10 +161,10 @@ struct SubmeshGeometry
 {
     std::string name;
 
-    UINT IndexCount = 0;//索引数目
-    UINT IndexStartLocation = 0;//索引开始位置
-    UINT VertexBaseLocation = 0;//基准定点位置
-    DirectX::BoundingBox Bounds;//设置边界框
+    UINT indexCount = 0;//索引数目
+    UINT indexStartLocation = 0;//索引开始位置
+    UINT vertexBaseLocation = 0;//基准定点位置
+    DirectX::BoundingBox bounds;//设置边界框
 };
 //存储全部网格体的结构体
 struct MeshGeometry
@@ -174,9 +174,9 @@ public:
     D3D12_VERTEX_BUFFER_VIEW VertexBufferView()const
     {
         D3D12_VERTEX_BUFFER_VIEW vbv;
-        vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
-        vbv.StrideInBytes = VertexByteStride;
-        vbv.SizeInBytes = VertexBufferByteSize;
+        vbv.BufferLocation = vertexBufferGPU->GetGPUVirtualAddress();
+        vbv.StrideInBytes = vertexByteStride;
+        vbv.SizeInBytes = vertexBufferByteSize;
 
         return vbv;
     }
@@ -184,36 +184,36 @@ public:
     D3D12_INDEX_BUFFER_VIEW IndexBufferView()const
     {
         D3D12_INDEX_BUFFER_VIEW ibv;
-        ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
-        ibv.Format = IndexFormat;
-        ibv.SizeInBytes = IndexBufferByteSize;
+        ibv.BufferLocation = indexBufferGPU->GetGPUVirtualAddress();
+        ibv.Format = indexFormat;
+        ibv.SizeInBytes = indexBufferByteSize;
 
         return ibv;
     }
     // 在向GPU上传完资源之后释放顶点上传缓冲区和索引上传缓冲区
     void DisposeUploaders()
     {
-        VertexBufferUploader = nullptr;
-        IndexBufferUploader = nullptr;
+        vertexBufferUploader = nullptr;
+        indexBufferUploader = nullptr;
     }
 public:
-    std::string Name;
+    std::string name;
 
-    Microsoft::WRL::ComPtr<ID3DBlob> VertexBufferCPU = nullptr;
-    Microsoft::WRL::ComPtr<ID3DBlob> IndexBufferCPU = nullptr;
+    Microsoft::WRL::ComPtr<ID3DBlob> vertexBufferCPU = nullptr;
+    Microsoft::WRL::ComPtr<ID3DBlob> indexBufferCPU = nullptr;
     //                       ↓
-    Microsoft::WRL::ComPtr<ID3D12Resource> VertexBufferUploader = nullptr;
-    Microsoft::WRL::ComPtr<ID3D12Resource> IndexBufferUploader = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> vertexBufferUploader = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> indexBufferUploader = nullptr;
     //                       ↓
-    Microsoft::WRL::ComPtr<ID3D12Resource> VertexBufferGPU = nullptr;
-    Microsoft::WRL::ComPtr<ID3D12Resource> IndexBufferGPU = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> vertexBufferGPU = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> indexBufferGPU = nullptr;
 
-    UINT VertexByteStride = 0;//顶点结构体大小
-    UINT VertexBufferByteSize = 0;//顶点缓冲区大小
-    DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;//资源格式
-    UINT IndexBufferByteSize = 0;//索引缓冲区大小
+    UINT vertexByteStride = 0;//顶点结构体大小
+    UINT vertexBufferByteSize = 0;//顶点缓冲区大小
+    DXGI_FORMAT indexFormat = DXGI_FORMAT_R16_UINT;//资源格式
+    UINT indexBufferByteSize = 0;//索引缓冲区大小
 
-    std::unordered_map<std::string, SubmeshGeometry> SubmeshList;//将全部网格体拆分为若干单个网格体，存储到无序图中
+    std::unordered_map<std::string, SubmeshGeometry> submeshList;//将全部网格体拆分为若干单个网格体，存储到无序图中
 };
 
 //存储材质数据的结构体
@@ -221,14 +221,34 @@ struct Material
 {
     std::string name;
 
-    UINT MaterialConstBufferIndex = -1;//该材质在常量缓冲区中的索引
-    UINT DiffuseSrvHeapIndex = -1;//漫反射纹理在SRV堆中的索引
-    UINT NumDirtyFrames = -1;//待更新的帧资源数量
+    UINT materialConstBufferIndex = -1;//该材质在常量缓冲区中的索引
+    UINT diffuseSrvHeapIndex = -1;//漫反射纹理在SRV堆中的索引
+    UINT normalSrvHeapIndex = -1;
+    UINT numDirtyFrames = -1;//待更新的帧资源数量
 
-    DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };//漫反射反照率
-    DirectX::XMFLOAT3 FresneRf0 = { 0.0f,0.0f,0.0f };//菲涅尔效应材质属性Rf（0°）
-    float Roughness = 0.0f;//材质粗糙度
-    DirectX::XMFLOAT4X4 MaterialTransform = MathHelper::Identity4x4();
+    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };//漫反射反照率
+    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };//菲涅尔效应材质属性Rf（0°）
+    float roughness = 0.0f;//材质粗糙度
+    DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
+};
+//参数顺序不可改变，且与hlsl中顺序一一对应，以保证shader能对参数正确打包为4D向量
+struct Light
+{
+    DirectX::XMFLOAT3 rgbIntensity = { 1.0f, 1.0f, 1.0f };//光源的RGB值
+    float start = 0.0f;                                   //点光源、聚光灯使用，指定光源能照射到的最近距离
+    DirectX::XMFLOAT3 direction = { 0.0f, 0.0f, 1.0f };  //平行光、聚光灯使用，指定光源方向
+    float end = 10.0f;                                    //点光源、聚光灯使用，指定光源能照射到的最远距离
+    DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };    //点光源、聚光灯使用，指定光源位置
+    float spotPower = 128.0f;                              //聚光灯使用,
+};
+struct Texture
+{
+    std::string name;
+
+    std::wstring filename;
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> uploadHeap = nullptr;
 };
 
 #ifndef ThrowIfFailed

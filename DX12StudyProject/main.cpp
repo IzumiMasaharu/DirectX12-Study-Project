@@ -7,11 +7,11 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 #endif
     try
     {
-        MyApp MyDXProject(hInstance);
-        if (!MyDXProject.Init())
+        MyApp myDXProject(hInstance);
+        if (!myDXProject.Init())
             return 0;
 
-        return MyDXProject.Run();
+        return myDXProject.Run();
     }
     catch (DxException& error)
     {

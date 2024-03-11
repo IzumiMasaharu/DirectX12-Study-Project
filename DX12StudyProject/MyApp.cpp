@@ -150,6 +150,7 @@ bool MyApp::Init()
 	BuildShaders();
 	BuildInputLayout();
 	BuildMeshGeometry();
+	BuildImportedGeometry();
 	BuildMaterials();
 	BuildRenderItems();
 	BuildFrameResources();
@@ -190,20 +191,16 @@ void MyApp::Update(const GameTimer& GTimer)
 	mCurrentFrameResourceIndex = (mCurrentFrameResourceIndex + 1) % gNumFrameResources;
 	mCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
 
-	if (mCurrentFrameResource->Fence != 0 && mFence->GetCompletedValue() < mCurrentFrameResource->Fence)
+	if (mCurrentFrameResource->fence != 0 && mFence->GetCompletedValue() < mCurrentFrameResource->fence)
 	{
 		HANDLE event = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
-		ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFrameResource->Fence, event))
+		ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFrameResource->fence, event))
 		if (event)
 		{
 			WaitForSingleObject(event, INFINITE);
 			CloseHandle(event);
 		}
 	}
-
-	RGBA[0] = CircleRun(GTimer.TotalTime() * 0.05f, 1.0f);
-	RGBA[1] = CircleRun(GTimer.TotalTime() * 0.07f, 1.0f);
-	RGBA[2] = CircleRun(GTimer.TotalTime() * 0.11f, 1.0f);
 
 	UpdateMaterialConstBuffers();
 	UpdateObjectsConstBuffers();
@@ -217,7 +214,7 @@ void MyApp::Update(const GameTimer& GTimer)
 //绘制帧画面
 void MyApp::Draw(const GameTimer& GTimer)
 {
-	auto cmdListAllocator = mCurrentFrameResource->CommandAllocator;
+	auto cmdListAllocator = mCurrentFrameResource->commandAllocator;
 
 	ThrowIfFailed(cmdListAllocator->Reset())
 	if (mIsWireframe)
@@ -231,7 +228,7 @@ void MyApp::Draw(const GameTimer& GTimer)
 	mCommandList->ResourceBarrier(1,
 		&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	mCommandList->ClearRenderTargetView(CurrentBackBufferView(), RGBA, 0, nullptr);
+	mCommandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0, nullptr);
 	mCommandList->ClearDepthStencilView(DepthStencilBufferView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilBufferView());
@@ -242,7 +239,7 @@ void MyApp::Draw(const GameTimer& GTimer)
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 	auto PassCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	PassCbvHandle.Offset(mPassCbvOffset + mCurrentFrameResourceIndex, mCBV_SRV_UAVDescriptorSize);
-	mCommandList->SetGraphicsRootDescriptorTable(1, PassCbvHandle);
+	mCommandList->SetGraphicsRootDescriptorTable(2, PassCbvHandle);
 
 	DrawRenderItems(mCommandList.Get(), mOpaqueRenderItems);
 
@@ -252,12 +249,12 @@ void MyApp::Draw(const GameTimer& GTimer)
 	ThrowIfFailed(mCommandList->Close())
 
 	ID3D12CommandList* CommandList[] = { mCommandList.Get() };
-	mCommandQueue->ExecuteCommandLists(_countof(CommandList), CommandList);
+	mCommandQueue->ExecuteCommandLists(_countof(CommandList), CommandList); 
 
 	ThrowIfFailed(mSwapChain->Present(0, 0))
 
 	mCurrentBackBuffer = (mCurrentBackBuffer + 1) % SwapChainBufferCount;
-	mCurrentFrameResource->Fence = ++mCurrentFence;
+	mCurrentFrameResource->fence = ++mCurrentFence;
 	mCommandQueue->Signal(mFence.Get(), mCurrentFence);
 }
 //当鼠标按下时调用
@@ -305,6 +302,7 @@ void MyApp::BuildRootSignature()
 	CBVTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
 	CD3DX12_DESCRIPTOR_RANGE CBVTable2;
 	CBVTable2.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 2);
+
 	CD3DX12_ROOT_PARAMETER slotRootParameter[3];
 	slotRootParameter[0].InitAsDescriptorTable(1, &CBVTable0);
 	slotRootParameter[1].InitAsDescriptorTable(1, &CBVTable1);
@@ -313,23 +311,23 @@ void MyApp::BuildRootSignature()
 	CD3DX12_ROOT_SIGNATURE_DESC RootSignatureDesc(3, slotRootParameter, 0, nullptr,
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
-	ComPtr<ID3DBlob> SerializedRootSignature = nullptr;
-	ComPtr<ID3DBlob> ErrorBlob = nullptr;
+	ComPtr<ID3DBlob> serializedRootSignature = nullptr;
+	ComPtr<ID3DBlob> errorBlob = nullptr;
 	HRESULT hr = D3D12SerializeRootSignature(&RootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
-		SerializedRootSignature.GetAddressOf(), ErrorBlob.GetAddressOf());
+		serializedRootSignature.GetAddressOf(), errorBlob.GetAddressOf());
 
-	if (ErrorBlob != nullptr)
-		::OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
+	if (errorBlob != nullptr)
+		::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
 	ThrowIfFailed(hr)
 
-	ThrowIfFailed(md3dDevice->CreateRootSignature(0, SerializedRootSignature->GetBufferPointer(),
-		SerializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)))
+	ThrowIfFailed(md3dDevice->CreateRootSignature(0, serializedRootSignature->GetBufferPointer(),
+		serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)))
 }
 //着色器，启动！
 void MyApp::BuildShaders()
 {
-	mShaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Color.hlsl", nullptr, "VS", "vs_5_1");
-	mShaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Color.hlsl", nullptr, "PS", "ps_5_1");
+	mShaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "VS", "vs_5_1");
+	mShaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "PS", "ps_5_1");
 }
 //创建输入布局
 void MyApp::BuildInputLayout()
@@ -337,7 +335,7 @@ void MyApp::BuildInputLayout()
 	mInputLayout =
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
-		{"COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 	};
 }
 //创建网格体
@@ -354,59 +352,129 @@ void MyApp::BuildMeshGeometry()
 
 	SubmeshGeometry Geo_Cylinder;
 	Geo_Cylinder.name = "Geo_Cylinder";
-	Geo_Cylinder.VertexBaseLocation = CylinderVertexOffset;
-	Geo_Cylinder.IndexStartLocation = CylinderIndexOffset;
-	Geo_Cylinder.IndexCount = (UINT)cylinder.Indices_32.size();
+	Geo_Cylinder.vertexBaseLocation = CylinderVertexOffset;
+	Geo_Cylinder.indexStartLocation = CylinderIndexOffset;
+	Geo_Cylinder.indexCount = (UINT)cylinder.Indices_32.size();
 	SubmeshGeometry Geo_Ball;
 	Geo_Ball.name = "Geo_Ball";
-	Geo_Ball.VertexBaseLocation = BallVertexOffset;
-	Geo_Ball.IndexStartLocation = BallIndexOffset;
-	Geo_Ball.IndexCount = (UINT)ball.Indices_32.size();
+	Geo_Ball.vertexBaseLocation = BallVertexOffset;
+	Geo_Ball.indexStartLocation = BallIndexOffset;
+	Geo_Ball.indexCount = (UINT)ball.Indices_32.size();
 
 	auto totalVertexCount =
 		ball.Vertices.size() +
 		cylinder.Vertices.size();
 
-	std::vector<VertexInfo> vertices(totalVertexCount);
+	std::vector<VertexConstants> vertices(totalVertexCount);
 	std::vector<std::uint16_t> indices;
 	UINT k = 0;
 	for (size_t i = 0; i < cylinder.Vertices.size(); i++,k++)
 	{
-		vertices[k].Pos = cylinder.Vertices[i].Position;
-		vertices[k].Color = XMFLOAT4(DirectX::Colors::DarkGreen);
+		vertices[k].pos = cylinder.Vertices[i].position;
+		vertices[k].normal = cylinder.Vertices[i].Normal;
 	}
 	for (size_t i = 0; i < ball.Vertices.size(); i++,k++)
 	{
-		vertices[k].Pos = ball.Vertices[i].Position;
-		vertices[k].Color = XMFLOAT4(DirectX::Colors::Red);
+		vertices[k].pos = ball.Vertices[i].position;
+		vertices[k].normal = ball.Vertices[i].Normal;
 	}
 
 	indices.insert(indices.end(), std::begin(cylinder.GetIndices_16()), std::end(cylinder.GetIndices_16()));
 	indices.insert(indices.end(), std::begin(ball.GetIndices_16()), std::end(ball.GetIndices_16()));
 
-	const UINT VertexBufferByteSize = (UINT)vertices.size() * sizeof(VertexInfo);
-	const UINT IndexBufferByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+	const UINT vertexBufferByteSize = (UINT)vertices.size() * sizeof(VertexConstants);
+	const UINT indexBufferByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
 	auto Geo = std::make_unique<MeshGeometry>();
-	Geo->Name = "Geo";
+	Geo->name = "Geo";
 
-	ThrowIfFailed(D3DCreateBlob(VertexBufferByteSize, &Geo->VertexBufferCPU))
-	CopyMemory(Geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), VertexBufferByteSize);
-	ThrowIfFailed(D3DCreateBlob(IndexBufferByteSize, &Geo->IndexBufferCPU))
-	CopyMemory(Geo->IndexBufferCPU->GetBufferPointer(),indices.data(), IndexBufferByteSize);
+	ThrowIfFailed(D3DCreateBlob(vertexBufferByteSize, &Geo->vertexBufferCPU))
+	CopyMemory(Geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vertexBufferByteSize);
+	ThrowIfFailed(D3DCreateBlob(indexBufferByteSize, &Geo->indexBufferCPU))
+	CopyMemory(Geo->indexBufferCPU->GetBufferPointer(),indices.data(), indexBufferByteSize);
 
-	Geo->VertexBufferGPU = DXBase::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), vertices.data(), VertexBufferByteSize, Geo->VertexBufferUploader);
-	Geo->IndexBufferGPU = DXBase::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), indices.data(), IndexBufferByteSize, Geo->IndexBufferUploader);
+	Geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), vertices.data(), vertexBufferByteSize, Geo->vertexBufferUploader);
+	Geo->indexBufferGPU = DXBase::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), indices.data(), indexBufferByteSize, Geo->indexBufferUploader);
 
-	Geo->VertexByteStride = sizeof(VertexInfo);
-	Geo->VertexBufferByteSize = VertexBufferByteSize;
-	Geo->IndexFormat = DXGI_FORMAT_R16_UINT;
-	Geo->IndexBufferByteSize = IndexBufferByteSize;
+	Geo->vertexByteStride = sizeof(VertexConstants);
+	Geo->vertexBufferByteSize = vertexBufferByteSize;
+	Geo->indexFormat = DXGI_FORMAT_R16_UINT;
+	Geo->indexBufferByteSize = indexBufferByteSize;
 
-	Geo->SubmeshList[Geo_Cylinder.name] = Geo_Cylinder;
-	Geo->SubmeshList[Geo_Ball.name] = Geo_Ball;
+	Geo->submeshList[Geo_Cylinder.name] = Geo_Cylinder;
+	Geo->submeshList[Geo_Ball.name] = Geo_Ball;
 
-	mGeos[Geo->Name] = std::move(Geo);
+	mGeos[Geo->name] = std::move(Geo);
+}
+void MyApp::BuildImportedGeometry()
+{
+	std::ifstream fin("../Models/skull.txt");
+
+	if (!fin)
+	{
+		MessageBox(nullptr, L"Models/skull.txt not found.", nullptr, 0);
+		return;
+	}
+
+	UINT vcount = 0;
+	UINT tcount = 0;
+	std::string ignore;
+
+	fin >> ignore >> vcount;
+	fin >> ignore >> tcount;
+	fin >> ignore >> ignore >> ignore >> ignore;
+
+	std::vector<VertexConstants> vertices(vcount);
+	for (UINT i = 0; i < vcount; ++i)
+	{
+		fin >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
+		fin >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
+	}
+
+	fin >> ignore;
+	fin >> ignore;
+	fin >> ignore;
+
+	std::vector<std::int32_t> indices(3 * tcount);
+	for (UINT i = 0; i < tcount; ++i)
+	{
+		fin >> indices[i * 3 + 0] >> indices[i * 3 + 1] >> indices[i * 3 + 2];
+	}
+
+	fin.close();
+
+	const UINT vbByteSize = (UINT)vertices.size() * sizeof(VertexConstants);
+
+	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::int32_t);
+
+	auto geo = std::make_unique<MeshGeometry>();
+	geo->name = "skullGeo";
+
+	ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->vertexBufferCPU));
+	CopyMemory(geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+
+	ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->indexBufferCPU));
+	CopyMemory(geo->indexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+	geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(md3dDevice.Get(),
+		mCommandList.Get(), vertices.data(), vbByteSize, geo->vertexBufferUploader);
+
+	geo->indexBufferGPU = DXBase::CreateDefaultBuffer(md3dDevice.Get(),
+		mCommandList.Get(), indices.data(), ibByteSize, geo->indexBufferUploader);
+
+	geo->vertexByteStride = sizeof(VertexConstants);
+	geo->vertexBufferByteSize = vbByteSize;
+	geo->indexFormat = DXGI_FORMAT_R32_UINT;
+	geo->indexBufferByteSize = ibByteSize;
+
+	SubmeshGeometry submesh;
+	submesh.indexCount = (UINT)indices.size();
+	submesh.indexStartLocation = 0;
+	submesh.vertexBaseLocation = 0;
+
+	geo->submeshList["skull"] = submesh;
+
+	mGeos[geo->name] = std::move(geo);
 }
 //创建材质
 void MyApp::BuildMaterials()
@@ -415,13 +483,21 @@ void MyApp::BuildMaterials()
 
 	auto grass = std::make_unique<Material>();
 	grass->name = "Grass";
-	grass->MaterialConstBufferIndex = MaterialIndex++;
-	grass->NumDirtyFrames = gNumFrameResources;
-	grass->DiffuseAlbedo = XMFLOAT4(0.2f, 0.6f, 0.2f, 1.0f);
-	grass->FresneRf0 = XMFLOAT3(0.01f, 0.01f, 0.01f);
-	grass->Roughness = 0.125f;
+	grass->materialConstBufferIndex = MaterialIndex++;
+	grass->diffuseAlbedo = XMFLOAT4(0.2f, 0.6f, 0.2f, 1.0f);
+	grass->numDirtyFrames = gNumFrameResources;
+	grass->fresneRf0 = XMFLOAT3(0.01f, 0.01f, 0.01f);
+	grass->roughness = 0.125f;
+	auto glass = std::make_unique<Material>();
+	glass->name = "Glass";
+	glass->materialConstBufferIndex = MaterialIndex++;
+	glass->diffuseAlbedo = XMFLOAT4(0.88f, 0.85f, 0.785f,1.0f);
+	glass->numDirtyFrames = gNumFrameResources;
+	glass->fresneRf0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
+	glass->roughness = 0.02f;
 
 	mMaterials[grass->name] = std::move(grass);
+	mMaterials[glass->name] = std::move(glass);
 }
 //创建渲染项
 void MyApp::BuildRenderItems()
@@ -435,7 +511,7 @@ void MyApp::BuildRenderItems()
 
 	XMMATRIX leftCylinderWorld = XMMatrixTranslation(0.0f, +0.0f, -2.0f);
 	XMMATRIX leftBallWorld = XMMatrixTranslation(0.0f, +2.96f, -2.0f);
-	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f ,+ 2.0f );
+	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f ,+2.0f );
 	XMMATRIX rightBallWorld = XMMatrixTranslation(0.0f, +2.96f, +2.0f);
 
 	XMStoreFloat4x4(&leftCylinderRenderItem->World, leftCylinderWorld);
@@ -443,41 +519,54 @@ void MyApp::BuildRenderItems()
 	leftCylinderRenderItem->Mat = mMaterials["Grass"].get();
 	leftCylinderRenderItem->Geo = mGeos["Geo"].get();
 	leftCylinderRenderItem->PrimitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	leftCylinderRenderItem->IndexCount = leftCylinderRenderItem->Geo->SubmeshList["Geo_Cylinder"].IndexCount;
-	leftCylinderRenderItem->IndexStartLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Cylinder"].IndexStartLocation;
-	leftCylinderRenderItem->VertexBaseLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Cylinder"].VertexBaseLocation;
+	leftCylinderRenderItem->indexCount = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
+	leftCylinderRenderItem->indexStartLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
+	leftCylinderRenderItem->vertexBaseLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
 
 	XMStoreFloat4x4(&leftBallRenderItem->World, leftBallWorld);
 	leftBallRenderItem->ObjectConstBufferIndex = GeoObjectIndex++;
 	leftBallRenderItem->Mat = mMaterials["Grass"].get();
 	leftBallRenderItem->Geo = mGeos["Geo"].get();
 	leftBallRenderItem->PrimitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	leftBallRenderItem->IndexCount = leftCylinderRenderItem->Geo->SubmeshList["Geo_Ball"].IndexCount;
-	leftBallRenderItem->IndexStartLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Ball"].IndexStartLocation;
-	leftBallRenderItem->VertexBaseLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Ball"].VertexBaseLocation;
+	leftBallRenderItem->indexCount = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
+	leftBallRenderItem->indexStartLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
+	leftBallRenderItem->vertexBaseLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
 	XMStoreFloat4x4(&rightCylinderRenderItem->World, rightCylinderWorld);
 	rightCylinderRenderItem->ObjectConstBufferIndex = GeoObjectIndex++;
 	rightCylinderRenderItem->Mat = mMaterials["Grass"].get();
 	rightCylinderRenderItem->Geo = mGeos["Geo"].get();
 	rightCylinderRenderItem->PrimitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	rightCylinderRenderItem->IndexCount = leftCylinderRenderItem->Geo->SubmeshList["Geo_Cylinder"].IndexCount;
-	rightCylinderRenderItem->IndexStartLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Cylinder"].IndexStartLocation;
-	rightCylinderRenderItem->VertexBaseLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Cylinder"].VertexBaseLocation;
+	rightCylinderRenderItem->indexCount = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
+	rightCylinderRenderItem->indexStartLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
+	rightCylinderRenderItem->vertexBaseLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
 
 	XMStoreFloat4x4(&rightBallRenderItem->World, rightBallWorld);
 	rightBallRenderItem->ObjectConstBufferIndex = GeoObjectIndex++;
 	rightBallRenderItem->Mat = mMaterials["Grass"].get();
 	rightBallRenderItem->Geo = mGeos["Geo"].get();
 	rightBallRenderItem->PrimitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	rightBallRenderItem->IndexCount = leftCylinderRenderItem->Geo->SubmeshList["Geo_Ball"].IndexCount;
-	rightBallRenderItem->IndexStartLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Ball"].IndexStartLocation;
-	rightBallRenderItem->VertexBaseLocation = leftCylinderRenderItem->Geo->SubmeshList["Geo_Ball"].VertexBaseLocation;
+	rightBallRenderItem->indexCount = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
+	rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
+	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
+
+	auto skullRenderItem = std::make_unique<RenderItem>();
+	XMMATRIX skullWorld = XMMatrixScaling(0.25f, 0.25f, 0.25f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, 3*MathHelper::Pi / 2);
+
+	XMStoreFloat4x4(&skullRenderItem->World, skullWorld);
+	skullRenderItem->ObjectConstBufferIndex = GeoObjectIndex++;
+	skullRenderItem->Mat = mMaterials["Glass"].get();
+	skullRenderItem->Geo = mGeos["skullGeo"].get();
+	skullRenderItem->PrimitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	skullRenderItem->indexCount = skullRenderItem->Geo->submeshList["skull"].indexCount;
+	skullRenderItem->indexStartLocation = skullRenderItem->Geo->submeshList["skull"].indexStartLocation;
+	skullRenderItem->vertexBaseLocation = skullRenderItem->Geo->submeshList["skull"].vertexBaseLocation;
 
 	mAllRenderItems.push_back(std::move(leftCylinderRenderItem));
 	mAllRenderItems.push_back(std::move(leftBallRenderItem));
 	mAllRenderItems.push_back(std::move(rightCylinderRenderItem));
 	mAllRenderItems.push_back(std::move(rightBallRenderItem));
+	mAllRenderItems.push_back(std::move(skullRenderItem));
 
 	for (auto& i: mAllRenderItems)
 		mOpaqueRenderItems.push_back(i.get());
@@ -491,12 +580,12 @@ void MyApp::BuildFrameResources()
 //创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
 void MyApp::BuildDescriptorHeaps()
 {
-	mPassCbvOffset = (UINT)mOpaqueRenderItems.size() * gNumFrameResources;
+	mPassCbvOffset = ((UINT)mOpaqueRenderItems.size() + (UINT)mMaterials.size()) * gNumFrameResources;
 
 	D3D12_DESCRIPTOR_HEAP_DESC CBV_HEAP_DESC;
 	CBV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	CBV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	CBV_HEAP_DESC.NumDescriptors = ((UINT)mOpaqueRenderItems.size() + 1) * gNumFrameResources;
+	CBV_HEAP_DESC.NumDescriptors = (((UINT)mOpaqueRenderItems.size() + (UINT)mMaterials.size()) + 1) * gNumFrameResources;
 	CBV_HEAP_DESC.NodeMask = 0;
 
 	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&CBV_HEAP_DESC, IID_PPV_ARGS(&mCbvDescriptorHeap)))
@@ -505,17 +594,18 @@ void MyApp::BuildDescriptorHeaps()
 void MyApp::BuildConstantBufferViews()
 {
 	UINT objConstantsBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(ObjectConstants));
+	UINT matConstantsBufferByeSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(MaterialConstants));
 	UINT passConstantsBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(RenderingPassConstants));
 	for (UINT frameresourceIndex = 0; frameresourceIndex < gNumFrameResources; frameresourceIndex++)
 	{
 		//为物体常量缓冲区分配CBV描述符
-		auto objectConstBuffer = mFrameResources[frameresourceIndex]->ObjectConstBuffer->Resource();
+		auto objectConstBuffer = mFrameResources[frameresourceIndex]->objectConstBuffer->Resource();
 		for (UINT objectIndex = 0; objectIndex < (UINT)mOpaqueRenderItems.size(); objectIndex++)
 		{
 			D3D12_GPU_VIRTUAL_ADDRESS objConstantsBufferAddress = objectConstBuffer->GetGPUVirtualAddress();
 			objConstantsBufferAddress += objectIndex * objConstantsBufferByteSize;
 
-			int descriptorIndex = frameresourceIndex * mOpaqueRenderItems.size() + objectIndex;
+			UINT descriptorIndex = frameresourceIndex * (mOpaqueRenderItems.size() + mMaterials.size()) + objectIndex;
 			auto cbvCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 			cbvCPUHandle.Offset(descriptorIndex, mCBV_SRV_UAVDescriptorSize);
 			D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc;
@@ -523,9 +613,23 @@ void MyApp::BuildConstantBufferViews()
 			CBVDesc.SizeInBytes = objConstantsBufferByteSize;
 			md3dDevice->CreateConstantBufferView(&CBVDesc, cbvCPUHandle);
 		}
-		//为渲染过程常量缓冲区分配CBV描述符
-		auto passConstBuffer = mFrameResources[frameresourceIndex]->PassConstBuffer->Resource();
+		//为材质常量缓冲区分配CBV描述符
+		auto materialConstBuffer = mFrameResources[frameresourceIndex]->materialConstBuffer->Resource();
+		for (UINT materialIndex = 0; materialIndex < (UINT)mMaterials.size(); materialIndex++)
+		{
+			D3D12_GPU_VIRTUAL_ADDRESS matConstantsBufferAddress = materialConstBuffer->GetGPUVirtualAddress();
+			matConstantsBufferAddress += materialIndex * matConstantsBufferByeSize;
 
+			UINT descriptorIndex = frameresourceIndex * (mOpaqueRenderItems.size() + mMaterials.size()) + mOpaqueRenderItems.size() + materialIndex;
+			auto cbvCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+			cbvCPUHandle.Offset(descriptorIndex, mCBV_SRV_UAVDescriptorSize);
+			D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc;
+			CBVDesc.BufferLocation = matConstantsBufferAddress;
+			CBVDesc.SizeInBytes = matConstantsBufferByeSize;
+			md3dDevice->CreateConstantBufferView(&CBVDesc, cbvCPUHandle);
+		}
+		//为渲染过程常量缓冲区分配CBV描述符
+		auto passConstBuffer = mFrameResources[frameresourceIndex]->passConstBuffer->Resource();
 		D3D12_GPU_VIRTUAL_ADDRESS passConstantsBufferAddress = passConstBuffer->GetGPUVirtualAddress();
 
 		UINT descriptorIndex = mPassCbvOffset + frameresourceIndex;
@@ -535,6 +639,7 @@ void MyApp::BuildConstantBufferViews()
 		CBVDesc.BufferLocation = passConstantsBufferAddress;
 		CBVDesc.SizeInBytes = passConstantsBufferByteSize;
 		md3dDevice->CreateConstantBufferView(&CBVDesc, cbvCPUHandle);
+		
 	}
 }
 //创建渲染管线状态对象
@@ -613,11 +718,11 @@ void MyApp::UpdateCamara()
 //更新物体常量缓冲区（世界矩阵）
 void MyApp::UpdateObjectsConstBuffers()const
 {
-	auto currentObjectConstBuffer = mCurrentFrameResource->ObjectConstBuffer.get();
+	auto currentObjectConstBuffer = mCurrentFrameResource->objectConstBuffer.get();
 
 	for (auto& it : mAllRenderItems)
 	{
-		if (it->NumDirtyFrames > 0)
+		if (it->numDirtyFrames > 0)
 		{
 			XMMATRIX world = XMLoadFloat4x4(&it->World);
 			ObjectConstants objectconstant;
@@ -625,7 +730,7 @@ void MyApp::UpdateObjectsConstBuffers()const
 
 			currentObjectConstBuffer->CopyData(it->ObjectConstBufferIndex, objectconstant);
 
-			it->NumDirtyFrames--;
+			it->numDirtyFrames--;
 		}
 	}
 }
@@ -641,42 +746,47 @@ void MyApp::UpdatePassConstBuffers()const
 	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
 	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
 
-	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.View, XMMatrixTranspose(view));
-	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.Proj, XMMatrixTranspose(proj));
-	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.ViewProj, XMMatrixTranspose(viewProj));
-	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.InvView, XMMatrixTranspose(invView));
-	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.InvProj, XMMatrixTranspose(invProj));
-	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.InvViewProj, XMMatrixTranspose(invViewProj));
+	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.view, XMMatrixTranspose(view));
+	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.proj, XMMatrixTranspose(proj));
+	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.viewProj, XMMatrixTranspose(viewProj));
+	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.invView, XMMatrixTranspose(invView));
+	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.invProj, XMMatrixTranspose(invProj));
+	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.invViewProj, XMMatrixTranspose(invViewProj));
 
-	mRenderingPassConstantsBuffer.EyePosW = mEyePos;
-	mRenderingPassConstantsBuffer.RenderTargetSize = XMFLOAT2((float)mClientWidth, (float)mClientHeight);
-	mRenderingPassConstantsBuffer.InvRenderTargetSize = XMFLOAT2(1.0f / mClientWidth, 1.0f / mClientHeight);
-	mRenderingPassConstantsBuffer.NearZ = 1.0f;
-	mRenderingPassConstantsBuffer.FarZ = 1000.0f;
-	mRenderingPassConstantsBuffer.TotalTime = mGameTimer.TotalTime();
-	mRenderingPassConstantsBuffer.DeltaTime = mGameTimer.DeltaTime();
+	mRenderingPassConstantsBuffer.eyePosW = mEyePos;
+	mRenderingPassConstantsBuffer.renderTargetSize = XMFLOAT2((float)mClientWidth, (float)mClientHeight);
+	mRenderingPassConstantsBuffer.invRenderTargetSize = XMFLOAT2(1.0f / mClientWidth, 1.0f / mClientHeight);
+	mRenderingPassConstantsBuffer.nearZ = 1.0f;
+	mRenderingPassConstantsBuffer.farZ = 1000.0f;
+	mRenderingPassConstantsBuffer.totalTime = mGameTimer.TotalTime();
+	mRenderingPassConstantsBuffer.deltaTime = mGameTimer.DeltaTime();
+	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };
 
-	auto currentPassConstsBuffer = mCurrentFrameResource->PassConstBuffer.get();
+	mRenderingPassConstantsBuffer.lights[0].rgbIntensity = { 1.0f,1.0f,1.0f };
+	mRenderingPassConstantsBuffer.lights[0].position = { 10.0f*sinf(mGameTimer.TotalTime()*MathHelper::Pi),0.0f,0.0f};
+	mRenderingPassConstantsBuffer.lights[0].direction = { 1.0f,0.0f,0.0f };
+
+	auto currentPassConstsBuffer = mCurrentFrameResource->passConstBuffer.get();
 	currentPassConstsBuffer->CopyData(0, mRenderingPassConstantsBuffer);
 }
 //更新材质常量缓冲区
 void MyApp::UpdateMaterialConstBuffers()const
 {
-	auto currentMaterialConstBuffer = mCurrentFrameResource->MaterialConstBuffer.get();
+	auto currentMaterialConstBuffer = mCurrentFrameResource->materialConstBuffer.get();
 
 	for (auto& ma : mMaterials)
 	{
-		Material* pMa = ma.second.get();
-		if(pMa->NumDirtyFrames > 0)
+		Material* pMat = ma.second.get();
+		if(pMat->numDirtyFrames > 0)
 		{
 			MaterialConstants materialConstant;
-			materialConstant.DiffuseAlbedo = pMa->DiffuseAlbedo;
-			materialConstant.FresneRf0 = pMa->FresneRf0;
-			materialConstant.Roughness = pMa->Roughness;
-			materialConstant.MaterialTransform = pMa->MaterialTransform;
-			currentMaterialConstBuffer->CopyData(pMa->MaterialConstBufferIndex, materialConstant);
+			materialConstant.diffuseAlbedo = pMat->diffuseAlbedo;
+			materialConstant.fresneRf0 = pMat->fresneRf0;
+			materialConstant.roughness = pMat->roughness;
+			materialConstant.materialTransform = pMat->materialTransform;
+			currentMaterialConstBuffer->CopyData(pMat->materialConstBufferIndex, materialConstant);
 
-			pMa->NumDirtyFrames--;
+			pMat->numDirtyFrames--;
 		}
 	}
 }
@@ -691,11 +801,18 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 		commandList->IASetIndexBuffer(&item->Geo->IndexBufferView());
 		commandList->IASetPrimitiveTopology(item->PrimitiveType);
 
-		UINT cbvIndex = mCurrentFrameResourceIndex * renderItems.size() + item->ObjectConstBufferIndex;
-		auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-		cbvHandle.Offset(cbvIndex, mCBV_SRV_UAVDescriptorSize);
-		commandList->SetGraphicsRootDescriptorTable(0, cbvHandle);
-		commandList->DrawIndexedInstanced(item->IndexCount, 1, item->IndexStartLocation, item->VertexBaseLocation, 0);
+		size_t resourceSizePerFrameresource = renderItems.size() + mMaterials.size();
+		UINT objCbvIndex = mCurrentFrameResourceIndex * resourceSizePerFrameresource + item->ObjectConstBufferIndex;
+		auto objCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		objCbvHandle.Offset(objCbvIndex, mCBV_SRV_UAVDescriptorSize);
+		commandList->SetGraphicsRootDescriptorTable(0, objCbvHandle);
+
+		UINT matCbvIndex = mCurrentFrameResourceIndex * resourceSizePerFrameresource + renderItems.size() + item->Mat->materialConstBufferIndex;
+		auto matCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		matCbvHandle.Offset(matCbvIndex, mCBV_SRV_UAVDescriptorSize);
+		commandList->SetGraphicsRootDescriptorTable(1, matCbvHandle);
+
+		commandList->DrawIndexedInstanced(item->indexCount, 1, item->indexStartLocation, item->vertexBaseLocation, 0);
 	}
 }
 
