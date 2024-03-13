@@ -1,4 +1,0 @@
-﻿  MyApp.cpp
-C:\Users\muyun\OneDrive\RubbishProgram\DX12StudyProject\DX12StudyProject\MyApp.cpp(327,17): warning C4267: “初始化”: 从“size_t”转换到“UINT”，可能丢失数据
-C:\Users\muyun\OneDrive\RubbishProgram\DX12StudyProject\DX12StudyProject\MyApp.cpp(362,24): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-  DX12StudyProject.vcxproj -> C:\Users\muyun\OneDrive\RubbishProgram\DX12StudyProject\x64\Debug\DX12StudyProject.exe
