@@ -1,1 +1,3 @@
 *ipch/
+*.vs/
+*.gitignore

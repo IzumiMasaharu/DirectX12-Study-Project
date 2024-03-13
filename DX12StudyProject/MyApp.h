@@ -1,8 +1,9 @@
 #include "DXApp.h"
-#include "UploadBuffer.h"
+#include "DDSTextureLoader.h"
 #include "FrameResource.h"
 #include "GeometryGenerator.h"
 #include "RenderItem.h"
+#include "UploadBuffer.h"
 
 class MyApp : public DXApp
 {
@@ -27,6 +28,7 @@ private:
 	void BuildMeshGeometry();//创建网格体
 	void BuildImportedGeometry();//创建通过文件导入的模型
 	void BuildMaterials();//创建材质
+	void BuildTexture();//创建纹理
 	void BuildRenderItems();//创建渲染项
 	void BuildFrameResources();//创建帧资源
 	void BuildDescriptorHeaps();//创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）

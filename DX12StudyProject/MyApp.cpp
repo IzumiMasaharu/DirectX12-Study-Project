@@ -336,6 +336,7 @@ void MyApp::BuildInputLayout()
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+		{"TEXTURE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 	};
 }
 //创建网格体
@@ -481,23 +482,36 @@ void MyApp::BuildMaterials()
 {
 	UINT MaterialIndex = 0;
 
-	auto grass = std::make_unique<Material>();
-	grass->name = "Grass";
-	grass->materialConstBufferIndex = MaterialIndex++;
-	grass->diffuseAlbedo = XMFLOAT4(0.2f, 0.6f, 0.2f, 1.0f);
-	grass->numDirtyFrames = gNumFrameResources;
-	grass->fresneRf0 = XMFLOAT3(0.01f, 0.01f, 0.01f);
-	grass->roughness = 0.125f;
-	auto glass = std::make_unique<Material>();
-	glass->name = "Glass";
-	glass->materialConstBufferIndex = MaterialIndex++;
-	glass->diffuseAlbedo = XMFLOAT4(0.88f, 0.85f, 0.785f,1.0f);
-	glass->numDirtyFrames = gNumFrameResources;
-	glass->fresneRf0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
-	glass->roughness = 0.02f;
+	auto matGrass = std::make_unique<Material>();
+	matGrass->name = "Grass";
+	matGrass->materialConstBufferIndex = MaterialIndex++;
+	matGrass->diffuseAlbedo = XMFLOAT4(0.2f, 0.6f, 0.2f, 1.0f);
+	matGrass->numDirtyFrames = gNumFrameResources;
+	matGrass->fresneRf0 = XMFLOAT3(0.01f, 0.01f, 0.01f);
+	matGrass->roughness = 0.125f;
+	auto matGlass = std::make_unique<Material>();
+	matGlass->name = "Glass";
+	matGlass->materialConstBufferIndex = MaterialIndex++;
+	matGlass->diffuseAlbedo = XMFLOAT4(0.88f, 0.85f, 0.785f,1.0f);
+	matGlass->numDirtyFrames = gNumFrameResources;
+	matGlass->fresneRf0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
+	matGlass->roughness = 0.02f;
 
-	mMaterials[grass->name] = std::move(grass);
-	mMaterials[glass->name] = std::move(glass);
+	mMaterials[matGrass->name] = std::move(matGrass);
+	mMaterials[matGlass->name] = std::move(matGlass);
+}
+//创建纹理
+void MyApp::BuildTexture()
+{
+	auto texStone = std::make_unique<Texture>();
+	texStone->name = "stone";
+	texStone->filename = L"../Texture/stone.dds";
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),mCommandList.Get(), texStone->filename.c_str(), texStone->resource, texStone->uploadHeap))
+
+	auto texBrick = std::make_unique<Texture>();
+	texBrick->name = "brick";
+	texBrick->filename = L"../Texture/brick.dds";
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(), mCommandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap))
 }
 //创建渲染项
 void MyApp::BuildRenderItems()
@@ -581,14 +595,19 @@ void MyApp::BuildFrameResources()
 void MyApp::BuildDescriptorHeaps()
 {
 	mPassCbvOffset = ((UINT)mOpaqueRenderItems.size() + (UINT)mMaterials.size()) * gNumFrameResources;
-
 	D3D12_DESCRIPTOR_HEAP_DESC CBV_HEAP_DESC;
 	CBV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	CBV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	CBV_HEAP_DESC.NumDescriptors = (((UINT)mOpaqueRenderItems.size() + (UINT)mMaterials.size()) + 1) * gNumFrameResources;
 	CBV_HEAP_DESC.NodeMask = 0;
-
 	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&CBV_HEAP_DESC, IID_PPV_ARGS(&mCbvDescriptorHeap)))
+
+	D3D12_DESCRIPTOR_HEAP_DESC SRV_HEAP_DESC;
+	SRV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	SRV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	SRV_HEAP_DESC.NumDescriptors = 2;
+	SRV_HEAP_DESC.NodeMask = 0;
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC,IID_PPV_ARGS(&mSrvDescriptorHeap)))
 }
 //创建常量缓冲区
 void MyApp::BuildConstantBufferViews()

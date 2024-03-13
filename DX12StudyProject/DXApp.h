@@ -1,5 +1,6 @@
 #include "DXBase.h"
 #include "GameTimer.h"
+#include "resource.h"
 
 class DXApp
 {

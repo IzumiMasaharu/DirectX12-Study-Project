@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DXApp.cpp" />
     <ClCompile Include="DXBase.cpp" />
     <ClCompile Include="FrameResource.cpp" />
@@ -138,6 +139,7 @@
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyApp.cpp" />
+    <ClCompile Include="DDSTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h" />

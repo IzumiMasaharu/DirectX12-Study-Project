@@ -8,6 +8,7 @@ struct VertexConstants
 {
     DirectX::XMFLOAT3 pos;
     DirectX::XMFLOAT3 normal;
+    DirectX::XMFLOAT2 texture;
 };
 
 //与着色器绑定的材质结构体

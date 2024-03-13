@@ -7,48 +7,16 @@
       "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\MyApp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\MyApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\MyApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DXBase.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\GeometryGenerator.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\Shaders\\Main.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Shaders\\Main.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\Shaders\\Light.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Shaders\\Light.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DXApp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\GeometryGenerator.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\RenderItem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\RenderItem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\FrameResource.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\Shaders\\Main.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Shaders\\Main.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DXApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\MyApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\MyApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\UploadBuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -58,15 +26,52 @@
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive\\RubbishProgram\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\FrameResource.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\GeometryGenerator.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DDSTextureLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DDSTextureLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\GeometryGenerator.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\FrameResource.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DXBase.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Microsoft Visual Studio\\VC\\Tools\\MSVC\\14.39.33519\\include\\xhash||{3B902123-F8A7-4915-9F01-361F908088D0}|"
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DXApp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DXBase.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DDSTextureLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DDSTextureLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\DXApp.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\RenderItem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\RenderItem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\FrameResource.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F40D8A30-DBB3-409B-A209-AC82A4293724}|DX12StudyProject\\DX12StudyProject.vcxproj|solutionrelative:DX12StudyProject\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -76,11 +81,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 71,
-          "SelectedChildIndex": 16,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 17,
               "Title": "main.cpp",
               "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\main.cpp",
               "RelativeDocumentMoniker": "DX12StudyProject\\main.cpp",
@@ -93,26 +98,27 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 14,
               "Title": "DXApp.h",
               "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.h",
               "RelativeDocumentMoniker": "DX12StudyProject\\DXApp.h",
               "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.h",
               "RelativeToolTip": "DX12StudyProject\\DXApp.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAHwAAAAHAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2024-02-27T06:29:45.315Z",
-              "IsPinned": true
+              "IsPinned": true,
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "MyApp.h",
               "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\MyApp.h",
               "RelativeDocumentMoniker": "DX12StudyProject\\MyApp.h",
               "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\MyApp.h",
               "RelativeToolTip": "DX12StudyProject\\MyApp.h",
-              "ViewState": "AQIAAAoAAAAAAAAAAAAAwBoAAAARAAAA",
+              "ViewState": "AQIAABsAAAAAAAAAAAAAAAUAAAAZAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2024-02-27T07:38:48.474Z",
               "IsPinned": true,
@@ -120,155 +126,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Light.hlsl",
               "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\Shaders\\Light.hlsl",
               "RelativeDocumentMoniker": "Shaders\\Light.hlsl",
               "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\Shaders\\Light.hlsl",
               "RelativeToolTip": "Shaders\\Light.hlsl",
-              "ViewState": "AQIAAE4AAAAAAAAAAAAAAEgAAAATAAAA",
+              "ViewState": "AQIAADkAAAAAAAAAAAAAAEgAAAATAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-03-07T09:33:28.464Z",
-              "IsPinned": true
+              "IsPinned": true,
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 1,
               "Title": "Main.hlsl",
               "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\Shaders\\Main.hlsl",
               "RelativeDocumentMoniker": "Shaders\\Main.hlsl",
               "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\Shaders\\Main.hlsl",
               "RelativeToolTip": "Shaders\\Main.hlsl",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAeAAAA",
+              "ViewState": "AQIAAB4AAAAAAAAAAAAAADAAAAAGAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-03-08T07:58:12.557Z",
-              "IsPinned": true
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "xhash",
-              "DocumentMoniker": "D:\\Microsoft Visual Studio\\VC\\Tools\\MSVC\\14.39.33519\\include\\xhash",
-              "RelativeDocumentMoniker": "..\\..\\..\\Microsoft Visual Studio\\VC\\Tools\\MSVC\\14.39.33519\\include\\xhash",
-              "ToolTip": "D:\\Microsoft Visual Studio\\VC\\Tools\\MSVC\\14.39.33519\\include\\xhash",
-              "RelativeToolTip": "..\\..\\..\\Microsoft Visual Studio\\VC\\Tools\\MSVC\\14.39.33519\\include\\xhash",
-              "ViewState": "AQIAAJsCAAAAAAAAAAASwLECAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-03-10T14:20:09.513Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "GeometryGenerator.cpp",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.cpp",
-              "RelativeDocumentMoniker": "DX12StudyProject\\GeometryGenerator.cpp",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.cpp",
-              "RelativeToolTip": "DX12StudyProject\\GeometryGenerator.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAPgAAAABAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-03-10T11:10:36.839Z",
+              "IsPinned": true,
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "Default.hlsl",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
-              "RelativeDocumentMoniker": "..\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
-              "RelativeToolTip": "..\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
-              "ViewState": "AQIAACEAAAAAAAAAAAAAAAgAAAAcAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-03-10T11:47:38.245Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "GeometryGenerator.h",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.h",
-              "RelativeDocumentMoniker": "DX12StudyProject\\GeometryGenerator.h",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.h",
-              "RelativeToolTip": "DX12StudyProject\\GeometryGenerator.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABQAAAAYAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-02-27T07:01:07.058Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "DXApp.cpp",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.cpp",
-              "RelativeDocumentMoniker": "DX12StudyProject\\DXApp.cpp",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.cpp",
-              "RelativeToolTip": "DX12StudyProject\\DXApp.cpp",
-              "ViewState": "AQIAABsAAAAAAAAAAAASwBwAAAAOAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-03-08T05:35:05.194Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "DXBase.h",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.h",
-              "RelativeDocumentMoniker": "DX12StudyProject\\DXBase.h",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.h",
-              "RelativeToolTip": "DX12StudyProject\\DXBase.h",
-              "ViewState": "AQIAANUAAAAAAAAAAAAlwO0AAAATAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-03-09T06:40:17.373Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "FrameResource.h",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.h",
-              "RelativeDocumentMoniker": "DX12StudyProject\\FrameResource.h",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.h",
-              "RelativeToolTip": "DX12StudyProject\\FrameResource.h",
-              "ViewState": "AQIAACUAAAAAAAAAAAAAwDoAAAAhAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-03-07T09:10:20.526Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "UploadBuffer.h",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\UploadBuffer.h",
-              "RelativeDocumentMoniker": "DX12StudyProject\\UploadBuffer.h",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\UploadBuffer.h",
-              "RelativeToolTip": "DX12StudyProject\\UploadBuffer.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAZAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-03-08T06:22:08.306Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "DXBase.cpp",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.cpp",
-              "RelativeDocumentMoniker": "DX12StudyProject\\DXBase.cpp",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.cpp",
-              "RelativeToolTip": "DX12StudyProject\\DXBase.cpp",
-              "ViewState": "AQIAACsAAAAAAAAAAAAQwFQAAAA4AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-02-27T06:29:44.588Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "RenderItem.h",
-              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\RenderItem.h",
-              "RelativeDocumentMoniker": "DX12StudyProject\\RenderItem.h",
-              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\RenderItem.h",
-              "RelativeToolTip": "DX12StudyProject\\RenderItem.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAARAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-02-27T07:01:50.061Z"
             },
             {
               "$type": "Document",
@@ -278,14 +160,162 @@
               "RelativeDocumentMoniker": "DX12StudyProject\\MyApp.cpp",
               "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\MyApp.cpp",
               "RelativeToolTip": "DX12StudyProject\\MyApp.cpp",
-              "ViewState": "AQIAAIIBAAAAAAAAAAAlwJABAAAjAAAA",
+              "ViewState": "AQIAAEgCAAAAAAAAAAAQwF8CAAAiAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-02-27T06:29:45.314Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "DDSTextureLoader.cpp",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DDSTextureLoader.cpp",
+              "RelativeDocumentMoniker": "DX12StudyProject\\DDSTextureLoader.cpp",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DDSTextureLoader.cpp",
+              "RelativeToolTip": "DX12StudyProject\\DDSTextureLoader.cpp",
+              "ViewState": "AQIAALEHAAAAAAAAAAApwFgIAAApAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-03-12T15:34:22.4Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 7,
+              "Title": "DDSTextureLoader.h",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DDSTextureLoader.h",
+              "RelativeDocumentMoniker": "DX12StudyProject\\DDSTextureLoader.h",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DDSTextureLoader.h",
+              "RelativeToolTip": "DX12StudyProject\\DDSTextureLoader.h",
+              "ViewState": "AQIAAHgAAAAAAAAAAAAgwKsAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-03-12T15:33:36.984Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "GeometryGenerator.cpp",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.cpp",
+              "RelativeDocumentMoniker": "DX12StudyProject\\GeometryGenerator.cpp",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.cpp",
+              "RelativeToolTip": "DX12StudyProject\\GeometryGenerator.cpp",
+              "ViewState": "AQIAAFAAAAAAAAAAAAAgwPgAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-03-10T11:10:36.839Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Default.hlsl",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
+              "RelativeDocumentMoniker": "..\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
+              "RelativeToolTip": "..\\47921\u914D\u5957\u8D44\u6E90\\\u672C\u4E66\u914D\u5957\u6E90\u4EE3\u7801\\\u7B2C8\u7AE0\\LitColumns\\Shaders\\Default.hlsl",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAcAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-03-10T11:47:38.245Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "GeometryGenerator.h",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.h",
+              "RelativeDocumentMoniker": "DX12StudyProject\\GeometryGenerator.h",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\GeometryGenerator.h",
+              "RelativeToolTip": "DX12StudyProject\\GeometryGenerator.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABQAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-02-27T07:01:07.058Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "DXApp.cpp",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.cpp",
+              "RelativeDocumentMoniker": "DX12StudyProject\\DXApp.cpp",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXApp.cpp",
+              "RelativeToolTip": "DX12StudyProject\\DXApp.cpp",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAASAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-03-08T05:35:05.194Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DXBase.h",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.h",
+              "RelativeDocumentMoniker": "DX12StudyProject\\DXBase.h",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.h",
+              "RelativeToolTip": "DX12StudyProject\\DXBase.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-03-09T06:40:17.373Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "FrameResource.h",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.h",
+              "RelativeDocumentMoniker": "DX12StudyProject\\FrameResource.h",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.h",
+              "RelativeToolTip": "DX12StudyProject\\FrameResource.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-03-07T09:10:20.526Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UploadBuffer.h",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\UploadBuffer.h",
+              "RelativeDocumentMoniker": "DX12StudyProject\\UploadBuffer.h",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\UploadBuffer.h",
+              "RelativeToolTip": "DX12StudyProject\\UploadBuffer.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAZAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-03-08T06:22:08.306Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "DXBase.cpp",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.cpp",
+              "RelativeDocumentMoniker": "DX12StudyProject\\DXBase.cpp",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\DXBase.cpp",
+              "RelativeToolTip": "DX12StudyProject\\DXBase.cpp",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAFQAAAA4AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-02-27T06:29:44.588Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "RenderItem.h",
+              "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\RenderItem.h",
+              "RelativeDocumentMoniker": "DX12StudyProject\\RenderItem.h",
+              "ToolTip": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\RenderItem.h",
+              "RelativeToolTip": "DX12StudyProject\\RenderItem.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAARAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-02-27T07:01:50.061Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
               "Title": "FrameResource.cpp",
               "DocumentMoniker": "D:\\OneDrive\\RubbishProgram\\DirectX12-Study-Project\\DX12StudyProject\\FrameResource.cpp",
               "RelativeDocumentMoniker": "DX12StudyProject\\FrameResource.cpp",
@@ -293,7 +323,8 @@
               "RelativeToolTip": "DX12StudyProject\\FrameResource.cpp",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAABAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-02-27T07:52:27.672Z"
+              "WhenOpened": "2024-02-27T07:52:27.672Z",
+              "EditorCaption": ""
             }
           ]
         }
