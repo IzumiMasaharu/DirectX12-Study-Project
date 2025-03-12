@@ -21,7 +21,7 @@ MyApp::MyApp(HINSTANCE hInstance) : DXApp(hInstance), WC1(hInstance)
 	mClientWidth = 1000;
 	mClientHeight = 600;
 }
-//ÏûÏ¢¹ı³Ì´¦Àíº¯Êı
+//æ¶ˆæ¯è¿‡ç¨‹å¤„ç†å‡½æ•°
 LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -133,7 +133,7 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
-//Ó¦ÓÃ³ÌĞò³õÊ¼»¯
+//åº”ç”¨ç¨‹åºåˆå§‹åŒ–
 bool MyApp::Init()
 {
 	if(!DXApp::InitWindowClass(WC1,L"JustTest"))
@@ -165,12 +165,12 @@ bool MyApp::Init()
 
 	return true;
 }
-//´°¿Ú´óĞ¡ÖØĞÂÊÊÅä
+//çª—å£å¤§å°é‡æ–°é€‚é…
 void MyApp::Resize()
 {
 	DXApp::Resize();
 
-	//ÉèÖÃÊÓ¿Ú
+	//è®¾ç½®è§†å£
 	mScreenViewport.Height = static_cast<float>(mClientHeight);
 	mScreenViewport.Width = static_cast<float>(mClientWidth);
 	mScreenViewport.TopLeftX = 0;
@@ -182,7 +182,7 @@ void MyApp::Resize()
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, W_H_Ratio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProj, P);
 }
-//¸üĞÂÖ¡»­Ãæ
+//æ›´æ–°å¸§ç”»é¢
 void MyApp::Update(const GameTimer& GTimer)
 {
 	ChangePSOstate();
@@ -211,7 +211,7 @@ void MyApp::Update(const GameTimer& GTimer)
 
 	SetWindowText(mhWndHwnd, AnsiToWstring(os.str().c_str()).c_str());
 }
-//»æÖÆÖ¡»­Ãæ
+//ç»˜åˆ¶å¸§ç”»é¢
 void MyApp::Draw(const GameTimer& GTimer)
 {
 	auto cmdListAllocator = mCurrentFrameResource->commandAllocator;
@@ -257,7 +257,7 @@ void MyApp::Draw(const GameTimer& GTimer)
 	mCurrentFrameResource->fence = ++mCurrentFence;
 	mCommandQueue->Signal(mFence.Get(), mCurrentFence);
 }
-//µ±Êó±ê°´ÏÂÊ±µ÷ÓÃ
+//å½“é¼ æ ‡æŒ‰ä¸‹æ—¶è°ƒç”¨
 void MyApp::MouseDown(WPARAM ButtonState, int x, int y)
 {
 	mLastMousePos.x = x;
@@ -265,12 +265,12 @@ void MyApp::MouseDown(WPARAM ButtonState, int x, int y)
 
 	SetCapture(mhWndHwnd);
 }
-//µ±Êó±êÌ§ÆğÊ±µ÷ÓÃ
+//å½“é¼ æ ‡æŠ¬èµ·æ—¶è°ƒç”¨
 void MyApp::MouseUp(WPARAM ButtonState, int x, int y)
 {
 	ReleaseCapture();
 }
-//µ±Êó±êÒÆ¶¯Ê±µ÷ÓÃ
+//å½“é¼ æ ‡ç§»åŠ¨æ—¶è°ƒç”¨
 void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
@@ -285,7 +285,7 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 	mLastMousePos.x = x;
 	mLastMousePos.y = y;
 }
-//µ±Êó±ê¹öÂÖ¹ö¶¯Ê±
+//å½“é¼ æ ‡æ»šè½®æ»šåŠ¨æ—¶
 void MyApp::MouseWheel(short zDelta)
 {
 	mRadius += -0.05f * (zDelta / 10);
@@ -293,7 +293,7 @@ void MyApp::MouseWheel(short zDelta)
 	mRadius = MathHelper::Clamp(mRadius, 3.0f, 15.0f);
 }
 
-//´´½¨¸ùÇ©Ãû
+//åˆ›å»ºæ ¹ç­¾å
 void MyApp::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE CBVTable0;
@@ -323,13 +323,13 @@ void MyApp::BuildRootSignature()
 	ThrowIfFailed(md3dDevice->CreateRootSignature(0, serializedRootSignature->GetBufferPointer(),
 		serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)))
 }
-//×ÅÉ«Æ÷£¬Æô¶¯£¡
+//ç€è‰²å™¨ï¼Œå¯åŠ¨ï¼
 void MyApp::BuildShaders()
 {
 	mShaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "VS", "vs_5_1");
 	mShaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "PS", "ps_5_1");
 }
-//´´½¨ÊäÈë²¼¾Ö
+//åˆ›å»ºè¾“å…¥å¸ƒå±€
 void MyApp::BuildInputLayout()
 {
 	mInputLayout =
@@ -339,7 +339,7 @@ void MyApp::BuildInputLayout()
 		{"TEXTURE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 	};
 }
-//´´½¨Íø¸ñÌå
+//åˆ›å»ºç½‘æ ¼ä½“
 void MyApp::BuildMeshGeometry()
 {
 	GeometryGenerator GeoGenerator;
@@ -477,7 +477,7 @@ void MyApp::BuildImportedGeometry()
 
 	mGeos[geo->name] = std::move(geo);
 }
-//´´½¨²ÄÖÊ
+//åˆ›å»ºæè´¨
 void MyApp::BuildMaterials()
 {
 	UINT MaterialIndex = 0;
@@ -500,7 +500,7 @@ void MyApp::BuildMaterials()
 	mMaterials[matGrass->name] = std::move(matGrass);
 	mMaterials[matGlass->name] = std::move(matGlass);
 }
-//´´½¨ÎÆÀí
+//åˆ›å»ºçº¹ç†
 void MyApp::BuildTexture()
 {
 	auto texStone = std::make_unique<Texture>();
@@ -513,7 +513,7 @@ void MyApp::BuildTexture()
 	texBrick->filename = L"../Texture/brick.dds";
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(), mCommandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap))
 }
-//´´½¨äÖÈ¾Ïî
+//åˆ›å»ºæ¸²æŸ“é¡¹
 void MyApp::BuildRenderItems()
 {
 	auto leftCylinderRenderItem = std::make_unique<RenderItem>();
@@ -585,13 +585,13 @@ void MyApp::BuildRenderItems()
 	for (auto& i: mAllRenderItems)
 		mOpaqueRenderItems.push_back(i.get());
 }
-//´´½¨Ö¡×ÊÔ´
+//åˆ›å»ºå¸§èµ„æº
 void MyApp::BuildFrameResources()
 {
 	for (int i = 0; i < gNumFrameResources; i++)
 		mFrameResources.push_back(std::make_unique<FrameResource>(md3dDevice.Get(), 1, (UINT)mAllRenderItems.size(), (UINT)mMaterials.size()));
 }
-//´´½¨³ÌĞòËùĞèµÄÆäËûÃèÊö·û¶Ñ£¨³ı³õÊ¼»¯Ê±´´½¨µÄDSV¡¢RTVÃèÊö·û¶Ñ£©
+//åˆ›å»ºç¨‹åºæ‰€éœ€çš„å…¶ä»–æè¿°ç¬¦å †ï¼ˆé™¤åˆå§‹åŒ–æ—¶åˆ›å»ºçš„DSVã€RTVæè¿°ç¬¦å †ï¼‰
 void MyApp::BuildDescriptorHeaps()
 {
 	mPassCbvOffset = ((UINT)mOpaqueRenderItems.size() + (UINT)mMaterials.size()) * gNumFrameResources;
@@ -609,7 +609,7 @@ void MyApp::BuildDescriptorHeaps()
 	SRV_HEAP_DESC.NodeMask = 0;
 	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC,IID_PPV_ARGS(&mSrvDescriptorHeap)))
 }
-//´´½¨³£Á¿»º³åÇø
+//åˆ›å»ºå¸¸é‡ç¼“å†²åŒº
 void MyApp::BuildConstantBufferViews()
 {
 	UINT objConstantsBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(ObjectConstants));
@@ -617,7 +617,7 @@ void MyApp::BuildConstantBufferViews()
 	UINT passConstantsBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(RenderingPassConstants));
 	for (UINT frameresourceIndex = 0; frameresourceIndex < gNumFrameResources; frameresourceIndex++)
 	{
-		//ÎªÎïÌå³£Á¿»º³åÇø·ÖÅäCBVÃèÊö·û
+		//ä¸ºç‰©ä½“å¸¸é‡ç¼“å†²åŒºåˆ†é…CBVæè¿°ç¬¦
 		auto objectConstBuffer = mFrameResources[frameresourceIndex]->objectConstBuffer->Resource();
 		for (UINT objectIndex = 0; objectIndex < (UINT)mOpaqueRenderItems.size(); objectIndex++)
 		{
@@ -632,7 +632,7 @@ void MyApp::BuildConstantBufferViews()
 			CBVDesc.SizeInBytes = objConstantsBufferByteSize;
 			md3dDevice->CreateConstantBufferView(&CBVDesc, cbvCPUHandle);
 		}
-		//Îª²ÄÖÊ³£Á¿»º³åÇø·ÖÅäCBVÃèÊö·û
+		//ä¸ºæè´¨å¸¸é‡ç¼“å†²åŒºåˆ†é…CBVæè¿°ç¬¦
 		auto materialConstBuffer = mFrameResources[frameresourceIndex]->materialConstBuffer->Resource();
 		for (UINT materialIndex = 0; materialIndex < (UINT)mMaterials.size(); materialIndex++)
 		{
@@ -647,7 +647,7 @@ void MyApp::BuildConstantBufferViews()
 			CBVDesc.SizeInBytes = matConstantsBufferByeSize;
 			md3dDevice->CreateConstantBufferView(&CBVDesc, cbvCPUHandle);
 		}
-		//ÎªäÖÈ¾¹ı³Ì³£Á¿»º³åÇø·ÖÅäCBVÃèÊö·û
+		//ä¸ºæ¸²æŸ“è¿‡ç¨‹å¸¸é‡ç¼“å†²åŒºåˆ†é…CBVæè¿°ç¬¦
 		auto passConstBuffer = mFrameResources[frameresourceIndex]->passConstBuffer->Resource();
 		D3D12_GPU_VIRTUAL_ADDRESS passConstantsBufferAddress = passConstBuffer->GetGPUVirtualAddress();
 
@@ -661,7 +661,7 @@ void MyApp::BuildConstantBufferViews()
 		
 	}
 }
-//´´½¨äÖÈ¾¹ÜÏß×´Ì¬¶ÔÏó
+//åˆ›å»ºæ¸²æŸ“ç®¡çº¿çŠ¶æ€å¯¹è±¡
 void MyApp::BuildPSOs()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC OpaquePSODesc;
@@ -702,13 +702,13 @@ void MyApp::BuildPSOs()
 	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&mPSOs["Wireframe"])))
 }
 
-//¸Ä±ä´°¿ÚµÄ¸ß¶ÈºÍ¿í¶È
+//æ”¹å˜çª—å£çš„é«˜åº¦å’Œå®½åº¦
 void MyApp::ChangeW_H(int width, int height)
 {
 	mClientWidth = width;
 	mClientHeight = height;
 }
-//¸ü¸ÄPSO
+//æ›´æ”¹PSO
 void MyApp::ChangePSOstate()
 {
 	if (GetAsyncKeyState('1') & 0x8000)
@@ -716,7 +716,7 @@ void MyApp::ChangePSOstate()
 	else
 		mIsWireframe = false;
 }
-//¸üĞÂÉãÏñÍ·¾ØÕó
+//æ›´æ–°æ‘„åƒå¤´çŸ©é˜µ
 void MyApp::UpdateCamara()
 {
 	mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
@@ -734,7 +734,7 @@ void MyApp::UpdateCamara()
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, view);
 }
-//¸üĞÂÎïÌå³£Á¿»º³åÇø£¨ÊÀ½ç¾ØÕó£©
+//æ›´æ–°ç‰©ä½“å¸¸é‡ç¼“å†²åŒºï¼ˆä¸–ç•ŒçŸ©é˜µï¼‰
 void MyApp::UpdateObjectsConstBuffers()const
 {
 	auto currentObjectConstBuffer = mCurrentFrameResource->objectConstBuffer.get();
@@ -753,7 +753,7 @@ void MyApp::UpdateObjectsConstBuffers()const
 		}
 	}
 }
-//¸üĞÂäÖÈ¾¹ı³Ì³£Á¿
+//æ›´æ–°æ¸²æŸ“è¿‡ç¨‹å¸¸é‡
 void MyApp::UpdatePassConstBuffers()const
 {
 	RenderingPassConstants mRenderingPassConstantsBuffer;
@@ -788,7 +788,7 @@ void MyApp::UpdatePassConstBuffers()const
 	auto currentPassConstsBuffer = mCurrentFrameResource->passConstBuffer.get();
 	currentPassConstsBuffer->CopyData(0, mRenderingPassConstantsBuffer);
 }
-//¸üĞÂ²ÄÖÊ³£Á¿»º³åÇø
+//æ›´æ–°æè´¨å¸¸é‡ç¼“å†²åŒº
 void MyApp::UpdateMaterialConstBuffers()const
 {
 	auto currentMaterialConstBuffer = mCurrentFrameResource->materialConstBuffer.get();
@@ -810,7 +810,7 @@ void MyApp::UpdateMaterialConstBuffers()const
 	}
 }
 
-//»æÖÆäÖÈ¾Ïî
+//ç»˜åˆ¶æ¸²æŸ“é¡¹
 void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<RenderItem*>& renderItems)const
 {
 	for (size_t itemIndex = 0; itemIndex < renderItems.size(); itemIndex++)
@@ -835,7 +835,7 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 	}
 }
 
-//»ñÈ¡Ö¸ÏòMyAppÀà×ÔÉíµÄÖ¸Õë
+//è·å–æŒ‡å‘MyAppç±»è‡ªèº«çš„æŒ‡é’ˆ
 const MyApp* MyApp::GetMyApp()const
 {
 	return this;
