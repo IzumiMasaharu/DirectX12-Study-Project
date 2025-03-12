@@ -12,7 +12,7 @@
 
 cbuffer cbPerObject : register(b0)
 {
-    float4x4 gWorld;//ÎïÌåÊÀ½ç±ä»»¾ØÕó
+    float4x4 gWorld;//ç‰©ä½“ä¸–ç•Œå˜æ¢çŸ©é˜µ
 }
 cbuffer cbMaterial : register(b1)
 {
@@ -23,21 +23,21 @@ cbuffer cbMaterial : register(b1)
 }
 cbuffer cbPass : register(b2)
 {
-    float4x4 gView;//ÉãÏñ»úÊÓÍ¼¾ØÕó
-    float4x4 gInvView;//ÊÓÍ¼¾ØÕóµÄÄæ¾ØÕó
-    float4x4 gProj;//Í¶Ó°£¨ÖÁÏÔÊ¾ÆÁÄ»£©¾ØÕó
-    float4x4 gInvProj;//Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-    float4x4 gViewProj;//ÊÓÍ¼Í¶Ó°¾ØÕó
-    float4x4 gInvViewProj;//ÊÓÍ¼Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-    float3 gEyePosW;//ÉãÏñ»úÎ»ÖÃ×ø±ê
+    float4x4 gView;//æ‘„åƒæœºè§†å›¾çŸ©é˜µ
+    float4x4 gInvView;//è§†å›¾çŸ©é˜µçš„é€†çŸ©é˜µ
+    float4x4 gProj;//æŠ•å½±ï¼ˆè‡³æ˜¾ç¤ºå±å¹•ï¼‰çŸ©é˜µ
+    float4x4 gInvProj;//æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+    float4x4 gViewProj;//è§†å›¾æŠ•å½±çŸ©é˜µ
+    float4x4 gInvViewProj;//è§†å›¾æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+    float3 gEyePosW;//æ‘„åƒæœºä½ç½®åæ ‡
     float cbPerObjectPad1;
-    float2 gRenderTargetSize;//äÖÈ¾Ä¿±êµÄ´óĞ¡
-    float2 gInvRenderTargetSize;//äÖÈ¾Ä¿±ê´óĞ¡µÄµ¹Êı
-    float gNearZ;//½üÊÓÆ½Ãæ
-    float gFarZ;//Ô¶ÊÓÆ½Ãæ
-    float gTotalTime;//³ÌĞòÔËĞĞ×ÜÊ±¼ä
-    float gDeltaTime;//Á½´ÎtickÖ®¼äµÄÊ±¼ä²î
-    float4 gAmbientIlluminating;//ÎïÌå×ÔÉí·¢¹â
+    float2 gRenderTargetSize;//æ¸²æŸ“ç›®æ ‡çš„å¤§å°
+    float2 gInvRenderTargetSize;//æ¸²æŸ“ç›®æ ‡å¤§å°çš„å€’æ•°
+    float gNearZ;//è¿‘è§†å¹³é¢
+    float gFarZ;//è¿œè§†å¹³é¢
+    float gTotalTime;//ç¨‹åºè¿è¡Œæ€»æ—¶é—´
+    float gDeltaTime;//ä¸¤æ¬¡tickä¹‹é—´çš„æ—¶é—´å·®
+    float4 gAmbientIlluminating;//ç‰©ä½“è‡ªèº«å‘å…‰
     
     Light gLights[MAX_NUM_LIGHTS];
 }

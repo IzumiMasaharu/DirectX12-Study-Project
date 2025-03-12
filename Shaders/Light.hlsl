@@ -16,13 +16,13 @@ struct Material
     float roughness;
 };
 
-//¹âÑ§¼ÆËã·½·¨
-//¼ÆËãÏßĞÔË¥¼õÒò×Ó
+//å…‰å­¦è®¡ç®—æ–¹æ³•
+//è®¡ç®—çº¿æ€§è¡°å‡å› å­
 float CalculatorAttenuatiohn(float d, float start, float end)
 {
     return saturate((end - d) / (end - start));
 }
-//Ê¯Àï¿Ë½üËÆÄ£Äâ·ÆÄù¶û·´ÉäÂÊ
+//çŸ³é‡Œå…‹è¿‘ä¼¼æ¨¡æ‹Ÿè²æ¶…å°”åå°„ç‡
 float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
 {
     float cosNormalLightAngle = saturate(dot(normal, lightVector));
@@ -30,7 +30,7 @@ float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
     float3 reflectPercent = Rf0 + (1.0f - Rf0) * pow(r, 5);
     return reflectPercent;
 }
-//¼ÆËãÒòÂş·´ÉäÓë¾µÃæ·´Éä¶ø½øÈëÈËÑÛµÄ¹âÁ¿
+//è®¡ç®—å› æ¼«åå°„ä¸é•œé¢åå°„è€Œè¿›å…¥äººçœ¼çš„å…‰é‡
 float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 normal, float3 toEyeVector, Material material)
 {
     const float m = (1.0f - material.roughness) * 256.0f;
@@ -44,8 +44,8 @@ float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 norma
     return (mirrorReflectedAlbedo + material.diffuseAlbedo.rgb) * rgbIntensity;
 }
 
-//¹âÔ´Éú³É·½·¨
-//Éú³ÉÆ½ĞĞ¹â
+//å…‰æºç”Ÿæˆæ–¹æ³•
+//ç”Ÿæˆå¹³è¡Œå…‰
 float3 ComputeDirectionalLight(Light light,Material material,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = -light.direction;
@@ -53,7 +53,7 @@ float3 ComputeDirectionalLight(Light light,Material material,float3 normal,float
     
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
 }
-//Éú³Éµã¹âÔ´
+//ç”Ÿæˆç‚¹å…‰æº
 float3 ComputePointLight(Light light,Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = light.position - illuminatedPosition;
@@ -67,7 +67,7 @@ float3 ComputePointLight(Light light,Material material,float3 illuminatedPositio
 
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
 }
-//Éú³É¾Û¹âµÆ
+//ç”Ÿæˆèšå…‰ç¯
 float3 ComputeSpotLight(Light light,Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = -(illuminatedPosition - light.position);
@@ -83,7 +83,7 @@ float3 ComputeSpotLight(Light light,Material material,float3 illuminatedPosition
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
 }
 
-//Éú³ÉÈ«²¿¹âÔ´
+//ç”Ÿæˆå…¨éƒ¨å…‰æº
 float4 ComputeAllLights(Light lights[MAX_NUM_LIGHTS],Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector,float3 shadowFactor)
 {
     float3 result = 0.0f;
