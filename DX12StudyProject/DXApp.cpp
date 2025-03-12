@@ -4,7 +4,7 @@ using namespace Microsoft::WRL;
 
 DXApp* DXApp::mApp = nullptr;
 
-//´°¿Ú¹ı³Ì»Øµ÷º¯Êı
+//çª—å£è¿‡ç¨‹å›è°ƒå‡½æ•°
 LRESULT CALLBACK DXAppWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     return DXApp::GetApp()->MessageProc(hwnd, msg, wParam, lParam);
@@ -20,12 +20,12 @@ DXApp::~DXApp()
     if (md3dDevice != nullptr)
         FlushCommandQueue();
 }
-//ÅÉÉúÀàĞè¸²Ğ´´ËĞéº¯ÊıÒÔ±àĞ´×Ô¼ºĞèÒªµÄ´°¿ÚÏûÏ¢´¦Àí·½Ê½
+//æ´¾ç”Ÿç±»éœ€è¦†å†™æ­¤è™šå‡½æ•°ä»¥ç¼–å†™è‡ªå·±éœ€è¦çš„çª—å£æ¶ˆæ¯å¤„ç†æ–¹å¼
 LRESULT DXApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
-//Ó¦ÓÃÔËĞĞ
+//åº”ç”¨è¿è¡Œ
 int DXApp::Run()
 {
     MSG msg = { nullptr };
@@ -58,12 +58,12 @@ int DXApp::Run()
 
     return (int)msg.wParam;
 }
-//³õÊ¼»¯´°¿ÚÀà
+//åˆå§‹åŒ–çª—å£ç±»
 bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR windowclassName)
 {
-    //´°¿ÚÀàÃüÃû
+    //çª—å£ç±»å‘½å
     WC.SetWCName(windowclassName);
-    //ÌîĞ´´°¿ÚÀà½á¹¹Ìå
+    //å¡«å†™çª—å£ç±»ç»“æ„ä½“
     WNDCLASSEX wc = { 0 };
     wc.cbSize = sizeof(wc);
     wc.hInstance = mhAppInst;
@@ -79,7 +79,7 @@ bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR windowclassName)
     wc.lpszMenuName = nullptr;
     wc.style = CS_HREDRAW | CS_VREDRAW;
 
-    //×¢²áËùÌîĞ´´°¿ÚÀà
+    //æ³¨å†Œæ‰€å¡«å†™çª—å£ç±»
     if (!RegisterClassEx(&wc))
     {
         MessageBox(nullptr, L"RegisterWindowClass Failed.", nullptr, 0);
@@ -88,8 +88,8 @@ bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR windowclassName)
 
     return true;
 }
-//³õÊ¼»¯´°¿Ú£¨Á½ÖÖÖØÔØĞÎÊ½£©
-//ÎŞÖ¸¶¨´óĞ¡µÄ´°¿Ú
+//åˆå§‹åŒ–çª—å£ï¼ˆä¸¤ç§é‡è½½å½¢å¼ï¼‰
+//æ— æŒ‡å®šå¤§å°çš„çª—å£
 bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pWndName)
 {
     Wnd.SetWndName(pWndName);
@@ -98,7 +98,7 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pW
     AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
     int width = R.right - R.left;
     int height = R.bottom - R.top;
-    //´´½¨´°¿Ú
+    //åˆ›å»ºçª—å£
     Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
         Wnd.pWindowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
         CW_USEDEFAULT, CW_USEDEFAULT, width, height,
@@ -112,27 +112,26 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pW
     if (!mhWndHwnd)
         mhWndHwnd = Wnd.wndHwnd;
 
-    //Õ¹Ê¾´°¿Ú
+    //å±•ç¤ºçª—å£
     ShowWindow(mhWndHwnd, SW_SHOW);
     UpdateWindow(mhWndHwnd);
     
     return true;
 }
-//Ö¸¶¨´óĞ¡µÄ´°¿Ú
-bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR pWndName,
-    int x, int y, int wx, int wy)
+//æŒ‡å®šå¤§å°çš„çª—å£
+bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR pWndName, int x, int y, int wx, int wy)
 {
-    //ÉèÖÃ´°¿ÚÃû³ÆÓëÎ»ÖÃ
+    //è®¾ç½®çª—å£åç§°ä¸ä½ç½®
     Wnd.SetWndName(pWndName);
     Wnd.SetWndPos(x, y, wx, wy);
 
     RECT R = { 0, 0, Wnd.mWin_wx, Wnd.mWin_wy };
     AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
-    //´´½¨´°¿Ú
+    //åˆ›å»ºçª—å£
     Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
         Wnd.pWindowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
         Wnd.mWin_x, Wnd.mWin_y, Wnd.mWin_wx, Wnd.mWin_wy,nullptr, nullptr, WC.GetInstance(), nullptr);
-    
+
     if (!Wnd.wndHwnd)
     {
         MessageBox(nullptr, L"CreateWindow Failed.", nullptr, 0);
@@ -140,16 +139,16 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR p
     }
     if (!mhWndHwnd) 
         mhWndHwnd = Wnd.wndHwnd;
-    //Õ¹Ê¾´°¿Ú
+    //å±•ç¤ºçª—å£
     ShowWindow(mhWndHwnd, SW_SHOW);
     UpdateWindow(mhWndHwnd);
 
     return true;
 }
-//³õÊ¼»¯DirectX 3D
+//åˆå§‹åŒ–DirectX 3D
 bool DXApp::InitDirectX3D()
 {
-    //Æô¶¯D3Dµ÷ÊÔ²ã
+    //å¯åŠ¨D3Dè°ƒè¯•å±‚
     #if defined(DEBUG)||defined(_DEBUG)
     {
         ComPtr<ID3D12Debug> debugCotroller;
@@ -157,21 +156,21 @@ bool DXApp::InitDirectX3D()
         debugCotroller->EnableDebugLayer();
     }
     #endif
-    //´´½¨DXGI Factory
+    //åˆ›å»ºDXGI Factory
     ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&mdxgiFactory)))
-    //´´½¨Ó²¼şD3DÉè±¸
+    //åˆ›å»ºç¡¬ä»¶D3Dè®¾å¤‡
     HRESULT hardwareResulte = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&md3dDevice));
-    //Èô´´½¨Ê§°Ü£¬»ØÍËÖÁWARPÉè±¸
+    //è‹¥åˆ›å»ºå¤±è´¥ï¼Œå›é€€è‡³WARPè®¾å¤‡
     if (FAILED(hardwareResulte))
     {
         ComPtr<IDXGIAdapter> pWARPAdapter;
         ThrowIfFailed(mdxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWARPAdapter)))
         ThrowIfFailed(D3D12CreateDevice(pWARPAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&md3dDevice)))
     }
-    //´´½¨Î§À¸
+    //åˆ›å»ºå›´æ 
     ThrowIfFailed(md3dDevice->CreateFence(mCurrentFence, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)))
     
-    //¼ì²âMSAA¼¶±ğÖ§³Ö
+    //æ£€æµ‹MSAAçº§åˆ«æ”¯æŒ
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS mQualityLevel;
     mQualityLevel.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
     mQualityLevel.Format = mBackBufferFormat;
@@ -181,9 +180,9 @@ bool DXApp::InitDirectX3D()
                      &mQualityLevel, 
                      sizeof(mQualityLevel)))
     m4xMSAAQuality = mQualityLevel.NumQualityLevels;
-    assert(m4xMSAAQuality > 0 && "µ±Ç°MSAA¼¶±ğ²»¿ÉÓÃ");
+    assert(m4xMSAAQuality > 0 && "å½“å‰MSAAçº§åˆ«ä¸å¯ç”¨");
 
-    //»ñÈ¡ÃèÊö·û´óĞ¡
+    //è·å–æè¿°ç¬¦å¤§å°
     mRTVDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     mDSVDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
     mCBV_SRV_UAVDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -197,14 +196,14 @@ bool DXApp::InitDirectX3D()
 
     return true;
 }
-//´´½¨ÃüÁî¶ÓÁĞ¡¢ÃüÁî·ÖÅäÆ÷¡¢ÃüÁîÁĞ±í
+//åˆ›å»ºå‘½ä»¤é˜Ÿåˆ—ã€å‘½ä»¤åˆ†é…å™¨ã€å‘½ä»¤åˆ—è¡¨
 void DXApp::CreateCmdObjects()
 {
-    //ÌîĞ´ÃèÊöÃüÁî¶ÓÁĞµÄ½á¹¹Ìå
+    //å¡«å†™æè¿°å‘½ä»¤é˜Ÿåˆ—çš„ç»“æ„ä½“
     D3D12_COMMAND_QUEUE_DESC qd = {};
     qd.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     qd.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    //´´½¨
+    //åˆ›å»º
     ThrowIfFailed(md3dDevice->CreateCommandQueue(&qd, IID_PPV_ARGS(&mCommandQueue)))
     ThrowIfFailed(md3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS( mCommandAllocator.GetAddressOf())))
     ThrowIfFailed(md3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandAllocator.Get(), 
@@ -212,42 +211,42 @@ void DXApp::CreateCmdObjects()
 
     mCommandList->Close();
 }
-//´´½¨½»»»Á´
+//åˆ›å»ºäº¤æ¢é“¾
 void DXApp::CreateSwapChain()
 {
-    //ÊÍ·ÅÖ®Ç°Ëù´´½¨µÄµÄ½»»»Á´£¬ÖØĞÂ´´½¨
+    //é‡Šæ”¾ä¹‹å‰æ‰€åˆ›å»ºçš„çš„äº¤æ¢é“¾ï¼Œé‡æ–°åˆ›å»º
     mSwapChain.Reset();
-    //ÌîĞ´ÃèÊöËù´´½¨½»»»Á´µÄ½á¹¹Ìå
+    //å¡«å†™æè¿°æ‰€åˆ›å»ºäº¤æ¢é“¾çš„ç»“æ„ä½“
     DXGI_SWAP_CHAIN_DESC scd;
     scd.BufferDesc.Width = mClientWidth;
     scd.BufferDesc.Height = mClientHeight;
-    scd.BufferDesc.Format = mBackBufferFormat;//ÏÔÊ¾¸ñÊ½
-    scd.BufferDesc.RefreshRate.Numerator = 120;//×î¸ßË¢ĞÂÂÊ
-    scd.BufferDesc.RefreshRate.Denominator = 1;//×îµÍË¢ĞÂÂÊ
-    scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;//ÊÇ·ñËõ·Å
-    scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;//ÖğĞĞÉ¨Ãè»¹ÊÇ¸ôĞĞÉ¨Ãè
-    scd.SampleDesc.Count = m4xMSAAState ? 4 : 1;//¶àÖØ²ÉÑù²ÉÑùÊıÁ¿
-    scd.SampleDesc.Quality = m4xMSAAState ? (m4xMSAAQuality - 1) : 0;//¶àÖØ²ÉÑùÖÊÁ¿¼¶±ğ
+    scd.BufferDesc.Format = mBackBufferFormat;//æ˜¾ç¤ºæ ¼å¼
+    scd.BufferDesc.RefreshRate.Numerator = 120;//æœ€é«˜åˆ·æ–°ç‡
+    scd.BufferDesc.RefreshRate.Denominator = 1;//æœ€ä½åˆ·æ–°ç‡
+    scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;//æ˜¯å¦ç¼©æ”¾
+    scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;//é€è¡Œæ‰«æè¿˜æ˜¯éš”è¡Œæ‰«æ
+    scd.SampleDesc.Count = m4xMSAAState ? 4 : 1;//å¤šé‡é‡‡æ ·é‡‡æ ·æ•°é‡
+    scd.SampleDesc.Quality = m4xMSAAState ? (m4xMSAAQuality - 1) : 0;//å¤šé‡é‡‡æ ·è´¨é‡çº§åˆ«
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     scd.BufferCount = SwapChainBufferCount;
-    scd.Windowed = true;//´°¿ÚÏÔÊ¾»¹ÊÇÈ«ÆÁÏÔÊ¾
-    scd.OutputWindow = mhWndHwnd;//Í¼ÏñÊä³ö´°¿Ú¾ä±ú
+    scd.Windowed = true;//çª—å£æ˜¾ç¤ºè¿˜æ˜¯å…¨å±æ˜¾ç¤º
+    scd.OutputWindow = mhWndHwnd;//å›¾åƒè¾“å‡ºçª—å£å¥æŸ„
     scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
     ThrowIfFailed(mdxgiFactory->CreateSwapChain(mCommandQueue.Get(), &scd, mSwapChain.GetAddressOf()))
 }
-//´´½¨ÃèÊö·û¶Ñ(RTVºÍDSV)
+//åˆ›å»ºæè¿°ç¬¦å †(RTVå’ŒDSV)
 void DXApp::Create_DSV_RTV_DescriptorHeaps()
 {
-    //´´½¨RTVÃèÊö·û¶Ñ
+    //åˆ›å»ºRTVæè¿°ç¬¦å †
     D3D12_DESCRIPTOR_HEAP_DESC RTVHeapDesc ;
     RTVHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     RTVHeapDesc.NodeMask = 0;
     RTVHeapDesc.NumDescriptors = SwapChainBufferCount;
     RTVHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&RTVHeapDesc, IID_PPV_ARGS(mRTVHeap.GetAddressOf())))
-    //´´½¨DSVÃèÊö·û¶Ñ
+    //åˆ›å»ºDSVæè¿°ç¬¦å †
     D3D12_DESCRIPTOR_HEAP_DESC DSVHeapDesc ;
     DSVHeapDesc.NumDescriptors = 1;
     DSVHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -255,7 +254,7 @@ void DXApp::Create_DSV_RTV_DescriptorHeaps()
     DSVHeapDesc.NodeMask = 0;
     ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&DSVHeapDesc, IID_PPV_ARGS(mDSVHeap.GetAddressOf())))
 }
-//¼ÓÔØÃ¶¾ÙËùÓĞÏÔÊ¾ÊÊÅäÆ÷
+//åŠ è½½æšä¸¾æ‰€æœ‰æ˜¾ç¤ºé€‚é…å™¨
 void DXApp::LogAdapters()
 {
     IDXGIAdapter* Adapter = nullptr;
@@ -265,7 +264,7 @@ void DXApp::LogAdapters()
         DXGI_ADAPTER_DESC ad;
         Adapter->GetDesc(&ad);
 
-        std::wstring AdapterText = L"¿ÉÓÃÏÔÊ¾ÊÊÅäÆ÷ " + std::to_wstring(i + 1) + L":";
+        std::wstring AdapterText = L"å¯ç”¨æ˜¾ç¤ºé€‚é…å™¨ " + std::to_wstring(i + 1) + L":";
         AdapterText += ad.Description;
         AdapterText += L"\n";
         OutputDebugString(AdapterText.c_str());
@@ -281,7 +280,7 @@ void DXApp::LogAdapters()
         ad = nullptr;
     }
 }
-//¼ÓÔØÃ¶¾ÙËùÓĞÏÔÊ¾Êä³ö
+//åŠ è½½æšä¸¾æ‰€æœ‰æ˜¾ç¤ºè¾“å‡º
 void DXApp::LogAdapterOutputs(IDXGIAdapter* adapter)
 {
     IDXGIOutput* Output = nullptr;
@@ -290,7 +289,7 @@ void DXApp::LogAdapterOutputs(IDXGIAdapter* adapter)
         DXGI_OUTPUT_DESC od;
         Output->GetDesc(&od);
 
-        std::wstring OutputText = L"¿ÉÓÃÏÔÊ¾Êä³ö " + std::to_wstring(i + 1) + L":";
+        std::wstring OutputText = L"å¯ç”¨æ˜¾ç¤ºè¾“å‡º " + std::to_wstring(i + 1) + L":";
         OutputText += od.DeviceName;
         OutputText += L"\n";
         OutputDebugString(OutputText.c_str());
@@ -300,13 +299,13 @@ void DXApp::LogAdapterOutputs(IDXGIAdapter* adapter)
         ReleaseCom(Output);
     }
 }
-//¼ÓÔØÃ¶¾ÙËùÓĞÏÔÊ¾Êä³ö¸ñÊ½
+//åŠ è½½æšä¸¾æ‰€æœ‰æ˜¾ç¤ºè¾“å‡ºæ ¼å¼
 void DXApp::LogAdapterDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 {
     UINT count = 0;
     UINT flags = 0;
 
-    output->GetDisplayModeList(format, flags, &count, nullptr);//½«²ÎÊıpDescÉèÎªnullptr¿É»ñÈ¡Âú×ãÌõ¼şµÄÏÔÊ¾Ä£Ê½µÄÊıÁ¿£¬²¢´æÈëcountÖĞ
+    output->GetDisplayModeList(format, flags, &count, nullptr);//å°†å‚æ•°pDescè®¾ä¸ºnullptrå¯è·å–æ»¡è¶³æ¡ä»¶çš„æ˜¾ç¤ºæ¨¡å¼çš„æ•°é‡ï¼Œå¹¶å­˜å…¥countä¸­
     std::vector<DXGI_MODE_DESC> modelist(count);
     output->GetDisplayModeList(format, flags, &count, &modelist[0]);
 
@@ -317,18 +316,19 @@ void DXApp::LogAdapterDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
         UINT nu = i.RefreshRate.Numerator;
         UINT de = i.RefreshRate.Denominator;
         std::wstring DisplayModeText =
-            L"ÏÔÊ¾Ä£Ê½" + std::to_wstring(x) +
-            L"¿í¶È£º" + std::to_wstring(i.Width) + L"  " +
-            L"¸ß¶È£º" + std::to_wstring(i.Height) + L"  " +
-            L"Ë¢ĞÂÂÊ£º" + std::to_wstring(nu) + L"~" + std::to_wstring(de) +
+            L"æ˜¾ç¤ºæ¨¡å¼" + std::to_wstring(x) +
+            L"å®½åº¦ï¼š" + std::to_wstring(i.Width) + L"  " +
+            L"é«˜åº¦ï¼š" + std::to_wstring(i.Height) + L"  " +
+            L"åˆ·æ–°ç‡ï¼š" + std::to_wstring(nu) + L"~" + std::to_wstring(de) +
             L"\n";
 
         OutputDebugString(DisplayModeText.c_str());
     }
 }
-//Ë¢ĞÂÃüÁî¶ÓÁĞ
+//åˆ·æ–°å‘½ä»¤é˜Ÿåˆ—
 void DXApp::FlushCommandQueue()
 {
+    //å›´æ æ³•
     mCurrentFence++;
     ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), mCurrentFence))
     if (mFence->GetCompletedValue() < mCurrentFence)
@@ -344,25 +344,25 @@ void DXApp::FlushCommandQueue()
         }
     }
 }
-//»ñÈ¡Ö¸Ïòµ±Ç°»º³åÇøµÄÖ¸Õë
+//è·å–æŒ‡å‘å½“å‰ç¼“å†²åŒºçš„æŒ‡é’ˆ
 ID3D12Resource* DXApp::CurrentBackBuffer()const
 {
     return mSwapChainBuffer[mCurrentBackBuffer].Get();
 }
-//»ñÈ¡µ±Ç°ºóÌ¨»º³åÇøµÄRTV
+//è·å–å½“å‰åå°ç¼“å†²åŒºçš„RTV
 D3D12_CPU_DESCRIPTOR_HANDLE DXApp::CurrentBackBufferView()const
 {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
         mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
         mCurrentBackBuffer, mRTVDescriptorSize);
 }
-//»ñÈ¡µ±Ç°ºóÌ¨»º³åÇøµÄDSV
+//è·å–å½“å‰åå°ç¼“å†²åŒºçš„DSV
 D3D12_CPU_DESCRIPTOR_HANDLE DXApp::DepthStencilBufferView()const
 {
     return mDSVHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-//ÖØĞÂÉèÖÃDXÏà¹Ø³ß´çÊôĞÔ
+//é‡æ–°è®¾ç½®DXç›¸å…³å°ºå¯¸å±æ€§
 void DXApp::Resize()
 {
     assert(md3dDevice);
@@ -385,16 +385,16 @@ void DXApp::Resize()
 
     mCurrentBackBuffer = 0;
 
-    //ÎªÃ¿¸ö»º³åÇø´´½¨RTV±êÊ¶·û
+    //ä¸ºæ¯ä¸ªç¼“å†²åŒºåˆ›å»ºRTVæ ‡è¯†ç¬¦
     CD3DX12_CPU_DESCRIPTOR_HANDLE RTVHeapHandle(mRTVHeap->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < SwapChainBufferCount; i++)
     {
         mSwapChain->GetBuffer(i, IID_PPV_ARGS(&mSwapChainBuffer[i]));
         md3dDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), nullptr, RTVHeapHandle);
-        //½«RTVÃèÊö·û¶Ñ¾ä±úÏòºóÆ«ÒÆÒ»Î»
+        //å°†RTVæè¿°ç¬¦å †å¥æŸ„å‘ååç§»ä¸€ä½
         RTVHeapHandle.Offset(1, mRTVDescriptorSize);
     }
-    //ÎªÃ¿¸ö»º³åÇø´´½¨DSV±êÊ¶·û
+    //ä¸ºæ¯ä¸ªç¼“å†²åŒºåˆ›å»ºDSVæ ‡è¯†ç¬¦
     D3D12_RESOURCE_DESC DSD;
     DSD.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     DSD.Format = mDepthStencilFormat;
@@ -405,8 +405,8 @@ void DXApp::Resize()
     DSD.Width = mClientWidth;
     DSD.Height = mClientHeight;
     DSD.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    DSD.SampleDesc.Count = m4xMSAAState ? 4 : 1;//¶àÖØ²ÉÑù²ÉÑùÊıÁ¿
-    DSD.SampleDesc.Quality = m4xMSAAState ? (m4xMSAAQuality - 1) : 0;//¶àÖØ²ÉÑùÖÊÁ¿¼¶±ğ
+    DSD.SampleDesc.Count = m4xMSAAState ? 4 : 1;//å¤šé‡é‡‡æ ·é‡‡æ ·æ•°é‡
+    DSD.SampleDesc.Quality = m4xMSAAState ? (m4xMSAAQuality - 1) : 0;//å¤šé‡é‡‡æ ·è´¨é‡çº§åˆ«
 
     D3D12_CLEAR_VALUE OptiClear;
     OptiClear.Format = mDepthStencilFormat;
@@ -431,33 +431,33 @@ void DXApp::Resize()
     mCommandQueue->ExecuteCommandLists(_countof(CmdList),CmdList);
     FlushCommandQueue();
 }
-//´¦ÀíÊó±êĞÅÏ¢£¨¿É±»ÅÉÉúÀà¸²Ğ´£©
+//å¤„ç†é¼ æ ‡ä¿¡æ¯ï¼ˆå¯è¢«æ´¾ç”Ÿç±»è¦†å†™ï¼‰
 void DXApp::MouseDown(WPARAM ButtonState, int x, int y){ return; }
 void DXApp::MouseUp(WPARAM ButtonState, int x, int y){ return; }
 void DXApp::MouseMove(WPARAM ButtonState, int x, int y){ return; }
 void DXApp::MouseWheel(short zDelta) { return; }
 
-//»ñÈ¡DXAppÀàÊµÀıµÄ¾ä±ú
+//è·å–DXAppç±»å®ä¾‹çš„å¥æŸ„
 HINSTANCE DXApp::GetAppInst()const
 {
     return this->mhAppInst;
 }
-//»ñÈ¡Ö¸ÏòDXAppÀàµÄÖ¸Õë
+//è·å–æŒ‡å‘DXAppç±»çš„æŒ‡é’ˆ
 DXApp* DXApp::GetApp()
 {
     return mApp;
 }
-//»ñÈ¡³ÌĞòÖ÷´°¿Ú¾ä±ú
+//è·å–ç¨‹åºä¸»çª—å£å¥æŸ„
 HWND DXApp::GetMainHwnd()const
 {
     return mhWndHwnd;
 }
-//²é¿´ÊÇ·ñ¿ªÆô4xMSAA¹¦ÄÜ
+//æŸ¥çœ‹æ˜¯å¦å¼€å¯4xMSAAåŠŸèƒ½
 bool DXApp::Get4xMSAAState()const
 {
     return m4xMSAAState;
 }
-//¸ü¸Ä4xMSAA¹¦ÄÜ¿ª¹Ø×´Ì¬
+//æ›´æ”¹4xMSAAåŠŸèƒ½å¼€å…³çŠ¶æ€
 void DXApp::Set4xMSAAState(bool On_Off)
 {
     if (m4xMSAAState != On_Off)
@@ -469,12 +469,12 @@ void DXApp::Set4xMSAAState(bool On_Off)
         Resize();
     }
 }
-//·µ»Ø»º³åÇø¿í¸ß±È
+//è¿”å›ç¼“å†²åŒºå®½é«˜æ¯”
 float DXApp::W_H_Ratio()const
 {
     return static_cast<float>(mClientWidth) / static_cast<float>(mClientHeight);
 }
-//¼ÆËãÃ¿ÃëÖ¡ÊıºÍÖ¡äÖÈ¾Ê±³¤          
+//è®¡ç®—æ¯ç§’å¸§æ•°å’Œå¸§æ¸²æŸ“æ—¶é•¿          
 void DXApp::CalculateFPS_MSPF()
 {
     static int FrameCount = 0;
@@ -492,44 +492,44 @@ void DXApp::CalculateFPS_MSPF()
     }
 }
 
-//¹¹Ôì´°¿ÚÀà
+//æ„é€ çª—å£ç±»
 DXApp::WindowClass::WindowClass(HINSTANCE hInstance) :hWndClassInst(hInstance)
 {}
-//×¢Ïú´°¿ÚÀà
+//æ³¨é”€çª—å£ç±»
 DXApp::WindowClass::~WindowClass()
 {
     UnregisterClass(windowclassName, GetInstance());
 }
-//ÉèÖÃ´°¿ÚÀàÃû³Æ
+//è®¾ç½®çª—å£ç±»åç§°
 const wchar_t* DXApp::WindowClass::SetWCName(LPCTSTR WCName)
 {
     windowclassName = WCName;
     return windowclassName;
 }
-//·µ»Ø´°¿ÚÀàÃû³Æ
+//è¿”å›çª—å£ç±»åç§°
 const wchar_t* DXApp::WindowClass::GetWCName()const
 {
     return windowclassName;
 }
-//·µ»Ø´°¿ÚÀàÊµÀı¾ä±ú
+//è¿”å›çª—å£ç±»å®ä¾‹å¥æŸ„
 HINSTANCE DXApp::WindowClass::GetInstance()const
 {
     return hWndClassInst;
 }
 
-//Ïú»Ù´°¿Ú
+//é”€æ¯çª—å£
 DXApp::Window::~Window()
 {
     if (wndHwnd != nullptr)
         DestroyWindow(wndHwnd);
 }
-//ÉèÖÃ´°¿ÚÃû³Æ
+//è®¾ç½®çª—å£åç§°
 const wchar_t* DXApp::Window::SetWndName(LPCTSTR WndName)
 {
     pWindowName = WndName;
     return pWindowName;
 }
-//ÉèÖÃ´°¿Ú×ø±êÊı¾İ
+//è®¾ç½®çª—å£åæ ‡æ•°æ®
 void DXApp::Window::SetWndPos(int x, int y, int wx, int wy)
 {
     mWin_x = x;
@@ -537,7 +537,7 @@ void DXApp::Window::SetWndPos(int x, int y, int wx, int wy)
     mWin_wx = wx;
     mWin_wy = wy;
 }
-//»ñÈ¡´°¿Ú¾ä±ú
+//è·å–çª—å£å¥æŸ„
 HWND DXApp::Window::GetWndHwnd()const
 {
     return this->wndHwnd;

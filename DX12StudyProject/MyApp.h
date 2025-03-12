@@ -22,61 +22,61 @@ private:
 	void MouseMove(WPARAM ButtonState, int x, int y) override;
 	void MouseWheel(short zDelta) override;
 	
-	void BuildRootSignature();//´´½¨¸ùÇ©Ãû
-	void BuildShaders();//×ÅÉ«Æ÷£¬Æô¶¯£¡
-	void BuildInputLayout();//´´½¨ÊäÈë²¼¾Ö
-	void BuildMeshGeometry();//´´½¨Íø¸ñÌå
-	void BuildImportedGeometry();//´´½¨Í¨¹ıÎÄ¼şµ¼ÈëµÄÄ£ĞÍ
-	void BuildMaterials();//´´½¨²ÄÖÊ
-	void BuildTexture();//´´½¨ÎÆÀí
-	void BuildRenderItems();//´´½¨äÖÈ¾Ïî
-	void BuildFrameResources();//´´½¨Ö¡×ÊÔ´
-	void BuildDescriptorHeaps();//´´½¨³ÌĞòËùĞèµÄÆäËûÃèÊö·û¶Ñ£¨³ı³õÊ¼»¯Ê±´´½¨µÄDSV¡¢RTVÃèÊö·û¶Ñ£©
-	void BuildConstantBufferViews();//´´½¨³£Á¿»º³åÇø
-	void BuildPSOs();//´´½¨äÖÈ¾¹ÜÏß×´Ì¬¶ÔÏó
+	void BuildRootSignature();//åˆ›å»ºæ ¹ç­¾å
+	void BuildShaders();//ç€è‰²å™¨ï¼Œå¯åŠ¨ï¼
+	void BuildInputLayout();//åˆ›å»ºè¾“å…¥å¸ƒå±€
+	void BuildMeshGeometry();//åˆ›å»ºç½‘æ ¼ä½“
+	void BuildImportedGeometry();//åˆ›å»ºé€šè¿‡æ–‡ä»¶å¯¼å…¥çš„æ¨¡å‹
+	void BuildMaterials();//åˆ›å»ºæè´¨
+	void BuildTexture();//åˆ›å»ºçº¹ç†
+	void BuildRenderItems();//åˆ›å»ºæ¸²æŸ“é¡¹
+	void BuildFrameResources();//åˆ›å»ºå¸§èµ„æº
+	void BuildDescriptorHeaps();//åˆ›å»ºç¨‹åºæ‰€éœ€çš„å…¶ä»–æè¿°ç¬¦å †ï¼ˆé™¤åˆå§‹åŒ–æ—¶åˆ›å»ºçš„DSVã€RTVæè¿°ç¬¦å †ï¼‰
+	void BuildConstantBufferViews();//åˆ›å»ºå¸¸é‡ç¼“å†²åŒº
+	void BuildPSOs();//åˆ›å»ºæ¸²æŸ“ç®¡çº¿çŠ¶æ€å¯¹è±¡
 
 	void ChangeW_H(int width, int height);
 	void ChangePSOstate();
-	void UpdateCamara();//¸üĞÂÉãÏñÍ·¾ØÕó
-	void UpdateObjectsConstBuffers()const;//¸üĞÂ³£Á¿»º³åÇø£¨ÊÀ½ç¾ØÕó£©
-	void UpdatePassConstBuffers()const;//¸üĞÂäÖÈ¾¹ı³Ì³£Á¿»º³åÇø
-	void UpdateMaterialConstBuffers()const;//¸üĞÂ²ÄÖÊ³£Á¿»º³åÇø
+	void UpdateCamara();//æ›´æ–°æ‘„åƒå¤´çŸ©é˜µ
+	void UpdateObjectsConstBuffers()const;//æ›´æ–°å¸¸é‡ç¼“å†²åŒºï¼ˆä¸–ç•ŒçŸ©é˜µï¼‰
+	void UpdatePassConstBuffers()const;//æ›´æ–°æ¸²æŸ“è¿‡ç¨‹å¸¸é‡ç¼“å†²åŒº
+	void UpdateMaterialConstBuffers()const;//æ›´æ–°æè´¨å¸¸é‡ç¼“å†²åŒº
 
-	void DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<RenderItem*>& renderItems)const;//»æÖÆäÖÈ¾Ïî
+	void DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<RenderItem*>& renderItems)const;//ç»˜åˆ¶æ¸²æŸ“é¡¹
 public:
-	const MyApp* GetMyApp()const;//»ñÈ¡Ö¸ÏòMyAppÀà×ÔÉíµÄÖ¸Õë
+	const MyApp* GetMyApp()const;//è·å–æŒ‡å‘MyAppç±»è‡ªèº«çš„æŒ‡é’ˆ
 private:
 	WindowClass WC1;
 	Window AppMainWin;
 
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature = nullptr;//¸ùÇ©Ãû
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvDescriptorHeap = nullptr;//CBVÃèÊö·û¶Ñ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr;//SRVÃèÊö·û¶Ñ
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature = nullptr;//æ ¹ç­¾å
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvDescriptorHeap = nullptr;//CBVæè¿°ç¬¦å †
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr;//SRVæè¿°ç¬¦å †
 
-	std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;//ÊäÈë²¼¾Ö
-	UINT mPassCbvOffset = 0;//äÖÈ¾¹ı³Ì³£Á¿»º³åÇøÆ«ÒÆÁ¿
+	std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;//è¾“å…¥å¸ƒå±€
+	UINT mPassCbvOffset = 0;//æ¸²æŸ“è¿‡ç¨‹å¸¸é‡ç¼“å†²åŒºåç§»é‡
 
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> mShaders;//´¢´æ×ÅÉ«Æ÷µÄÎŞĞòÍ¼
-	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeos;//´¢´æ¼¸ºÎÍø¸ñÌåµÄÎŞĞòÍ¼
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> mPSOs;//´¢´æ²»Í¬PSOµÄÎŞĞòÍ¼
-	std::unordered_map<std::string, std::unique_ptr<Material>> mMaterials;//´æ´¢²ÄÖÊµÄÎŞĞòÍ¼
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> mShaders;//å‚¨å­˜ç€è‰²å™¨çš„æ— åºå›¾
+	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeos;//å‚¨å­˜å‡ ä½•ç½‘æ ¼ä½“çš„æ— åºå›¾
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> mPSOs;//å‚¨å­˜ä¸åŒPSOçš„æ— åºå›¾
+	std::unordered_map<std::string, std::unique_ptr<Material>> mMaterials;//å­˜å‚¨æè´¨çš„æ— åºå›¾
 	
-	std::vector<std::unique_ptr<RenderItem>> mAllRenderItems;//´¢´æÓĞËùÓĞäÖÈ¾Ïî
+	std::vector<std::unique_ptr<RenderItem>> mAllRenderItems;//å‚¨å­˜æœ‰æ‰€æœ‰æ¸²æŸ“é¡¹
 	std::vector<RenderItem*> mOpaqueRenderItems;//
 	std::vector<RenderItem*> mTransparentRenderItems;//
 
-	UINT mCurrentFrameResourceIndex = 0;//µ±Ç°Ö¡×ÊÔ´Ë÷Òı
-	std::vector<std::unique_ptr<FrameResource>> mFrameResources;//È«²¿Ö¡×ÊÔ´
-	FrameResource* mCurrentFrameResource = nullptr;//µ±Ç°Ö¡×ÊÔ´
+	UINT mCurrentFrameResourceIndex = 0;//å½“å‰å¸§èµ„æºç´¢å¼•
+	std::vector<std::unique_ptr<FrameResource>> mFrameResources;//å…¨éƒ¨å¸§èµ„æº
+	FrameResource* mCurrentFrameResource = nullptr;//å½“å‰å¸§èµ„æº
 
 	POINT mLastMousePos;
 
 	bool mIsWireframe = false;
 
 	DirectX::XMFLOAT3 mEyePos = { 0.0f,0.0f,0.0f };
-	float mTheta = 0;//¼«µã-Ô­µãÔÚx-zÃæÉÏÍ¶Ó°ÓëxÖáÕı°ëÖá¼Ğ½Ç
-	float mPhi = DirectX::XM_PIDIV4;//¼«µã-Ô­µãÁ¬ÏßÓëYÖáÕı°ëÖá¼Ğ½Ç
-	float mRadius = 15.0f;//¼«¾¶³¤
+	float mTheta = 0;//æç‚¹-åŸç‚¹åœ¨x-zé¢ä¸ŠæŠ•å½±ä¸xè½´æ­£åŠè½´å¤¹è§’
+	float mPhi = DirectX::XM_PIDIV4;//æç‚¹-åŸç‚¹è¿çº¿ä¸Yè½´æ­£åŠè½´å¤¹è§’
+	float mRadius = 15.0f;//æå¾„é•¿
 
 	DirectX::XMFLOAT4X4 mView = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 mProj = MathHelper::Identity4x4();

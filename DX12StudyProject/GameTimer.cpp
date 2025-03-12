@@ -6,7 +6,7 @@ GameTimer::GameTimer()
 	QueryPerformanceFrequency((LARGE_INTEGER*)&CountsPerSeconcd);
 	mSecondsPerCount = 1.0 / (double)CountsPerSeconcd;
 }
-//ÓÎÏ·ÔËĞĞ×ÜÊ±¼ä£¨³ÌĞòÔËĞĞ×ÜÊ±¼ä-ÓÎÏ·ÔİÍ£×ÜÊ±¼ä£©
+//æ¸¸æˆè¿è¡Œæ€»æ—¶é—´ï¼ˆç¨‹åºè¿è¡Œæ€»æ—¶é—´-æ¸¸æˆæš‚åœæ€»æ—¶é—´ï¼‰
 float GameTimer::TotalTime()const
 {
 	if (mStopped)
@@ -14,12 +14,12 @@ float GameTimer::TotalTime()const
 	else
 		return (mCurrentTime - mStartTime - mTotalPausdTime) * mSecondsPerCount;
 }
-//·µ»ØÖ¡Ê±¼ä²î
+//è¿”å›å¸§æ—¶é—´å·®
 float GameTimer::DeltaTime()const
 {
 	return (float)mDeltaTime;
 }
-//ÖØÖÃ¼ÆÊ±Æ÷
+//é‡ç½®è®¡æ—¶å™¨
 void GameTimer::Reset()
 {
 	__int64 CurrentTime;
@@ -30,7 +30,7 @@ void GameTimer::Reset()
 	mPrevTime = CurrentTime;
 	mStopped = false;
 }
-//¿ªÆô¼ÆÊ±Æ÷
+//å¼€å¯è®¡æ—¶å™¨
 void GameTimer::Start()
 {
 	if (mStopped)
@@ -39,12 +39,12 @@ void GameTimer::Start()
 		QueryPerformanceCounter((LARGE_INTEGER*)&CurrentTime);
 
 		mTotalPausdTime += (CurrentTime - mStopTime);
-		mPrevTime = CurrentTime;//Ğè½«ÔİÍ£Ê±Ç°Ò»ÕóµÄÊ±¿Ì±äÎª¿ªÊ¼Ê±¿Ì
+		mPrevTime = CurrentTime;//éœ€å°†æš‚åœæ—¶å‰ä¸€é˜µçš„æ—¶åˆ»å˜ä¸ºå¼€å§‹æ—¶åˆ»
 		mStopTime = 0;
 		mStopped = false;
 	}
 }
-//ÔİÍ£¼ÆÊ±Æ÷
+//æš‚åœè®¡æ—¶å™¨
 void GameTimer::Stop()
 {
 	if (!mStopped)
@@ -56,7 +56,7 @@ void GameTimer::Stop()
 		mStopped = true;
 	}
 }
-//Ö¡¼ÆÊ±
+//å¸§è®¡æ—¶
 void GameTimer::Tick()
 {
 	__int64 CurrentTime;
@@ -66,5 +66,5 @@ void GameTimer::Tick()
 	mPrevTime = mCurrentTime;
 
 	if (mDeltaTime < 0.0)
-		 mDeltaTime = 0.0;//·ÀÖ¹ÒòÎªÍâ²¿Ô­Òòµ¼ÖÂ¦¤t<0
+		 mDeltaTime = 0.0;//é˜²æ­¢å› ä¸ºå¤–éƒ¨åŸå› å¯¼è‡´Î”t<0
 }

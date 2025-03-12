@@ -19,7 +19,7 @@ public:
 			nullptr,
 			IID_PPV_ARGS(&mUploadBuffer)))
 
-		ThrowIfFailed(mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData)))//Íê³É¶ÔGPUÏà¹Ø×ÊÔ´ÄÚ´æÎ»ÖÃµÄÓ³Éä
+		ThrowIfFailed(mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData)))//è·å¾—æŒ‡å®šCPUå­èµ„æºï¼ˆmMappedDataï¼‰æŒ‡é’ˆ
 	}
 	UploadBuffer(const UploadBuffer& ub) = delete;
 	~UploadBuffer()
@@ -31,19 +31,19 @@ public:
 public:
 	UploadBuffer& operator=(const UploadBuffer& ub) = delete;
 public:
-	//½«Êı¾İ¿½±´µ½CPUÖĞ£¬¼´¿ÉÍ¨¹ı×ÊÔ´Ó³ÉäËæÊ±¸ü¸ÄCPUÖĞµÄ×ÊÔ´Êı¾İ£¬´Ó¶ø¸ü¸ÄGPUäÖÈ¾¹ÜÏßÖĞµÄÊı¾İ
+	//å°†æ•°æ®æ‹·è´åˆ°CPUä¸­ï¼Œå³å¯é€šè¿‡èµ„æºæ˜ å°„éšæ—¶æ›´æ”¹CPUä¸­çš„èµ„æºæ•°æ®ï¼Œä»è€Œæ›´æ”¹GPUæ¸²æŸ“ç®¡çº¿ä¸­çš„æ•°æ®
 	void CopyData(int ElementIndex, const T& data)
 	{
 		memcpy(&mMappedData[ElementIndex * mElementByteSize], &data, sizeof(T));
 	}
-	//·µ»ØÖ¸Ïò»º³åÇø×ÊÔ´µÄÖ¸Õë
+	//è¿”å›æŒ‡å‘ç¼“å†²åŒºèµ„æºçš„æŒ‡é’ˆ
 	ID3D12Resource* Resource()const
 	{
 		return mUploadBuffer.Get();
 	}
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer;//Ö¸ÏòËù´´½¨ÉÏ´«»º³åÇøµÄÖ¸Õë
-	BYTE* mMappedData = nullptr;//Ö¸ÏòÓ³ÉäÊı¾İ¿éµÄÖ¸Õë
-	uint32_t mElementByteSize = 0;//ÉÏ´«»º³åÇø´æ´¢Êı¾İÀàĞÍµÄ´óĞ¡
+	Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer;//æŒ‡å‘æ‰€åˆ›å»ºä¸Šä¼ ç¼“å†²åŒºçš„æŒ‡é’ˆ
+	BYTE* mMappedData = nullptr;//æŒ‡å‘æ˜ å°„æ•°æ®å—çš„æŒ‡é’ˆ
+	uint32_t mElementByteSize = 0;//ä¸Šä¼ ç¼“å†²åŒºå­˜å‚¨æ•°æ®ç±»å‹çš„å¤§å°
 	bool mIsConstantBuffer = false;
 };

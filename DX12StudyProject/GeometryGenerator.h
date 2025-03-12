@@ -9,18 +9,18 @@ public:
 	struct Vertex;
 	struct MeshData;
 public:
-	//Éú³ÉÔ²Ì¨
+	//ç”Ÿæˆåœ†å°
 	void CreateCylinderTop(float topRadius, float height, uint32_t sliceCount, MeshData& meshData)const;
 	void CreateCylinderBottom(float bottomRadius, float height, uint32_t sliceCount, MeshData& meshData)const;
 	MeshData CreateCylinder(float bottomRadius, float topRadius, float height, uint32_t sliceCount, uint32_t stackCount)const;
-	//Éú³ÉÇòÌå
+	//ç”Ÿæˆçƒä½“
 	MeshData CreateBall(float Radius, uint32_t sliceCount, uint32_t stackCount)const;
-	//Éú³ÉÍø¸ñÆ½Ãæ
+	//ç”Ÿæˆç½‘æ ¼å¹³é¢
 	MeshData CreateGird(float length, float width, uint32_t xPointNum, uint32_t zPointNum)const;
-	//Éú³ÉSkullÄ£ĞÍ
+	//ç”ŸæˆSkullæ¨¡å‹
 	MeshData CreateSkull();
 };
-//´æ´¢¼¸ºÎÌåÉú³ÉÆ÷µÄµ¥¸ö¶¥µãÊı¾İµÄ½á¹¹Ìå
+//å­˜å‚¨å‡ ä½•ä½“ç”Ÿæˆå™¨çš„å•ä¸ªé¡¶ç‚¹æ•°æ®çš„ç»“æ„ä½“
 struct GeometryGenerator::Vertex
 {
 public:
@@ -32,16 +32,16 @@ public:
 		float tx, float ty, float tz,
 		float u, float v) :position(px, py, pz), Normal(nx, ny, nz), Tangent(tx, ty, tz), Texture(u, v) {}
 public:
-	DirectX::XMFLOAT3 position;//´¢´æ¶¥µãµÄÎ»ÖÃ×ø±ê
-	DirectX::XMFLOAT3 Normal;//´¢´æ¼¸ºÎÍø¸ñÌåÔÚ¶¥µã´¦¶¥µãµÄµ¥Î»·¨ÏòÁ¿
-	DirectX::XMFLOAT3 Tangent;//´¢´æ¼¸ºÎÍø¸ñÌåÔÚ¶¥µã´¦ÓëÇĞÏßÆ½ĞĞµÄµ¥Î»ÏòÁ¿
-	DirectX::XMFLOAT2 Texture;//ÎÆÀíÓ³Éäµ½Íø¸ñÌåÉÏÊ±ÔÚÎÆÀíÖĞ¶ÔÓ¦µÄÎÆÀí×ø±ê
+	DirectX::XMFLOAT3 position;//å‚¨å­˜é¡¶ç‚¹çš„ä½ç½®åæ ‡
+	DirectX::XMFLOAT3 Normal;//å‚¨å­˜å‡ ä½•ç½‘æ ¼ä½“åœ¨é¡¶ç‚¹å¤„é¡¶ç‚¹çš„å•ä½æ³•å‘é‡
+	DirectX::XMFLOAT3 Tangent;//å‚¨å­˜å‡ ä½•ç½‘æ ¼ä½“åœ¨é¡¶ç‚¹å¤„ä¸åˆ‡çº¿å¹³è¡Œçš„å•ä½å‘é‡
+	DirectX::XMFLOAT2 Texture;//çº¹ç†æ˜ å°„åˆ°ç½‘æ ¼ä½“ä¸Šæ—¶åœ¨çº¹ç†ä¸­å¯¹åº”çš„çº¹ç†åæ ‡
 };
-//´æ´¢¼¸ºÎÌåÉú³ÉÆ÷ËùÉú³ÉÍø¸ñÌåµÄ¶¥µã¼¯ºÍË÷Òı¼¯µÄ½á¹¹Ìå
+//å­˜å‚¨å‡ ä½•ä½“ç”Ÿæˆå™¨æ‰€ç”Ÿæˆç½‘æ ¼ä½“çš„é¡¶ç‚¹é›†å’Œç´¢å¼•é›†çš„ç»“æ„ä½“
 struct GeometryGenerator::MeshData
 {
 public:
-	std::vector<uint16_t>& GetIndices_16();//»ñÈ¡´æÓĞunit16_tÀàĞÍµÄË÷Òıvector
+	std::vector<uint16_t>& GetIndices_16();//è·å–å­˜æœ‰unit16_tç±»å‹çš„ç´¢å¼•vector
 public:
 	std::vector<GeometryGenerator::Vertex> Vertices;
 	std::vector<uint32_t> Indices_32;

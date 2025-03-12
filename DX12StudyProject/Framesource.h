@@ -2,7 +2,7 @@
 #include"DXBase.h"
 #include"UploadBuffer.h"
 
-//¶¥µã½á¹¹Ìå
+//é¡¶ç‚¹ç»“æ„ä½“
 struct VertexPos
 {
 	XMFLOAT3 Pos;
@@ -11,31 +11,31 @@ struct VertexColor
 {
 	XMFLOAT4 Color;
 };
-//ÊÀ½çÊÓÍ¼Í¶Ó°¾ØÕó
+//ä¸–ç•Œè§†å›¾æŠ•å½±çŸ©é˜µ
 struct ObjectConstants
 {
 	XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
 };
-//äÖÈ¾¹ı³Ì³£Á¿Êı¾İ
+//æ¸²æŸ“è¿‡ç¨‹å¸¸é‡æ•°æ®
 struct RenderingPassConstants
 {
-    XMFLOAT4X4 View = MathHelper::Identity4x4();//ÉãÏñ»úÊÓÍ¼¾ØÕó
-    XMFLOAT4X4 InvView = MathHelper::Identity4x4();//ÊÓÍ¼¾ØÕóµÄÄæ¾ØÕó
-    XMFLOAT4X4 Proj = MathHelper::Identity4x4();//Í¶Ó°£¨ÖÁÏÔÊ¾ÆÁÄ»£©¾ØÕó
-    XMFLOAT4X4 InvProj = MathHelper::Identity4x4();//Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-    XMFLOAT4X4 ViewProj = MathHelper::Identity4x4();//ÊÓÍ¼Í¶Ó°¾ØÕó
-    XMFLOAT4X4 InvViewProj = MathHelper::Identity4x4();//ÊÓÍ¼Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-    XMFLOAT3 EyePosW = { 0.0f, 0.0f, 0.0f };//ÉãÏñ»úÎ»ÖÃ×ø±ê
+    XMFLOAT4X4 View = MathHelper::Identity4x4();//æ‘„åƒæœºè§†å›¾çŸ©é˜µ
+    XMFLOAT4X4 InvView = MathHelper::Identity4x4();//è§†å›¾çŸ©é˜µçš„é€†çŸ©é˜µ
+    XMFLOAT4X4 Proj = MathHelper::Identity4x4();//æŠ•å½±ï¼ˆè‡³æ˜¾ç¤ºå±å¹•ï¼‰çŸ©é˜µ
+    XMFLOAT4X4 InvProj = MathHelper::Identity4x4();//æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+    XMFLOAT4X4 ViewProj = MathHelper::Identity4x4();//è§†å›¾æŠ•å½±çŸ©é˜µ
+    XMFLOAT4X4 InvViewProj = MathHelper::Identity4x4();//è§†å›¾æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+    XMFLOAT3 EyePosW = { 0.0f, 0.0f, 0.0f };//æ‘„åƒæœºä½ç½®åæ ‡
     float cbPerObjectPad1 = 0.0f;//
-    XMFLOAT2 RenderTargetSize = { 0.0f, 0.0f };//äÖÈ¾Ä¿±êµÄ´óĞ¡
-    XMFLOAT2 InvRenderTargetSize = { 0.0f, 0.0f };//äÖÈ¾Ä¿±ê´óĞ¡µÄµ¹Êı
-    float NearZ = 0.0f;//½üÊÓÆ½Ãæ
-    float FarZ = 0.0f;//Ô¶ÊÓÆ½Ãæ
-    float TotalTime = 0.0f;//³ÌĞòÔËĞĞ×ÜÊ±¼ä
-    float DeltaTime = 0.0f;//Á½´ÎtickÖ®¼äµÄÊ±¼ä²î
+    XMFLOAT2 RenderTargetSize = { 0.0f, 0.0f };//æ¸²æŸ“ç›®æ ‡çš„å¤§å°
+    XMFLOAT2 InvRenderTargetSize = { 0.0f, 0.0f };//æ¸²æŸ“ç›®æ ‡å¤§å°çš„å€’æ•°
+    float NearZ = 0.0f;//è¿‘è§†å¹³é¢
+    float FarZ = 0.0f;//è¿œè§†å¹³é¢
+    float TotalTime = 0.0f;//ç¨‹åºè¿è¡Œæ€»æ—¶é—´
+    float DeltaTime = 0.0f;//ä¸¤æ¬¡tickä¹‹é—´çš„æ—¶é—´å·®
 };
 
-//Ö¡×ÊÔ´
+//å¸§èµ„æº
 struct Framesource
 {
 public:

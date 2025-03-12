@@ -56,7 +56,7 @@ void GeometryGenerator::CreateCylinderBottom(float bottomRadius, float height, u
 		meshData.Indices_32.push_back(baseIndex + i+1);
 	}
 }
-//生成圆台
+//鐢熸垚鍦嗗彴
 GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius, float topRadius, float height, uint32_t sliceCount, uint32_t stackCount)const
 {
 	MeshData MeshCylinderData;
@@ -114,7 +114,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 
 	return MeshCylinderData;
 }
-//生成球体
+//鐢熸垚鐞冧綋
 GeometryGenerator::MeshData GeometryGenerator::CreateBall(float Radius, uint32_t sliceCount, uint32_t stackCount)const
 {
 	MeshData MeshBallData;
@@ -198,7 +198,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBall(float Radius, uint32_t
 
 	return MeshBallData;
 }
-//生成网格平面
+//鐢熸垚缃戞牸骞抽潰
 GeometryGenerator::MeshData GeometryGenerator::CreateGird(float length, float width, uint32_t xPointNum, uint32_t zPointNum)const
 {
 	MeshData MeshGirdData;
@@ -248,7 +248,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGird(float length, float wi
 	return MeshGirdData;
 }
 
-//获取存有unit16_t类型的索引vector
+//鑾峰彇瀛樻湁unit16_t绫诲瀷鐨勭储寮晇ector
 std::vector<uint16_t>& GeometryGenerator::MeshData::GetIndices_16()
 {
 	if (mIndices_16.empty())

@@ -1,23 +1,23 @@
 #pragma once
 #include "DXBase.h"
 
-const UINT gNumFrameResources = 3;//³ÌĞòËùÓÃÖ¡×ÊÔ´×ÜÊı
+const UINT gNumFrameResources = 3;//ç¨‹åºæ‰€ç”¨å¸§èµ„æºæ€»æ•°
 
 struct RenderItem
 {
 public:
 	RenderItem() = default;
 public:
-	DirectX::XMFLOAT4X4 World = MathHelper::Identity4x4();//äÖÈ¾ÏîµÄÊÀ½ç±ä»»¾ØÕó
+	DirectX::XMFLOAT4X4 World = MathHelper::Identity4x4();//æ¸²æŸ“é¡¹çš„ä¸–ç•Œå˜æ¢çŸ©é˜µ
 	DirectX::XMFLOAT4X4 TexTrans = MathHelper::Identity4x4();
 
-	UINT numDirtyFrames = gNumFrameResources;//¼ÇÂ¼ÓĞ¼¸¸öÖ¡×ÊÔ´ÖĞµÄäÖÈ¾ÏîÊı¾İ´ı¸üĞÂ
-	UINT ObjectConstBufferIndex = -1;//¸ÃäÖÈ¾ÏîµÄ³£Á¿»º³åÇøÔÚËùÓĞäÖÈ¾ÏîµÄ»º³åÇøÖĞµÄË÷Òı
+	UINT numDirtyFrames = gNumFrameResources;//è®°å½•æœ‰å‡ ä¸ªå¸§èµ„æºä¸­çš„æ¸²æŸ“é¡¹æ•°æ®å¾…æ›´æ–°
+	UINT ObjectConstBufferIndex = -1;//è¯¥æ¸²æŸ“é¡¹çš„å¸¸é‡ç¼“å†²åŒºåœ¨æ‰€æœ‰æ¸²æŸ“é¡¹çš„ç¼“å†²åŒºä¸­çš„ç´¢å¼•
 
-	Material* Mat = nullptr;//¸ÃäÖÈ¾ÏîËùÊ¹ÓÃµÄ²ÄÖÊ
-	MeshGeometry* Geo = nullptr;//¸ÃäÖÈ¾ÏîËùÊ¹ÓÃµÄÍø¸ñÌå¼¯
-	D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;//Ö¸¶¨äÖÈ¾ÏîµÄÍ¼ÔªÍØÆË¸ñÊ½
-	//ÒÔÏÂÈı¸ö±äÁ¿¾ùÓëGeoËù°ó¶¨µÄÍø¸ñÌåÏà¹Ø
+	Material* Mat = nullptr;//è¯¥æ¸²æŸ“é¡¹æ‰€ä½¿ç”¨çš„æè´¨
+	MeshGeometry* Geo = nullptr;//è¯¥æ¸²æŸ“é¡¹æ‰€ä½¿ç”¨çš„ç½‘æ ¼ä½“é›†
+	D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;//æŒ‡å®šæ¸²æŸ“é¡¹çš„å›¾å…ƒæ‹“æ‰‘æ ¼å¼
+	//ä»¥ä¸‹ä¸‰ä¸ªå˜é‡å‡ä¸Geoæ‰€ç»‘å®šçš„ç½‘æ ¼ä½“ç›¸å…³
 	UINT indexCount = 0;
 	uint32_t indexStartLocation = 0;
 	uint32_t vertexBaseLocation = 0;

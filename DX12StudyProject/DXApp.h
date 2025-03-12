@@ -14,27 +14,27 @@ protected:
 protected:
 	DXApp operator=(const DXApp& rhs) = delete;
 public:
-	virtual LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);//ÏûÏ¢¹ı³Ì´¦Àíº¯Êı£¨ĞèÍ¨¹ıÅÉÉúÀà¸²Ğ´£©
+	virtual LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);//æ¶ˆæ¯è¿‡ç¨‹å¤„ç†å‡½æ•°ï¼ˆéœ€é€šè¿‡æ´¾ç”Ÿç±»è¦†å†™ï¼‰
 	virtual bool Init() = 0;
 	int Run();
 protected:
-	//³õÊ¼»¯ÊµÏÖ
-	bool InitWindowClass(WindowClass& WC,LPCTSTR windowclassName);//´°¿ÚÀà³õÊ¼»¯
-	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);//´°¿Ú³õÊ¼»¯ÖØÔØ1
+	//åˆå§‹åŒ–å®ç°
+	bool InitWindowClass(WindowClass& WC,LPCTSTR windowclassName);//çª—å£ç±»åˆå§‹åŒ–
+	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);//çª—å£åˆå§‹åŒ–é‡è½½1
 	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName,
-		int x, int y, int wx, int wy);//´°¿Ú³õÊ¼»¯ÖØÔØ2
-	bool InitDirectX3D();//D3D³õÊ¼»¯
-	void LogAdapters();//¼ÓÔØÃ¶¾ÙËùÓĞÏÔÊ¾ÊÊÅäÆ÷
-	void LogAdapterOutputs(IDXGIAdapter* adapter);//¼ÓÔØÃ¶¾ÙËùÓĞÏÔÊ¾Êä³ö
-	void LogAdapterDisplayModes(IDXGIOutput* output, DXGI_FORMAT format);//¼ÓÔØÃ¶¾ÙËùÓĞÏÔÊ¾Êä³ö¸ñÊ½
-	void CreateCmdObjects();//´´½¨ÃüÁî¶ÓÁĞ¡¢ÃüÁî·ÖÅäÆ÷¡¢ÃüÁîÁĞ±í
-	void CreateSwapChain();//´´½¨½»»»Á´
-	void Create_DSV_RTV_DescriptorHeaps();//´´½¨ÃèÊö·û¶Ñ(RTVºÍDSV)
+		int x, int y, int wx, int wy);//çª—å£åˆå§‹åŒ–é‡è½½2
+	bool InitDirectX3D();//D3Dåˆå§‹åŒ–
+	void LogAdapters();//åŠ è½½æšä¸¾æ‰€æœ‰æ˜¾ç¤ºé€‚é…å™¨
+	void LogAdapterOutputs(IDXGIAdapter* adapter);//åŠ è½½æšä¸¾æ‰€æœ‰æ˜¾ç¤ºè¾“å‡º
+	void LogAdapterDisplayModes(IDXGIOutput* output, DXGI_FORMAT format);//åŠ è½½æšä¸¾æ‰€æœ‰æ˜¾ç¤ºè¾“å‡ºæ ¼å¼
+	void CreateCmdObjects();//åˆ›å»ºå‘½ä»¤é˜Ÿåˆ—ã€å‘½ä»¤åˆ†é…å™¨ã€å‘½ä»¤åˆ—è¡¨
+	void CreateSwapChain();//åˆ›å»ºäº¤æ¢é“¾
+	void Create_DSV_RTV_DescriptorHeaps();//åˆ›å»ºæè¿°ç¬¦å †(RTVå’ŒDSV)
 	
-	void FlushCommandQueue();//Ë¢ĞÂÃüÁî¶ÓÁĞ
-	ID3D12Resource* CurrentBackBuffer()const;//»ñÈ¡Ö¸Ïòµ±Ç°»º³åÇøµÄÖ¸Õë
-	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView()const;//»ñÈ¡µ±Ç°ºóÌ¨»º³åÇøµÄRTV
-	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilBufferView()const;//»ñÈ¡µ±Ç°ºóÌ¨»º³åÇøµÄDSV
+	void FlushCommandQueue();//åˆ·æ–°å‘½ä»¤é˜Ÿåˆ—
+	ID3D12Resource* CurrentBackBuffer()const;//è·å–æŒ‡å‘å½“å‰ç¼“å†²åŒºçš„æŒ‡é’ˆ
+	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView()const;//è·å–å½“å‰åå°ç¼“å†²åŒºçš„RTV
+	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilBufferView()const;//è·å–å½“å‰åå°ç¼“å†²åŒºçš„DSV
 protected:
 	virtual void Resize();
 private:
@@ -46,58 +46,56 @@ private:
 	virtual void MouseMove(WPARAM ButtonState, int x, int y);
 	virtual void MouseWheel(short zDelta);
 public:
-	HINSTANCE GetAppInst()const;//»ñÈ¡Ó¦ÓÃ³ÌĞò¾ä±ú
-	static DXApp* GetApp();//»ñÈ¡Ö¸ÏòDXAppÀàµÄÖ¸Õë
-	HWND GetMainHwnd()const;//»ñÈ¡³ÌĞòÖ÷´°¿Ú¾ä±ú
-	bool Get4xMSAAState()const;//²é¿´ÊÇ·ñ¿ªÆô4xMSAA¹¦ÄÜ
-	void Set4xMSAAState(bool On_Off);//¸ü¸Ä4xMSAA¹¦ÄÜ¿ª¹Ø×´Ì¬
-	float W_H_Ratio()const;//·µ»Ø»º³åÇø¿í¸ß±È
-	void CalculateFPS_MSPF();//¼ÆËãÃ¿ÃëÖ¡ÊıºÍÖ¡äÖÈ¾Ê±³¤
+	HINSTANCE GetAppInst()const;//è·å–åº”ç”¨ç¨‹åºå¥æŸ„
+	static DXApp* GetApp();//è·å–æŒ‡å‘DXAppç±»çš„æŒ‡é’ˆ
+	HWND GetMainHwnd()const;//è·å–ç¨‹åºä¸»çª—å£å¥æŸ„
+	bool Get4xMSAAState()const;//æŸ¥çœ‹æ˜¯å¦å¼€å¯4xMSAAåŠŸèƒ½
+	void Set4xMSAAState(bool On_Off);//æ›´æ”¹4xMSAAåŠŸèƒ½å¼€å…³çŠ¶æ€
+	float W_H_Ratio()const;//è¿”å›ç¼“å†²åŒºå®½é«˜æ¯”
+	void CalculateFPS_MSPF();//è®¡ç®—æ¯ç§’å¸§æ•°å’Œå¸§æ¸²æŸ“æ—¶é•¿
 protected:
-	static DXApp* mApp;//Ö¸ÏòDXAppÀàµÄÖ¸Õë
+	static DXApp* mApp;//æŒ‡å‘DXAppç±»çš„æŒ‡é’ˆ
 
 	GameTimer mGameTimer;
 	float FPS = 0.0f;
 	float MSPF = 0.0f;
 
-	HINSTANCE mhAppInst = nullptr;//Ó¦ÓÃ³ÌĞòÊµÀı¾ä±ú
-	HWND mhWndHwnd = nullptr;//Ö¸Ïò³ÌĞò´°¿ÚµÄ¾ä±ú£¨Ò»°ãÖ¸ÏòÖ÷´°¿Ú£©
-	bool mAppPaused = false;//Ó¦ÓÃ³ÌĞòÊÇ·ñÔİÍ£
-	bool mMinimized = false;//ÊÇ·ñ×îĞ¡»¯
-	bool mMaximized = false;//ÊÇ·ñ×î´ó»¯
-	bool mResized = false;//´°¿ÚÊÇ·ñ¸Ä±ä´óĞ¡
-	bool mFullScreenState = false;//ÊÇ·ñÈ«ÆÁ
+	HINSTANCE mhAppInst = nullptr;//åº”ç”¨ç¨‹åºå®ä¾‹å¥æŸ„
+	HWND mhWndHwnd = nullptr;//æŒ‡å‘ç¨‹åºçª—å£çš„å¥æŸ„ï¼ˆä¸€èˆ¬æŒ‡å‘ä¸»çª—å£ï¼‰
+	bool mAppPaused = false;//åº”ç”¨ç¨‹åºæ˜¯å¦æš‚åœ
+	bool mMinimized = false;//æ˜¯å¦æœ€å°åŒ–
+	bool mMaximized = false;//æ˜¯å¦æœ€å¤§åŒ–
+	bool mResized = false;//çª—å£æ˜¯å¦æ”¹å˜å¤§å°
+	bool mFullScreenState = false;//æ˜¯å¦å…¨å±
 
-	Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;//Factory½Ó¿ÚÖ¸Õë£¨Factory½Ó¿ÚÌá¹©ÁËÒ»Ì×´´½¨DXGIµÄ·½·¨£©
-	Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;//D3DÉè±¸Ö¸Õë
-	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;//Î§À¸Ö¸Õë
-	UINT64 mCurrentFence = 0;//Ö¸Ê¾µ±Ç°Î§À¸Öµ
+	Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;//Factoryæ¥å£æŒ‡é’ˆï¼ˆFactoryæ¥å£æä¾›äº†ä¸€å¥—åˆ›å»ºDXGIçš„æ–¹æ³•ï¼‰
+	Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;//D3Dè®¾å¤‡æŒ‡é’ˆ
+	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;//å›´æ æŒ‡é’ˆ
+	UINT64 mCurrentFence = 0;//æŒ‡ç¤ºå½“å‰å›´æ å€¼
 
-	bool m4xMSAAState = false;//ÊÇ·ñ¿ªÆô4xMSAA¿¹¾â³İ¼¼Êõ
-	UINT m4xMSAAQuality = 0;//4xMSAA¿¹¾â³İÖÊÁ¿¼¶±ğ
+	bool m4xMSAAState = false;//æ˜¯å¦å¼€å¯4xMSAAæŠ—é”¯é½¿æŠ€æœ¯
+	UINT m4xMSAAQuality = 0;//4xMSAAæŠ—é”¯é½¿è´¨é‡çº§åˆ«
+    
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;//å‘½ä»¤é˜Ÿåˆ—æŒ‡é’ˆ
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator;//å‘½ä»¤åˆ†é…å™¨æŒ‡é’ˆ
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;//å‘½ä»¤åˆ—è¡¨æŒ‡é’ˆ
 
-	//                   CPU                  ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª>               GPU             //
-	//  CommandAllocator ¡ª¡ª> CommandList      ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª>           CommandQueue        //     
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;//ÃüÁî¶ÓÁĞÖ¸Õë
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator;//ÃüÁî·ÖÅäÆ÷Ö¸Õë
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;//ÃüÁîÁĞ±íÖ¸Õë
+	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;//äº¤æ¢é“¾æŒ‡é’ˆ
+	static const int SwapChainBufferCount = 2;//äº¤æ¢é“¾ç¼“å†²åŒºæ•°é‡
+	int mCurrentBackBuffer = 0;//å½“å‰åç¼“å†²åŒºç¼–å·
+	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[SwapChainBufferCount];//äº¤æ¢é“¾ç¼“å†²åŒºæŒ‡é’ˆ
+	Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;//æ·±åº¦æ¨¡æ¿ç¼“å†²åŒºæŒ‡é’ˆ
 
-	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;//½»»»Á´Ö¸Õë
-	static const int SwapChainBufferCount = 2;//½»»»Á´»º³åÇøÊıÁ¿
-	int mCurrentBackBuffer = 0;//µ±Ç°ºó»º³åÇø±àºÅ
-	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[SwapChainBufferCount];//½»»»Á´»º³åÇøÖ¸Õë
-	Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;//Éî¶ÈÄ£°å»º³åÇøÖ¸Õë
+	UINT mRTVDescriptorSize = 0;//RTVæè¿°ç¬¦å¤§å°
+	UINT mDSVDescriptorSize = 0;//DSVæè¿°ç¬¦å¤§å°
+	UINT mCBV_SRV_UAVDescriptorSize = 0;//CBVã€SRVã€UAVæè¿°ç¬¦å¤§å°
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;//RTVæè¿°ç¬¦å †æŒ‡é’ˆ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;//DSVæè¿°ç¬¦å †æŒ‡é’ˆ
 
-	UINT mRTVDescriptorSize = 0;//RTVÃèÊö·û´óĞ¡
-	UINT mDSVDescriptorSize = 0;//DSVÃèÊö·û´óĞ¡
-	UINT mCBV_SRV_UAVDescriptorSize = 0;//CBV¡¢SRV¡¢UAVÃèÊö·û´óĞ¡
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;//RTVÃèÊö·û¶ÑÖ¸Õë
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;//DSVÃèÊö·û¶ÑÖ¸Õë
+	D3D12_VIEWPORT mScreenViewport = {};//è§†å£
+	D3D12_RECT mScissorRect = {};//è£å‰ªçŸ©å½¢
 
-	D3D12_VIEWPORT mScreenViewport = {};//ÊÓ¿Ú
-	D3D12_RECT mScissorRect = {};//²Ã¼ô¾ØĞÎ
-
-	//ÒÔÏÂ±äÁ¿¿ÉÔÚÅÉÉúÀàÖĞ×ÔĞĞ¶¨Òå
+	//ä»¥ä¸‹å˜é‡å¯åœ¨æ´¾ç”Ÿç±»ä¸­è‡ªè¡Œå®šä¹‰
 	LPCTSTR mMainWndTitle=L"DefaultTitle";
 	D3D_DRIVER_TYPE md3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
 	DXGI_FORMAT mBackBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -105,7 +103,7 @@ protected:
 	int mClientWidth=800;
 	int mClientHeight=600;
 };
-//Àà£º´°¿ÚÀàµÄÉùÃ÷
+//ç±»ï¼šçª—å£ç±»çš„å£°æ˜
 class DXApp::WindowClass
 {
 public:
@@ -113,14 +111,14 @@ public:
 	explicit WindowClass(HINSTANCE hInstance);
 	~WindowClass();
 public:
-	const wchar_t* SetWCName(LPCTSTR WCName);//ÉèÖÃ´°¿ÚÀàÃû³Æ
-	const wchar_t* GetWCName()const;//·µ»Ø´°¿ÚÀàÃû³Æ
-	HINSTANCE GetInstance()const;//·µ»Ø´°¿ÚÀàÊµÀı¾ä±ú
+	const wchar_t* SetWCName(LPCTSTR WCName);//è®¾ç½®çª—å£ç±»åç§°
+	const wchar_t* GetWCName()const;//è¿”å›çª—å£ç±»åç§°
+	HINSTANCE GetInstance()const;//è¿”å›çª—å£ç±»å®ä¾‹å¥æŸ„
 private:
 	HINSTANCE hWndClassInst;
 	const wchar_t* windowclassName = nullptr;
 };
-//Àà£º´°¿ÚµÄÉùÃ÷
+//ç±»ï¼šçª—å£çš„å£°æ˜
 class DXApp::Window
 {
 public:
@@ -131,9 +129,9 @@ public:
 	Window() = default;
 	~Window();
 public:
-	const wchar_t* SetWndName(LPCTSTR WndName);//ÉèÖÃ´°¿ÚÃû³Æ
-	void SetWndPos(int x, int y, int wx, int wy);//ÉèÖÃ´°¿Ú×ø±êÊı¾İ
-	HWND GetWndHwnd()const;//»ñÈ¡´°¿Ú¾ä±ú
+	const wchar_t* SetWndName(LPCTSTR WndName);//è®¾ç½®çª—å£åç§°
+	void SetWndPos(int x, int y, int wx, int wy);//è®¾ç½®çª—å£åæ ‡æ•°æ®
+	HWND GetWndHwnd()const;//è·å–çª—å£å¥æŸ„
 private:
 	HWND wndHwnd = nullptr;
 	LPCTSTR pWindowName = nullptr;

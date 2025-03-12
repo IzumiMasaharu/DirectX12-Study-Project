@@ -1,0 +1,2 @@
+﻿x64\Debug\DDSTextureLoader.obj : warning LNK4042: 对象被多次指定；已忽略多余的指定
+  DX12StudyProject.vcxproj -> D:\OneDrive\RubbishProgram\DirectX12-Study-Project\x64\Debug\DX12StudyProject.exe

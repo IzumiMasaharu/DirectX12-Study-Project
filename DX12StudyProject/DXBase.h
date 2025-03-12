@@ -52,7 +52,7 @@ inline void d3dSetDebugName(ID3D12DeviceChild* obj, const char* name)
         obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
     }
 }
-//½«string×ªÎªwstring
+//å°†stringè½¬ä¸ºwstring
 inline std::wstring AnsiToWstring(const std::string& str)
 {
     WCHAR buffer[512];
@@ -66,7 +66,7 @@ public:
     DxException() = default;
     DxException(HRESULT hr, const std::wstring& function_name, const std::wstring& file_name, UINT line_num);
 public:
-    std::wstring ErrorMessageString()const;//¶ÁÈ¡´íÎóĞÅÏ¢£¬²¢½«´íÎóĞÅÏ¢×ª»¯Îª¿ÉÊä³öµÄ×Ö·û´®
+    std::wstring ErrorMessageString()const;//è¯»å–é”™è¯¯ä¿¡æ¯ï¼Œå¹¶å°†é”™è¯¯ä¿¡æ¯è½¬åŒ–ä¸ºå¯è¾“å‡ºçš„å­—ç¬¦ä¸²
 public:
     HRESULT errorCode = S_OK;
     std::wstring functionName;
@@ -76,100 +76,100 @@ public:
 class DXBase
 {
 public:
-    //ÒÉÎÊ£ºÎªºÎÒª°ÑUploadBuffer×÷Îª²ÎÊı´«µİ½øº¯Êı ¶ø²»ÊÇÔÚº¯ÊıÖĞ´´½¨Ò»¸öComPtr<ID3D12Resource> UploadBufferÍê³É×ÊÔ´´«µİ²Ù×÷?
-    //´ğ£ºUploadBuffer²»ÄÜÁ¢¼´Ïú»Ù£¬ÒòÎªÃüÁîÁĞ±í¸´ÖÆ²Ù×÷ÔÚCreateDefaultBuffer£¨£©µ÷ÓÃÍê±ÏÊ±¿ÉÄÜÉĞÎ´Ö´ĞĞ£¬±ØĞëµÈµ÷ÓÃÕßµÃÖª¸´ÖÆÍê³Éºó²ÅÄÜÊÍ·ÅUploadBuffer¡£
+    //ç–‘é—®ï¼šä¸ºä½•è¦æŠŠUploadBufferä½œä¸ºå‚æ•°ä¼ é€’è¿›å‡½æ•° è€Œä¸æ˜¯åœ¨å‡½æ•°ä¸­åˆ›å»ºä¸€ä¸ªComPtr<ID3D12Resource> UploadBufferå®Œæˆèµ„æºä¼ é€’æ“ä½œ?
+    //ç­”ï¼šUploadBufferä¸èƒ½ç«‹å³é”€æ¯ï¼Œå› ä¸ºå‘½ä»¤åˆ—è¡¨å¤åˆ¶æ“ä½œåœ¨CreateDefaultBufferï¼ˆï¼‰è°ƒç”¨å®Œæ¯•æ—¶å¯èƒ½å°šæœªæ‰§è¡Œï¼Œå¿…é¡»ç­‰è°ƒç”¨è€…å¾—çŸ¥å¤åˆ¶å®Œæˆåæ‰èƒ½é‡Šæ”¾UploadBufferã€‚
     static Microsoft::WRL::ComPtr<ID3D12Resource> CreateDefaultBuffer(
         ID3D12Device* device,
         ID3D12GraphicsCommandList* cmdList,
         const void* initData,
         UINT64 byteSize,
         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
-    //½«Êı¾İ´óĞ¡×Ö½Ú¶ÔÆëÎª256bÒÔÊÊÅä³£Á¿»º³åÇø
+    //å°†æ•°æ®å¤§å°å­—èŠ‚å¯¹é½ä¸º256bä»¥é€‚é…å¸¸é‡ç¼“å†²åŒº
     static UINT ConstUploadBufferByteSize256Alignment(UINT ByteSize); 
-    //ÔÚÏß±àÒë×ÅÉ«Æ÷
+    //åœ¨çº¿ç¼–è¯‘ç€è‰²å™¨
     static Microsoft::WRL::ComPtr<ID3DBlob> CompileShaderOnline(
         const std::wstring& hlsl_filename,
         const D3D_SHADER_MACRO* defines,
         const std::string& Entrypoint,
         const std::string& TargetShaderType);
-    //½«¶ş½øÖÆ×Ö·û´®Ğ´½øBlobÎÄ¼ş
+    //å°†äºŒè¿›åˆ¶å­—ç¬¦ä¸²å†™è¿›Blobæ–‡ä»¶
     static Microsoft::WRL::ComPtr<ID3DBlob> LoadBinaryToBlob(const std::wstring& Binary_filename);
 };
-//ÊıÑ§°ïÊÖ£¬¸øÎÒÕâÖÖÄÔ²ĞÓÃµÄ
+//æ•°å­¦å¸®æ‰‹ï¼Œç»™æˆ‘è¿™ç§è„‘æ®‹ç”¨çš„
 class MathHelper
 {
 public:
-    // Éú³ÉÒ»¸öÎ»ÓÚ[0, 1)Çø¼äµÄËæ»úfloat
+    // ç”Ÿæˆä¸€ä¸ªä½äº[0, 1)åŒºé—´çš„éšæœºfloat
     static float RandF()
     {
         return (float)(rand()) / (float)RAND_MAX;
     }
-    // Éú³É[a, b)Çø¼äµÄËæ»úfloat
+    // ç”Ÿæˆ[a, b)åŒºé—´çš„éšæœºfloat
     static float RandF(float a, float b)
     {
         return a + RandF() * (b - a);
     }
-    //Éú³É[a, b)Çø¼äµÄËæ»úint
+    //ç”Ÿæˆ[a, b)åŒºé—´çš„éšæœºint
     static int Rand(int a, int b)
     {
         return a + rand() % ((b - a) + 1);
     }
-    //·µ»ØÁ½ÊıÖ®ÖĞ½ÏĞ¡Öµ
+    //è¿”å›ä¸¤æ•°ä¹‹ä¸­è¾ƒå°å€¼
     template<typename T>
     static T Min(const T& a, const T& b)
     {
         return a < b ? a : b;
     }
-    //·µ»ØÁ½ÊıÖ®ÖĞ½Ï´óÖµ
+    //è¿”å›ä¸¤æ•°ä¹‹ä¸­è¾ƒå¤§å€¼
     template<typename T>
     static T Max(const T& a, const T& b)
     {
         return a > b ? a : b;
     }
-    //·µ»Øa + (b - a) * t
+    //è¿”å›a + (b - a) * t
     template<typename T>
     static T Lerp(const T& a, const T& b, float t)
     {
         return a + (b - a) * t;
     }
-    //ÓÃÓÚÏŞÖÆx·¶Î§£¬¼´£ºÈôxĞ¡ÓÚlowÔò·µ»Ølow£¬Èô´óÓÚhighÔò·µ»Øhigh£¬·ñÔò·µ»Øx±¾Éí
+    //ç”¨äºé™åˆ¶xèŒƒå›´ï¼Œå³ï¼šè‹¥xå°äºlowåˆ™è¿”å›lowï¼Œè‹¥å¤§äºhighåˆ™è¿”å›highï¼Œå¦åˆ™è¿”å›xæœ¬èº«
     template<typename T>
     static T Clamp(const T& x, const T& low, const T& high)
     {
         return x < low ? low : (x > high ? high : x);
     }
 
-    //½«¼«×ø±ê×ª»»ÎªÖ±½Ç×ø±ê
+    //å°†æåæ ‡è½¬æ¢ä¸ºç›´è§’åæ ‡
     static DirectX::XMVECTOR SphericalToCartesian(float radius, float theta, float phi);
-    //·µ»ØMµÄÄæ¾ØÕóµÄ×ªÖÃ¾ØÕó
+    //è¿”å›Mçš„é€†çŸ©é˜µçš„è½¬ç½®çŸ©é˜µ
     static DirectX::XMMATRIX InverseTranspose(DirectX::CXMMATRIX M);
-    //³õÊ¼»¯4x4Êı×éÎªµ¥Î»Êı×é
+    //åˆå§‹åŒ–4x4æ•°ç»„ä¸ºå•ä½æ•°ç»„
     static DirectX::XMFLOAT4X4 Identity4x4();
-    // ·µ»ØÖ±½Ç×ø±êÏÂ£¨x£¬y£©ÔÚ¼«×ø±êÏÂµÄ¼«½Ç
+    // è¿”å›ç›´è§’åæ ‡ä¸‹ï¼ˆxï¼Œyï¼‰åœ¨æåæ ‡ä¸‹çš„æè§’
     static float AngleFromXY(float x, float y);
 
     static DirectX::XMVECTOR RandUnitVec3();
     static DirectX::XMVECTOR RandHemisphereUnitVec3(DirectX::XMVECTOR n);
 public:
-    static const float Infinity;//¸¡µãÊı×î´óÖµ
+    static const float Infinity;//æµ®ç‚¹æ•°æœ€å¤§å€¼
     static const float Pi;
 };
 
-//´æ´¢µ¥¸öÍø¸ñÌåµÄ½á¹¹Ìå
+//å­˜å‚¨å•ä¸ªç½‘æ ¼ä½“çš„ç»“æ„ä½“
 struct SubmeshGeometry
 {
     std::string name;
 
-    UINT indexCount = 0;//Ë÷ÒıÊıÄ¿
-    UINT indexStartLocation = 0;//Ë÷Òı¿ªÊ¼Î»ÖÃ
-    UINT vertexBaseLocation = 0;//»ù×¼¶¨µãÎ»ÖÃ
-    DirectX::BoundingBox bounds;//ÉèÖÃ±ß½ç¿ò
+    UINT indexCount = 0;//ç´¢å¼•æ•°ç›®
+    UINT indexStartLocation = 0;//ç´¢å¼•å¼€å§‹ä½ç½®
+    UINT vertexBaseLocation = 0;//åŸºå‡†å®šç‚¹ä½ç½®
+    DirectX::BoundingBox bounds;//è®¾ç½®è¾¹ç•Œæ¡†
 };
-//´æ´¢È«²¿Íø¸ñÌåµÄ½á¹¹Ìå
+//å­˜å‚¨å…¨éƒ¨ç½‘æ ¼ä½“çš„ç»“æ„ä½“
 struct MeshGeometry
 {
 public:
-    //½«GPUÖĞµÄ¶¥µã»º³åÇø×ÊÔ´×°ÔØ³É¶¥µã»º³åÇøÊÓÍ¼£¬×°Åäµ½Pipeline IA½×¶Î
+    //ä¸ºGPUä¸­çš„é¡¶ç‚¹ç¼“å†²åŒºèµ„æºåˆ›å»ºé¡¶ç‚¹ç¼“å†²åŒºè§†å›¾ï¼Œç”¨äºç»‘å®šåˆ°Pipeline IAé˜¶æ®µ
     D3D12_VERTEX_BUFFER_VIEW VertexBufferView()const
     {
         D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -179,7 +179,7 @@ public:
 
         return vbv;
     }
-    //½«GPUÖĞµÄË÷Òı»º³åÇø×ÊÔ´×°ÔØ³ÉË÷Òı»º³åÇøÊÓÍ¼£¬×°Åäµ½Pipeline IA½×¶Î
+    //ä¸ºGPUä¸­çš„ç´¢å¼•ç¼“å†²åŒºèµ„æºåˆ›å»ºç´¢å¼•ç¼“å†²åŒºè§†å›¾ï¼Œç”¨äºç»‘å®šåˆ°Pipeline IAé˜¶æ®µ
     D3D12_INDEX_BUFFER_VIEW IndexBufferView()const
     {
         D3D12_INDEX_BUFFER_VIEW ibv;
@@ -189,7 +189,7 @@ public:
 
         return ibv;
     }
-    // ÔÚÏòGPUÉÏ´«Íê×ÊÔ´Ö®ºóÊÍ·Å¶¥µãÉÏ´«»º³åÇøºÍË÷ÒıÉÏ´«»º³åÇø
+    // åœ¨å‘GPUä¸Šä¼ å®Œèµ„æºä¹‹åé‡Šæ”¾é¡¶ç‚¹ä¸Šä¼ ç¼“å†²åŒºå’Œç´¢å¼•ä¸Šä¼ ç¼“å†²åŒº
     void DisposeUploaders()
     {
         vertexBufferUploader = nullptr;
@@ -200,45 +200,46 @@ public:
 
     Microsoft::WRL::ComPtr<ID3DBlob> vertexBufferCPU = nullptr;
     Microsoft::WRL::ComPtr<ID3DBlob> indexBufferCPU = nullptr;
-    //                       ¡ı
+    //                       â†“
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexBufferUploader = nullptr;
     Microsoft::WRL::ComPtr<ID3D12Resource> indexBufferUploader = nullptr;
-    //                       ¡ı
+    //                       â†“
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexBufferGPU = nullptr;
     Microsoft::WRL::ComPtr<ID3D12Resource> indexBufferGPU = nullptr;
 
-    UINT vertexByteStride = 0;//¶¥µã½á¹¹Ìå´óĞ¡
-    UINT vertexBufferByteSize = 0;//¶¥µã»º³åÇø´óĞ¡
-    DXGI_FORMAT indexFormat = DXGI_FORMAT_R16_UINT;//×ÊÔ´¸ñÊ½
-    UINT indexBufferByteSize = 0;//Ë÷Òı»º³åÇø´óĞ¡
+    UINT vertexByteStride = 0;//é¡¶ç‚¹ç»“æ„ä½“å¤§å°
+    UINT vertexBufferByteSize = 0;//é¡¶ç‚¹ç¼“å†²åŒºå¤§å°
+    DXGI_FORMAT indexFormat = DXGI_FORMAT_R16_UINT;//èµ„æºæ ¼å¼
+    UINT indexBufferByteSize = 0;//ç´¢å¼•ç¼“å†²åŒºå¤§å°
 
-    std::unordered_map<std::string, SubmeshGeometry> submeshList;//½«È«²¿Íø¸ñÌå²ğ·ÖÎªÈô¸Éµ¥¸öÍø¸ñÌå£¬´æ´¢µ½ÎŞĞòÍ¼ÖĞ
+    std::unordered_map<std::string, SubmeshGeometry> submeshList;//å°†å…¨éƒ¨ç½‘æ ¼ä½“æ‹†åˆ†ä¸ºè‹¥å¹²å•ä¸ªç½‘æ ¼ä½“ï¼Œå­˜å‚¨åˆ°æ— åºå›¾ä¸­
 };
 
-//´æ´¢²ÄÖÊÊı¾İµÄ½á¹¹Ìå
+//å­˜å‚¨æè´¨æ•°æ®çš„ç»“æ„ä½“
 struct Material
 {
     std::string name;
 
-    UINT materialConstBufferIndex = -1;//¸Ã²ÄÖÊÔÚ³£Á¿»º³åÇøÖĞµÄË÷Òı
-    UINT diffuseSrvHeapIndex = -1;//Âş·´ÉäÎÆÀíÔÚSRV¶ÑÖĞµÄË÷Òı
+    UINT materialConstBufferIndex = -1;//è¯¥æè´¨åœ¨å¸¸é‡ç¼“å†²åŒºä¸­çš„ç´¢å¼•
+    UINT diffuseSrvHeapIndex = -1;//æ¼«åå°„çº¹ç†åœ¨SRVå †ä¸­çš„ç´¢å¼•
     UINT normalSrvHeapIndex = -1;
-    UINT numDirtyFrames = -1;//´ı¸üĞÂµÄÖ¡×ÊÔ´ÊıÁ¿
+    UINT numDirtyFrames = -1;//å¾…æ›´æ–°çš„å¸§èµ„æºæ•°é‡
 
-    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };//Âş·´Éä·´ÕÕÂÊ
-    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };//·ÆÄù¶ûĞ§Ó¦²ÄÖÊÊôĞÔRf£¨0¡ã£©
-    float roughness = 0.0f;//²ÄÖÊ´Ö²Ú¶È
+    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };//æ¼«åå°„åç…§ç‡
+    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };//è²æ¶…å°”æ•ˆåº”æè´¨å±æ€§Rfï¼ˆ0Â°ï¼‰
+    float roughness = 0.0f;//æè´¨ç²—ç³™åº¦
     DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
 };
-//²ÎÊıË³Ğò²»¿É¸Ä±ä£¬ÇÒÓëhlslÖĞË³ĞòÒ»Ò»¶ÔÓ¦£¬ÒÔ±£Ö¤shaderÄÜ¶Ô²ÎÊıÕıÈ·´ò°üÎª4DÏòÁ¿
+
+//å‚æ•°é¡ºåºä¸å¯æ”¹å˜ï¼Œä¸”ä¸hlslä¸­é¡ºåºä¸€ä¸€å¯¹åº”ï¼Œä»¥ä¿è¯shaderèƒ½å¯¹å‚æ•°æ­£ç¡®æ‰“åŒ…ä¸º4Då‘é‡
 struct Light
 {
-    DirectX::XMFLOAT3 rgbIntensity = { 1.0f, 1.0f, 1.0f };//¹âÔ´µÄRGBÖµ
-    float start = 0.0f;                                   //µã¹âÔ´¡¢¾Û¹âµÆÊ¹ÓÃ£¬Ö¸¶¨¹âÔ´ÄÜÕÕÉäµ½µÄ×î½ü¾àÀë
-    DirectX::XMFLOAT3 direction = { 0.0f, 0.0f, 1.0f };  //Æ½ĞĞ¹â¡¢¾Û¹âµÆÊ¹ÓÃ£¬Ö¸¶¨¹âÔ´·½Ïò
-    float end = 10.0f;                                    //µã¹âÔ´¡¢¾Û¹âµÆÊ¹ÓÃ£¬Ö¸¶¨¹âÔ´ÄÜÕÕÉäµ½µÄ×îÔ¶¾àÀë
-    DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };    //µã¹âÔ´¡¢¾Û¹âµÆÊ¹ÓÃ£¬Ö¸¶¨¹âÔ´Î»ÖÃ
-    float spotPower = 128.0f;                              //¾Û¹âµÆÊ¹ÓÃ,
+    DirectX::XMFLOAT3 rgbIntensity = { 1.0f, 1.0f, 1.0f }; //å…‰æºçš„RGBå€¼
+    float start = 0.0f;                                    //ç‚¹å…‰æºã€èšå…‰ç¯ä½¿ç”¨ï¼ŒæŒ‡å®šå…‰æºèƒ½ç…§å°„åˆ°çš„æœ€è¿‘è·ç¦»
+    DirectX::XMFLOAT3 direction = { 0.0f, 0.0f, 1.0f };    //å¹³è¡Œå…‰ã€èšå…‰ç¯ä½¿ç”¨ï¼ŒæŒ‡å®šå…‰æºæ–¹å‘
+    float end = 10.0f;                                     //ç‚¹å…‰æºã€èšå…‰ç¯ä½¿ç”¨ï¼ŒæŒ‡å®šå…‰æºèƒ½ç…§å°„åˆ°çš„æœ€è¿œè·ç¦»
+    DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };     //ç‚¹å…‰æºã€èšå…‰ç¯ä½¿ç”¨ï¼ŒæŒ‡å®šå…‰æºä½ç½®
+    float spotPower = 128.0f;                              //èšå…‰ç¯ä½¿ç”¨,
 };
 struct Texture
 {
@@ -258,7 +259,7 @@ struct Texture
     if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
 }
 #endif
-//ÊÍ·Å¶¯Ì¬Ö¸Õë
+//é‡Šæ”¾åŠ¨æ€æŒ‡é’ˆ
 #ifndef ReleaseCom
 #define ReleaseCom(x) { if(x){ x->Release(); x = 0; } }
 #endif

@@ -3,7 +3,7 @@
 #include "DXBase.h"
 #include "UploadBuffer.h"
 
-//Óë×ÅÉ«Æ÷°ó¶¨µÄ¶¥µã½á¹¹Ìå
+//ä¸ç€è‰²å™¨ç»‘å®šçš„é¡¶ç‚¹ç»“æ„ä½“
 struct VertexConstants
 {
     DirectX::XMFLOAT3 pos;
@@ -11,42 +11,42 @@ struct VertexConstants
     DirectX::XMFLOAT2 texture;
 };
 
-//Óë×ÅÉ«Æ÷°ó¶¨µÄ²ÄÖÊ½á¹¹Ìå
+//ä¸ç€è‰²å™¨ç»‘å®šçš„æè´¨ç»“æ„ä½“
 struct MaterialConstants
 {
-    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };//Âş·´Éä·´ÕÕÂÊ
-    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };//·ÆÄù¶ûĞ§Ó¦²ÄÖÊÊôĞÔRf£¨0¡ã£©
-    float roughness = 0.0f;//²ÄÖÊ´Ö²Ú¶È
+    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };//æ¼«åå°„åç…§ç‡
+    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };//è²æ¶…å°”æ•ˆåº”æè´¨å±æ€§Rfï¼ˆ0Â°ï¼‰
+    float roughness = 0.0f;//æè´¨ç²—ç³™åº¦
     DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
 };
-//Óë×ÅÉ«Æ÷°ó¶¨µÄÊÀ½çÊÓÍ¼Í¶Ó°¾ØÕó£¨ÎïÌå³£Á¿»º³åÇø£©
+//ä¸ç€è‰²å™¨ç»‘å®šçš„ä¸–ç•Œè§†å›¾æŠ•å½±çŸ©é˜µï¼ˆç‰©ä½“å¸¸é‡ç¼“å†²åŒºï¼‰
 struct ObjectConstants
 {
-    DirectX::XMFLOAT4X4 XMWorld = MathHelper::Identity4x4();//ÎïÌåµÄÊÀ½ç±ä»»¾ØÕó
+    DirectX::XMFLOAT4X4 XMWorld = MathHelper::Identity4x4();//ç‰©ä½“çš„ä¸–ç•Œå˜æ¢çŸ©é˜µ
 };
-//Óë×ÅÉ«Æ÷°ó¶¨µÄäÖÈ¾¹ı³Ì³£Á¿½á¹¹Ìå
+//ä¸ç€è‰²å™¨ç»‘å®šçš„æ¸²æŸ“è¿‡ç¨‹å¸¸é‡ç»“æ„ä½“
 struct RenderingPassConstants
 {
-    DirectX::XMFLOAT4X4 view = MathHelper::Identity4x4();//ÉãÏñ»úÊÓÍ¼¾ØÕó
-    DirectX::XMFLOAT4X4 invView = MathHelper::Identity4x4();//ÊÓÍ¼¾ØÕóµÄÄæ¾ØÕó
-    DirectX::XMFLOAT4X4 proj = MathHelper::Identity4x4();//Í¶Ó°£¨ÖÁÏÔÊ¾ÆÁÄ»£©¾ØÕó
-    DirectX::XMFLOAT4X4 invProj = MathHelper::Identity4x4();//Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-    DirectX::XMFLOAT4X4 viewProj = MathHelper::Identity4x4();//ÊÓÍ¼Í¶Ó°¾ØÕó
-    DirectX::XMFLOAT4X4 invViewProj = MathHelper::Identity4x4();//ÊÓÍ¼Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-    DirectX::XMFLOAT3 eyePosW = { 0.0f,0.0f,0.0f };//ÉãÏñ»úÎ»ÖÃ×ø±ê
+    DirectX::XMFLOAT4X4 view = MathHelper::Identity4x4();//æ‘„åƒæœºè§†å›¾çŸ©é˜µ
+    DirectX::XMFLOAT4X4 invView = MathHelper::Identity4x4();//è§†å›¾çŸ©é˜µçš„é€†çŸ©é˜µ
+    DirectX::XMFLOAT4X4 proj = MathHelper::Identity4x4();//æŠ•å½±ï¼ˆè‡³æ˜¾ç¤ºå±å¹•ï¼‰çŸ©é˜µ
+    DirectX::XMFLOAT4X4 invProj = MathHelper::Identity4x4();//æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+    DirectX::XMFLOAT4X4 viewProj = MathHelper::Identity4x4();//è§†å›¾æŠ•å½±çŸ©é˜µ
+    DirectX::XMFLOAT4X4 invViewProj = MathHelper::Identity4x4();//è§†å›¾æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+    DirectX::XMFLOAT3 eyePosW = { 0.0f,0.0f,0.0f };//æ‘„åƒæœºä½ç½®åæ ‡
     float cbPerObjectPad1 = 0.0f;//
-    DirectX::XMFLOAT2 renderTargetSize = { 1.0f,1.0f };//äÖÈ¾Ä¿±êµÄ´óĞ¡
-    DirectX::XMFLOAT2 invRenderTargetSize = { 1.0f,1.0f };//äÖÈ¾Ä¿±ê´óĞ¡µÄµ¹Êı
-    float nearZ = 0.0f;//½üÊÓÆ½Ãæ
-    float farZ = 0.0f;//Ô¶ÊÓÆ½Ãæ
-    float totalTime = 0;//³ÌĞòÔËĞĞ×ÜÊ±¼ä
-    float deltaTime = 0;//Á½´ÎtickÖ®¼äµÄÊ±¼ä²î
-    DirectX::XMFLOAT4 ambientIlluminating= { 0.0f,0.0f,0.0f,1.0f };//ÎïÌå×ÔÉí·¢¹â
+    DirectX::XMFLOAT2 renderTargetSize = { 1.0f,1.0f };//æ¸²æŸ“ç›®æ ‡çš„å¤§å°
+    DirectX::XMFLOAT2 invRenderTargetSize = { 1.0f,1.0f };//æ¸²æŸ“ç›®æ ‡å¤§å°çš„å€’æ•°
+    float nearZ = 0.0f;//è¿‘è§†å¹³é¢
+    float farZ = 0.0f;//è¿œè§†å¹³é¢
+    float totalTime = 0;//ç¨‹åºè¿è¡Œæ€»æ—¶é—´
+    float deltaTime = 0;//ä¸¤æ¬¡tickä¹‹é—´çš„æ—¶é—´å·®
+    DirectX::XMFLOAT4 ambientIlluminating= { 0.0f,0.0f,0.0f,1.0f };//ç‰©ä½“è‡ªèº«å‘å…‰
 
     Light lights[MAX_NUM_LIGHTS];
 };
 
-//Ö¡×ÊÔ´
+//å¸§èµ„æº
 struct FrameResource
 {
 public:
@@ -56,10 +56,10 @@ public:
 public:
     FrameResource& operator=(const FrameResource& rhs) = delete;
 public:
-    Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;//Ã¿¸öÖ¡×ÊÔ´µÄÃüÁî·ÖÅäÆ÷
-    std::unique_ptr<UploadBuffer<RenderingPassConstants>> passConstBuffer = nullptr;//Ã¿¸öÖ¡×ÊÔ´µÄäÖÈ¾¹ı³Ì³£Á¿»º³åÇø
-    std::unique_ptr<UploadBuffer<ObjectConstants>> objectConstBuffer=nullptr;//Ã¿¸öÖ¡×ÊÔ´µÄÎïÌå³£Á¿»º³åÇø
-    std::unique_ptr<UploadBuffer<MaterialConstants>> materialConstBuffer = nullptr;//Ã¿¸öÖ¡×ÊÔ´µÄ²ÄÖÊ³£Á¿»º³åÇø
+    Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;//æ¯ä¸ªå¸§èµ„æºçš„å‘½ä»¤åˆ†é…å™¨
+    std::unique_ptr<UploadBuffer<RenderingPassConstants>> passConstBuffer = nullptr;//æ¯ä¸ªå¸§èµ„æºçš„æ¸²æŸ“è¿‡ç¨‹å¸¸é‡ç¼“å†²åŒº
+    std::unique_ptr<UploadBuffer<ObjectConstants>> objectConstBuffer=nullptr;//æ¯ä¸ªå¸§èµ„æºçš„ç‰©ä½“å¸¸é‡ç¼“å†²åŒº
+    std::unique_ptr<UploadBuffer<MaterialConstants>> materialConstBuffer = nullptr;//æ¯ä¸ªå¸§èµ„æºçš„æè´¨å¸¸é‡ç¼“å†²åŒº
     UINT64 fence = 0;
 };
 

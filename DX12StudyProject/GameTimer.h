@@ -7,19 +7,19 @@ public:
 	GameTimer();
 	~GameTimer() = default;
 public:
-	float TotalTime()const;//ÓÎÏ·ÔËĞĞ×ÜÊ±¼ä£¨³ÌĞòÔËĞĞ×ÜÊ±¼ä-ÓÎÏ·ÔİÍ£×ÜÊ±¼ä£©
-	float DeltaTime()const;//·µ»ØÖ¡Ê±¼ä²î
-	void Reset();//ÖØÖÃ¼ÆÊ±Æ÷
-	void Start();//¿ªÆô¼ÆÊ±Æ÷
-	void Stop();//ÔİÍ£¼ÆÊ±Æ÷
-	void Tick();//Ö¡¼ÆÊ±
+	float TotalTime()const;//æ¸¸æˆè¿è¡Œæ€»æ—¶é—´ï¼ˆç¨‹åºè¿è¡Œæ€»æ—¶é—´-æ¸¸æˆæš‚åœæ€»æ—¶é—´ï¼‰
+	float DeltaTime()const;//è¿”å›å¸§æ—¶é—´å·®
+	void Reset();//é‡ç½®è®¡æ—¶å™¨
+	void Start();//å¼€å¯è®¡æ—¶å™¨
+	void Stop();//æš‚åœè®¡æ—¶å™¨
+	void Tick();//å¸§è®¡æ—¶
 private:
-	double mSecondsPerCount = 0.0;//¸Ã¼ÆÊ±Æ÷Ã¿´Î¼ÆÊıËù¼ä¸ôµÄÃëÊı
+	double mSecondsPerCount = 0.0;//è¯¥è®¡æ—¶å™¨æ¯æ¬¡è®¡æ•°æ‰€é—´éš”çš„ç§’æ•°
 	double mDeltaTime = -1.0;
-	__int64 mStartTime = 0;//³ÌĞò¿ªÊ¼ÔËĞĞÊ±µÄÊ±¿Ì
-	__int64 mTotalPausdTime = 0;//³ÌĞòÔİÍ£Ê±¼ä×ÜºÍ
-	__int64 mStopTime = 0;//³ÌĞòÔİÍ£µÄÊ±¿Ì
-	__int64 mPrevTime = 0;//ÉÏ´Î¼ÆÊ±Ê±¿Ì
-	__int64 mCurrentTime = 0;//µ±Ç°Ê±¿Ì
+	__int64 mStartTime = 0;//ç¨‹åºå¼€å§‹è¿è¡Œæ—¶çš„æ—¶åˆ»
+	__int64 mTotalPausdTime = 0;//ç¨‹åºæš‚åœæ—¶é—´æ€»å’Œ
+	__int64 mStopTime = 0;//ç¨‹åºæš‚åœçš„æ—¶åˆ»
+	__int64 mPrevTime = 0;//ä¸Šæ¬¡è®¡æ—¶æ—¶åˆ»
+	__int64 mCurrentTime = 0;//å½“å‰æ—¶åˆ»
 	bool mStopped = false;
 };

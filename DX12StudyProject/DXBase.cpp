@@ -8,16 +8,16 @@ DxException::DxException(HRESULT hr, const std::wstring& function_name, const st
 {
 	OutputDebugString(ErrorMessageString().c_str());
 }
-//¶ÁÈ¡´íÎóĞÅÏ¢£¬²¢½«´íÎóĞÅÏ¢×ª»¯Îª¿ÉÊä³öµÄ×Ö·û´®
+//è¯»å–é”™è¯¯ä¿¡æ¯ï¼Œå¹¶å°†é”™è¯¯ä¿¡æ¯è½¬åŒ–ä¸ºå¯è¾“å‡ºçš„å­—ç¬¦ä¸²
 std::wstring DxException::ErrorMessageString()const
 {
 	_com_error err(errorCode);
 	std::wstring msg = err.ErrorMessage();
 
-	return L"\n" + functionName + L"\n´íÎóÎ»ÓÚ£º" + fileName + L"µÚ" + std::to_wstring(lineNum) + L"ĞĞ;\n´íÎóÄÚÈİ: " + msg + L"\n\n";
+	return L"\n" + functionName + L"\né”™è¯¯ä½äºï¼š" + fileName + L"ç¬¬" + std::to_wstring(lineNum) + L"è¡Œ;\né”™è¯¯å†…å®¹: " + msg + L"\n\n";
 }
 
-//´´½¨Ä¬ÈÏ»º³åÇø
+//åˆ›å»ºé»˜è®¤ç¼“å†²åŒº
 ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
     ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList,
@@ -27,7 +27,7 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
 {
     ComPtr<ID3D12Resource> defaultBuffer;
 
-    //´´½¨Ä¬ÈÏ»º³åÇøºÍÉÏ´«»º³åÇø
+    //åˆ›å»ºé»˜è®¤ç¼“å†²åŒºå’Œä¸Šä¼ ç¼“å†²åŒº
     ThrowIfFailed(device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
@@ -47,7 +47,7 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
     cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(),
         D3D12_RESOURCE_STATE_COMMON,
         D3D12_RESOURCE_STATE_COPY_DEST));
-	//½«CPUÄÚ´æÖĞµÄ×ÊÔ´¸´ÖÆµ½GPUµÄÄ¬ÈÏ»º³åÇøÖĞ
+	//å°†CPUå†…å­˜ä¸­çš„èµ„æºå¤åˆ¶åˆ°GPUçš„é»˜è®¤ç¼“å†²åŒºä¸­
 	//subResourceData ---> uploadBuffer ---CopyTextureRegion/CopyBufferRegion---> DefaultBuffer
 	UpdateSubresources<1>(cmdList, defaultBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
 
@@ -58,13 +58,13 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
 	return defaultBuffer;
 }
 
-//½«Êı¾İ´óĞ¡×Ö½Ú¶ÔÆëÎª256bÒÔÊÊÅä³£Á¿»º³åÇø
+//å°†æ•°æ®å¤§å°å­—èŠ‚å¯¹é½ä¸º256bä»¥é€‚é…å¸¸é‡ç¼“å†²åŒº
 UINT DXBase::ConstUploadBufferByteSize256Alignment(UINT ByteSize)
 {
 	return (ByteSize + 255) & ~255;
 }
 
-//ÔÚÏß±àÒëShader
+//åœ¨çº¿ç¼–è¯‘Shader
 ComPtr<ID3DBlob> DXBase::CompileShaderOnline(
 	const std::wstring& hlsl_filename,
 	const D3D_SHADER_MACRO* defines,
@@ -89,7 +89,7 @@ ComPtr<ID3DBlob> DXBase::CompileShaderOnline(
 	return byteCode;
 }
 
-//½«¶ş½øÖÆÎÄ¼ş¶Á×÷ID3DBlobÎÄ¼ş
+//å°†äºŒè¿›åˆ¶æ–‡ä»¶è¯»ä½œID3DBlobæ–‡ä»¶
 ComPtr<ID3DBlob> DXBase::LoadBinaryToBlob(const std::wstring& Binary_filename)
 {
 	std::ifstream fin(Binary_filename, std::ios::binary);
@@ -109,7 +109,7 @@ ComPtr<ID3DBlob> DXBase::LoadBinaryToBlob(const std::wstring& Binary_filename)
 
 const float MathHelper::Infinity = FLT_MAX;
 const float MathHelper::Pi = 3.1415926535f;
-//½«¼«×ø±ê×ª»»ÎªÖ±½Ç×ø±ê
+//å°†æåæ ‡è½¬æ¢ä¸ºç›´è§’åæ ‡
 XMVECTOR MathHelper::SphericalToCartesian(float radius, float theta, float phi)
 {
 	return XMVectorSet(
@@ -118,16 +118,16 @@ XMVECTOR MathHelper::SphericalToCartesian(float radius, float theta, float phi)
 		radius * sinf(phi) * sinf(theta),
 		1.0f);
 }
-//·µ»ØMµÄÄæ¾ØÕóµÄ×ªÖÃ¾ØÕó
+//è¿”å›Mçš„é€†çŸ©é˜µçš„è½¬ç½®çŸ©é˜µ
 XMMATRIX MathHelper::InverseTranspose(CXMMATRIX M)
 {
 	XMMATRIX A = M;
 	A.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
-	XMVECTOR det = XMMatrixDeterminant(A);//·µ»Ø£¨det A£¬det A£¬det A£¬det A£©£¬det A = |A|
+	XMVECTOR det = XMMatrixDeterminant(A);//è¿”å›ï¼ˆdet Aï¼Œdet Aï¼Œdet Aï¼Œdet Aï¼‰ï¼Œdet A = |A|
 	return XMMatrixTranspose(XMMatrixInverse(&det, A));
 }
-//³õÊ¼»¯4x4Êı×éÎªµ¥Î»Êı×é
+//åˆå§‹åŒ–4x4æ•°ç»„ä¸ºå•ä½æ•°ç»„
 XMFLOAT4X4 MathHelper::Identity4x4()
 {
 	static XMFLOAT4X4 I(
@@ -138,7 +138,7 @@ XMFLOAT4X4 MathHelper::Identity4x4()
 
 	return I;
 }
-// ·µ»ØÖ±½Ç×ø±êÏÂ£¨x£¬y£©ÔÚ¼«×ø±êÏÂµÄ¼«½Ç
+// è¿”å›ç›´è§’åæ ‡ä¸‹ï¼ˆxï¼Œyï¼‰åœ¨æåæ ‡ä¸‹çš„æè§’
 float MathHelper::AngleFromXY(float x, float y)
 {
 	float theta = 0.0f;
