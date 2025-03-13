@@ -37,7 +37,7 @@ private:
 
 	void ChangeW_H(int width, int height);
 	void ChangePSOstate();
-	void UpdateCamara();//更新摄像头矩阵
+	void UpdateCamera();//更新摄像头矩阵
 	void UpdateObjectsConstBuffers()const;//更新常量缓冲区（世界矩阵）
 	void UpdatePassConstBuffers()const;//更新渲染过程常量缓冲区
 	void UpdateMaterialConstBuffers()const;//更新材质常量缓冲区

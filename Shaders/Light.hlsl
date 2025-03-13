@@ -16,13 +16,13 @@ struct Material
     float roughness;
 };
 
-//光学计算方法
-//计算线性衰减因子
+// 光学计算方法
+// 计算线性衰减因子
 float CalculatorAttenuatiohn(float d, float start, float end)
 {
     return saturate((end - d) / (end - start));
 }
-//石里克近似模拟菲涅尔反射率
+// 石里克近似模拟菲涅尔反射率
 float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
 {
     float cosNormalLightAngle = saturate(dot(normal, lightVector));
@@ -30,7 +30,7 @@ float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
     float3 reflectPercent = Rf0 + (1.0f - Rf0) * pow(r, 5);
     return reflectPercent;
 }
-//计算因漫反射与镜面反射而进入人眼的光量
+// 计算因漫反射与镜面反射而进入人眼的光量
 float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 normal, float3 toEyeVector, Material material)
 {
     const float m = (1.0f - material.roughness) * 256.0f;
@@ -44,8 +44,8 @@ float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 norma
     return (mirrorReflectedAlbedo + material.diffuseAlbedo.rgb) * rgbIntensity;
 }
 
-//光源生成方法
-//生成平行光
+// 光源生成方法
+// 生成平行光
 float3 ComputeDirectionalLight(Light light,Material material,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = -light.direction;
@@ -53,7 +53,8 @@ float3 ComputeDirectionalLight(Light light,Material material,float3 normal,float
     
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
 }
-//生成点光源
+
+// 生成点光源
 float3 ComputePointLight(Light light,Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = light.position - illuminatedPosition;
@@ -67,7 +68,8 @@ float3 ComputePointLight(Light light,Material material,float3 illuminatedPositio
 
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
 }
-//生成聚光灯
+
+// 生成聚光灯
 float3 ComputeSpotLight(Light light,Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = -(illuminatedPosition - light.position);
@@ -83,32 +85,25 @@ float3 ComputeSpotLight(Light light,Material material,float3 illuminatedPosition
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
 }
 
-//生成全部光源
+// 生成全部光源
 float4 ComputeAllLights(Light lights[MAX_NUM_LIGHTS],Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector,float3 shadowFactor)
 {
     float3 result = 0.0f;
-
     int index = 0;
 
 #if (NUM_DIRECTIONAL_LIGHTS > 0)
     for(index = 0; index < NUM_DIRECTIONAL_LIGHTS; ++index)
-    {
         result += shadowFactor[index] * ComputeDirectionalLight(lights[index], material, normal, toEyeVector);
-    }
 #endif
 
 #if (NUM_POINT_LIGHTS > 0)
     for(index = NUM_DIRECTIONAL_LIGHTS; index < NUM_DIRECTIONAL_LIGHTS+NUM_POINT_LIGHTS; ++index)
-    {
         result += ComputePointLight(lights[index], material, illuminatedPosition, normal, toEyeVector);
-    }
 #endif
 
 #if (NUM_SPOT_LIGHTS > 0)
     for(index = NUM_DIRECTIONAL_LIGHTS + NUM_POINT_LIGHTS; index < NUM_DIRECTIONAL_LIGHTS + NUM_POINT_LIGHTS + NUM_SPOT_LIGHTS; ++index)
-    {
         result += ComputeSpotLight(lights[index], material, illuminatedPosition, normal, toEyeVector);
-    }
 #endif 
 
     return float4(result, 0.0f);

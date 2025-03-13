@@ -8,7 +8,7 @@ DxException::DxException(HRESULT hr, const std::wstring& function_name, const st
 {
 	OutputDebugString(ErrorMessageString().c_str());
 }
-//读取错误信息，并将错误信息转化为可输出的字符串
+// 读取错误信息，并将错误信息转化为可输出的字符串
 std::wstring DxException::ErrorMessageString()const
 {
 	_com_error err(errorCode);
@@ -17,7 +17,7 @@ std::wstring DxException::ErrorMessageString()const
 	return L"\n" + functionName + L"\n错误位于：" + fileName + L"第" + std::to_wstring(lineNum) + L"行;\n错误内容: " + msg + L"\n\n";
 }
 
-//创建默认缓冲区
+// 创建默认缓冲区
 ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
     ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList,
@@ -27,7 +27,7 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
 {
     ComPtr<ID3D12Resource> defaultBuffer;
 
-    //创建默认缓冲区和上传缓冲区
+    // 创建默认缓冲区和上传缓冲区
     ThrowIfFailed(device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
@@ -39,6 +39,7 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
         D3D12_RESOURCE_STATE_COMMON,
         nullptr,IID_PPV_ARGS(uploadBuffer.GetAddressOf())))
 
+	// 描述上传到DefaultBuffer的数据
     D3D12_SUBRESOURCE_DATA subResourceData = {};
     subResourceData.pData = initData;
     subResourceData.RowPitch = byteSize;
@@ -47,8 +48,9 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
     cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(),
         D3D12_RESOURCE_STATE_COMMON,
         D3D12_RESOURCE_STATE_COPY_DEST));
-	//将CPU内存中的资源复制到GPU的默认缓冲区中
-	//subResourceData ---> uploadBuffer ---CopyTextureRegion/CopyBufferRegion---> DefaultBuffer
+
+	// 将上传缓冲区中的资源复制到GPU的默认缓冲区中
+	// uploadBuffer ---Command：CopyTextureRegion()/CopyBufferRegion()（由UpdateSubresources调用cmdList完成）---> DefaultBuffer
 	UpdateSubresources<1>(cmdList, defaultBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
 
     cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(),
@@ -58,13 +60,13 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
 	return defaultBuffer;
 }
 
-//将数据大小字节对齐为256b以适配常量缓冲区
+// 将数据大小字节对齐为256b以适配常量缓冲区
 UINT DXBase::ConstUploadBufferByteSize256Alignment(UINT ByteSize)
 {
 	return (ByteSize + 255) & ~255;
 }
 
-//在线编译Shader
+// 在线编译Shader
 ComPtr<ID3DBlob> DXBase::CompileShaderOnline(
 	const std::wstring& hlsl_filename,
 	const D3D_SHADER_MACRO* defines,
@@ -89,7 +91,7 @@ ComPtr<ID3DBlob> DXBase::CompileShaderOnline(
 	return byteCode;
 }
 
-//将二进制文件读作ID3DBlob文件
+// 将二进制文件读作ID3DBlob文件（可用于载入离线编译的Shader.cso）
 ComPtr<ID3DBlob> DXBase::LoadBinaryToBlob(const std::wstring& Binary_filename)
 {
 	std::ifstream fin(Binary_filename, std::ios::binary);
@@ -107,9 +109,11 @@ ComPtr<ID3DBlob> DXBase::LoadBinaryToBlob(const std::wstring& Binary_filename)
 	return blob;
 }
 
+
 const float MathHelper::Infinity = FLT_MAX;
 const float MathHelper::Pi = 3.1415926535f;
-//将极坐标转换为直角坐标
+
+// 将极坐标转换为直角坐标
 XMVECTOR MathHelper::SphericalToCartesian(float radius, float theta, float phi)
 {
 	return XMVectorSet(
@@ -118,7 +122,8 @@ XMVECTOR MathHelper::SphericalToCartesian(float radius, float theta, float phi)
 		radius * sinf(phi) * sinf(theta),
 		1.0f);
 }
-//返回M的逆矩阵的转置矩阵
+
+// 返回M的逆矩阵的转置矩阵
 XMMATRIX MathHelper::InverseTranspose(CXMMATRIX M)
 {
 	XMMATRIX A = M;
@@ -127,7 +132,8 @@ XMMATRIX MathHelper::InverseTranspose(CXMMATRIX M)
 	XMVECTOR det = XMMatrixDeterminant(A);//返回（det A，det A，det A，det A），det A = |A|
 	return XMMatrixTranspose(XMMatrixInverse(&det, A));
 }
-//初始化4x4数组为单位数组
+
+// 初始化4x4数组为单位数组
 XMFLOAT4X4 MathHelper::Identity4x4()
 {
 	static XMFLOAT4X4 I(
@@ -138,6 +144,7 @@ XMFLOAT4X4 MathHelper::Identity4x4()
 
 	return I;
 }
+
 // 返回直角坐标下（x，y）在极坐标下的极角
 float MathHelper::AngleFromXY(float x, float y)
 {
@@ -155,6 +162,8 @@ float MathHelper::AngleFromXY(float x, float y)
 
 	return theta;
 }
+
+// 生成一个随机的单位向量
 XMVECTOR MathHelper::RandUnitVec3()
 {
 	XMVECTOR One = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
@@ -170,6 +179,8 @@ XMVECTOR MathHelper::RandUnitVec3()
 		return XMVector3Normalize(v);
 	}
 }
+
+// 生成一个随机的单位向量，并且该向量位于给定向量 n 所在的半球内
 XMVECTOR MathHelper::RandHemisphereUnitVec3(XMVECTOR n)
 {
 	XMVECTOR One = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);

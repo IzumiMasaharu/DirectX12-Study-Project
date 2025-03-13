@@ -31,28 +31,23 @@
 #include "d3dx12.h"
 #include "d3d12.h"
 
+// 为 DirectX 对象设置调试名称，以便在调试时更容易识别和跟踪这些对象
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
 {
     if (obj)
-    {
         obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
-    }
 }
 inline void d3dSetDebugName(ID3D12Device* obj, const char* name)
 {
     if (obj)
-    {
         obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
-    }
 }
 inline void d3dSetDebugName(ID3D12DeviceChild* obj, const char* name)
 {
     if (obj)
-    {
         obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
-    }
 }
-//将string转为wstring
+// 将string转为wstring
 inline std::wstring AnsiToWstring(const std::string& str)
 {
     WCHAR buffer[512];
@@ -66,36 +61,41 @@ public:
     DxException() = default;
     DxException(HRESULT hr, const std::wstring& function_name, const std::wstring& file_name, UINT line_num);
 public:
-    std::wstring ErrorMessageString()const;//读取错误信息，并将错误信息转化为可输出的字符串
+    std::wstring ErrorMessageString()const; // 读取错误信息，并将错误信息转化为可输出的字符串
 public:
     HRESULT errorCode = S_OK;
     std::wstring functionName;
     std::wstring fileName;
     UINT lineNum = -1;
 };
+
 class DXBase
 {
 public:
-    //疑问：为何要把UploadBuffer作为参数传递进函数 而不是在函数中创建一个ComPtr<ID3D12Resource> UploadBuffer完成资源传递操作?
-    //答：UploadBuffer不能立即销毁，因为命令列表复制操作在CreateDefaultBuffer（）调用完毕时可能尚未执行，必须等调用者得知复制完成后才能释放UploadBuffer。
+    // 疑问：为何要把UploadBuffer作为参数传递进函数 而不是在函数中创建一个ComPtr<ID3D12Resource> UploadBuffer完成资源传递操作?
+    // 答：UploadBuffer不能立即销毁，因为命令列表复制操作在CreateDefaultBuffer（）调用完毕时可能尚未执行，必须等调用者得知复制完成后才能释放UploadBuffer。
     static Microsoft::WRL::ComPtr<ID3D12Resource> CreateDefaultBuffer(
         ID3D12Device* device,
         ID3D12GraphicsCommandList* cmdList,
         const void* initData,
         UINT64 byteSize,
         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
-    //将数据大小字节对齐为256b以适配常量缓冲区
+
+    // 将数据大小字节对齐为256b以适配常量缓冲区
     static UINT ConstUploadBufferByteSize256Alignment(UINT ByteSize); 
-    //在线编译着色器
+
+    // 在线编译着色器
     static Microsoft::WRL::ComPtr<ID3DBlob> CompileShaderOnline(
         const std::wstring& hlsl_filename,
         const D3D_SHADER_MACRO* defines,
         const std::string& Entrypoint,
         const std::string& TargetShaderType);
-    //将二进制字符串写进Blob文件
+
+    // 将二进制字符串写进Blob文件
     static Microsoft::WRL::ComPtr<ID3DBlob> LoadBinaryToBlob(const std::wstring& Binary_filename);
 };
-//数学帮手，给我这种脑残用的
+
+// 数学帮手，给我这种脑残用的
 class MathHelper
 {
 public:
@@ -109,67 +109,68 @@ public:
     {
         return a + RandF() * (b - a);
     }
-    //生成[a, b)区间的随机int
+    // 生成[a, b)区间的随机int
     static int Rand(int a, int b)
     {
         return a + rand() % ((b - a) + 1);
     }
-    //返回两数之中较小值
+    // 返回两数之中较小值
     template<typename T>
     static T Min(const T& a, const T& b)
     {
         return a < b ? a : b;
     }
-    //返回两数之中较大值
+    // 返回两数之中较大值
     template<typename T>
     static T Max(const T& a, const T& b)
     {
         return a > b ? a : b;
     }
-    //返回a + (b - a) * t
+    // 返回a + (b - a) * t
     template<typename T>
     static T Lerp(const T& a, const T& b, float t)
     {
         return a + (b - a) * t;
     }
-    //用于限制x范围，即：若x小于low则返回low，若大于high则返回high，否则返回x本身
+    // 用于限制x范围，即：若x小于low则返回low，若大于high则返回high，否则返回x本身
     template<typename T>
     static T Clamp(const T& x, const T& low, const T& high)
     {
         return x < low ? low : (x > high ? high : x);
     }
 
-    //将极坐标转换为直角坐标
+    // 将极坐标转换为直角坐标
     static DirectX::XMVECTOR SphericalToCartesian(float radius, float theta, float phi);
-    //返回M的逆矩阵的转置矩阵
+    // 返回M的逆矩阵的转置矩阵
     static DirectX::XMMATRIX InverseTranspose(DirectX::CXMMATRIX M);
-    //初始化4x4数组为单位数组
+    // 初始化4x4数组为单位数组
     static DirectX::XMFLOAT4X4 Identity4x4();
     // 返回直角坐标下（x，y）在极坐标下的极角
     static float AngleFromXY(float x, float y);
-
+    // 生成一个随机的单位向量
     static DirectX::XMVECTOR RandUnitVec3();
+    // 生成一个随机的单位向量，并且该向量位于给定向量 n 所在的半球内
     static DirectX::XMVECTOR RandHemisphereUnitVec3(DirectX::XMVECTOR n);
 public:
-    static const float Infinity;//浮点数最大值
+    static const float Infinity; // 浮点数最大值
     static const float Pi;
 };
 
-//存储单个网格体的结构体
+// 存储单个网格体的结构体
 struct SubmeshGeometry
 {
     std::string name;
 
-    UINT indexCount = 0;//索引数目
-    UINT indexStartLocation = 0;//索引开始位置
-    UINT vertexBaseLocation = 0;//基准定点位置
-    DirectX::BoundingBox bounds;//设置边界框
+    UINT indexCount = 0; // 索引数目
+    UINT indexStartLocation = 0; // 索引开始位置
+    UINT vertexBaseLocation = 0; // 基准定点位置
+    DirectX::BoundingBox bounds; // 设置边界框
 };
-//存储全部网格体的结构体
+// 存储全部网格体的结构体
 struct MeshGeometry
 {
 public:
-    //为GPU中的顶点缓冲区资源创建顶点缓冲区视图，用于绑定到Pipeline IA阶段
+    // 为GPU中的顶点缓冲区资源创建顶点缓冲区视图，用于绑定到Pipeline IA阶段
     D3D12_VERTEX_BUFFER_VIEW VertexBufferView()const
     {
         D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -179,7 +180,7 @@ public:
 
         return vbv;
     }
-    //为GPU中的索引缓冲区资源创建索引缓冲区视图，用于绑定到Pipeline IA阶段
+    // 为GPU中的索引缓冲区资源创建索引缓冲区视图，用于绑定到Pipeline IA阶段
     D3D12_INDEX_BUFFER_VIEW IndexBufferView()const
     {
         D3D12_INDEX_BUFFER_VIEW ibv;
@@ -207,44 +208,45 @@ public:
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexBufferGPU = nullptr;
     Microsoft::WRL::ComPtr<ID3D12Resource> indexBufferGPU = nullptr;
 
-    UINT vertexByteStride = 0;//顶点结构体大小
-    UINT vertexBufferByteSize = 0;//顶点缓冲区大小
-    DXGI_FORMAT indexFormat = DXGI_FORMAT_R16_UINT;//资源格式
-    UINT indexBufferByteSize = 0;//索引缓冲区大小
+    UINT vertexByteStride = 0; // 顶点结构体大小
+    UINT vertexBufferByteSize = 0; // 顶点缓冲区大小
+    UINT indexBufferByteSize = 0; // 索引缓冲区大小
+    DXGI_FORMAT indexFormat = DXGI_FORMAT_R16_UINT; // 资源格式
 
-    std::unordered_map<std::string, SubmeshGeometry> submeshList;//将全部网格体拆分为若干单个网格体，存储到无序图中
+    std::unordered_map<std::string, SubmeshGeometry> submeshList; // 将全部网格体拆分为若干单个网格体，存储到无序图中
 };
 
-//存储材质数据的结构体
+// 存储材质数据的结构体
 struct Material
 {
     std::string name;
 
-    UINT materialConstBufferIndex = -1;//该材质在常量缓冲区中的索引
-    UINT diffuseSrvHeapIndex = -1;//漫反射纹理在SRV堆中的索引
+    UINT materialConstBufferIndex = -1; // 该材质在常量缓冲区中的索引
+    UINT diffuseSrvHeapIndex = -1; // 漫反射纹理在SRV堆中的索引
     UINT normalSrvHeapIndex = -1;
-    UINT numDirtyFrames = -1;//待更新的帧资源数量
+    UINT numDirtyFrames = -1; // 待更新的帧资源数量
 
-    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };//漫反射反照率
-    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };//菲涅尔效应材质属性Rf（0°）
-    float roughness = 0.0f;//材质粗糙度
+    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f }; // 漫反射反照率
+    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f }; // 菲涅尔效应材质属性Rf（0°）
+    float roughness = 0.0f; // 材质粗糙度
     DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
 };
 
-//参数顺序不可改变，且与hlsl中顺序一一对应，以保证shader能对参数正确打包为4D向量
+// 参数顺序不可改变，且与hlsl中顺序一一对应，以保证shader能对参数正确打包为4D向量
 struct Light
 {
-    DirectX::XMFLOAT3 rgbIntensity = { 1.0f, 1.0f, 1.0f }; //光源的RGB值
-    float start = 0.0f;                                    //点光源、聚光灯使用，指定光源能照射到的最近距离
-    DirectX::XMFLOAT3 direction = { 0.0f, 0.0f, 1.0f };    //平行光、聚光灯使用，指定光源方向
-    float end = 10.0f;                                     //点光源、聚光灯使用，指定光源能照射到的最远距离
-    DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };     //点光源、聚光灯使用，指定光源位置
-    float spotPower = 128.0f;                              //聚光灯使用,
+    DirectX::XMFLOAT3 rgbIntensity = { 1.0f, 1.0f, 1.0f }; // 光源的RGB值
+    float start = 0.0f;                                    // 点光源、聚光灯使用，指定光源能照射到的最近距离
+    DirectX::XMFLOAT3 direction = { 0.0f, 0.0f, 1.0f };    // 平行光、聚光灯使用，指定光源方向
+    float end = 10.0f;                                     // 点光源、聚光灯使用，指定光源能照射到的最远距离
+    DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };     // 点光源、聚光灯使用，指定光源位置
+    float spotPower = 128.0f;                              // 聚光灯使用,
 };
+
+// 存储纹理数据的结构体
 struct Texture
 {
     std::string name;
-
     std::wstring filename;
 
     Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
@@ -259,7 +261,7 @@ struct Texture
     if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
 }
 #endif
-//释放动态指针
+// 释放动态指针
 #ifndef ReleaseCom
 #define ReleaseCom(x) { if(x){ x->Release(); x = 0; } }
 #endif

@@ -12,49 +12,52 @@
 
 cbuffer cbPerObject : register(b0)
 {
-    float4x4 gWorld;//物体世界变换矩阵
+    float4x4 gWorld; // 物体世界变换矩阵
 }
 cbuffer cbMaterial : register(b1)
 {
-    float4 gDiffuseAlbedo;
-    float3 gFresneRf0;
-    float gRoughness;
+    float4 gDiffuseAlbedo; // 漫反射反照率
+    float3 gFresneRf0; // 菲涅尔效应材质属性Rf（0°）
+    float gRoughness; // 材质粗糙度
     float4x4 gMaterialTransform;
 }
 cbuffer cbPass : register(b2)
 {
-    float4x4 gView;//摄像机视图矩阵
-    float4x4 gInvView;//视图矩阵的逆矩阵
-    float4x4 gProj;//投影（至显示屏幕）矩阵
-    float4x4 gInvProj;//投影矩阵的逆矩阵
-    float4x4 gViewProj;//视图投影矩阵
-    float4x4 gInvViewProj;//视图投影矩阵的逆矩阵
-    float3 gEyePosW;//摄像机位置坐标
-    float cbPerObjectPad1;
-    float2 gRenderTargetSize;//渲染目标的大小
-    float2 gInvRenderTargetSize;//渲染目标大小的倒数
-    float gNearZ;//近视平面
-    float gFarZ;//远视平面
-    float gTotalTime;//程序运行总时间
-    float gDeltaTime;//两次tick之间的时间差
+    float4x4 gView; // 摄像机视图矩阵
+    float4x4 gInvView; // 视图矩阵的逆矩阵
+    float4x4 gProj; // 投影（至显示屏幕）矩阵
+    float4x4 gInvProj; // 投影矩阵的逆矩阵
+    float4x4 gViewProj; // 视图投影矩阵
+    float4x4 gInvViewProj; // 视图投影矩阵的逆矩阵
+    float3 gEyePosW; // 摄像机位置坐标
+    float cbPerObjectPad1; // 填充字节以保证16字节对齐
+    float2 gRenderTargetSize; // 渲染目标的大小
+    float2 gInvRenderTargetSize; // 渲染目标大小的倒数
+    float gNearZ; // 近视平面
+    float gFarZ; // 远视平面
+    float gTotalTime; // 程序运行总时间
+    float gDeltaTime; // 两次tick之间的时间差
     float4 gAmbientIlluminating;//物体自身发光
     
     Light gLights[MAX_NUM_LIGHTS];
 }
 
+// 输入顶点数据
 struct VertexIn
 {
 	float3 pos	 :POSITION;
     float3 normal : NORMAL;
     //float2 texture : TEXTURE;
 };
+// 输出顶点数据
 struct VertexOut
 {
     float4 posH : SV_Position;
-    float3 posW : POSITIONT;
+    float3 posW : POSITION;
     float3 normalW : NORMAL;
 };
 
+// 顶点着色器
 VertexOut VS(VertexIn vin)
 {   
     VertexOut vout;
@@ -67,6 +70,7 @@ VertexOut VS(VertexIn vin)
     return vout;
 }
 
+// 像素着色器
 float4 PS( VertexOut pin ) : SV_Target
 {   
     pin.normalW = normalize(pin.normalW);

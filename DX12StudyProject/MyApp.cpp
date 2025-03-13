@@ -21,7 +21,8 @@ MyApp::MyApp(HINSTANCE hInstance) : DXApp(hInstance), WC1(hInstance)
 	mClientWidth = 1000;
 	mClientHeight = 600;
 }
-//消息过程处理函数
+
+// 消息过程处理函数
 LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -133,7 +134,8 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
-//应用程序初始化
+
+// 应用程序初始化
 bool MyApp::Init()
 {
 	if(!DXApp::InitWindowClass(WC1,L"JustTest"))
@@ -165,12 +167,13 @@ bool MyApp::Init()
 
 	return true;
 }
-//窗口大小重新适配
+
+// 窗口大小重新适配
 void MyApp::Resize()
 {
 	DXApp::Resize();
 
-	//设置视口
+	// 设置视口
 	mScreenViewport.Height = static_cast<float>(mClientHeight);
 	mScreenViewport.Width = static_cast<float>(mClientWidth);
 	mScreenViewport.TopLeftX = 0;
@@ -182,11 +185,12 @@ void MyApp::Resize()
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, W_H_Ratio(), 1.0f, 1000.0f);
 	XMStoreFloat4x4(&mProj, P);
 }
-//更新帧画面
+
+// 更新帧画面
 void MyApp::Update(const GameTimer& GTimer)
 {
 	ChangePSOstate();
-	UpdateCamara();
+	UpdateCamera();
 
 	mCurrentFrameResourceIndex = (mCurrentFrameResourceIndex + 1) % gNumFrameResources;
 	mCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
@@ -211,7 +215,8 @@ void MyApp::Update(const GameTimer& GTimer)
 
 	SetWindowText(mhWndHwnd, AnsiToWstring(os.str().c_str()).c_str());
 }
-//绘制帧画面
+
+// 绘制帧画面
 void MyApp::Draw(const GameTimer& GTimer)
 {
 	auto cmdListAllocator = mCurrentFrameResource->commandAllocator;
@@ -257,7 +262,8 @@ void MyApp::Draw(const GameTimer& GTimer)
 	mCurrentFrameResource->fence = ++mCurrentFence;
 	mCommandQueue->Signal(mFence.Get(), mCurrentFence);
 }
-//当鼠标按下时调用
+
+// 当鼠标按下时调用
 void MyApp::MouseDown(WPARAM ButtonState, int x, int y)
 {
 	mLastMousePos.x = x;
@@ -265,12 +271,12 @@ void MyApp::MouseDown(WPARAM ButtonState, int x, int y)
 
 	SetCapture(mhWndHwnd);
 }
-//当鼠标抬起时调用
+// 当鼠标抬起时调用
 void MyApp::MouseUp(WPARAM ButtonState, int x, int y)
 {
 	ReleaseCapture();
 }
-//当鼠标移动时调用
+// 当鼠标移动时调用
 void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
@@ -285,7 +291,7 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 	mLastMousePos.x = x;
 	mLastMousePos.y = y;
 }
-//当鼠标滚轮滚动时
+// 当鼠标滚轮滚动时
 void MyApp::MouseWheel(short zDelta)
 {
 	mRadius += -0.05f * (zDelta / 10);
@@ -293,7 +299,7 @@ void MyApp::MouseWheel(short zDelta)
 	mRadius = MathHelper::Clamp(mRadius, 3.0f, 15.0f);
 }
 
-//创建根签名
+// 创建根签名
 void MyApp::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE CBVTable0;
@@ -323,13 +329,15 @@ void MyApp::BuildRootSignature()
 	ThrowIfFailed(md3dDevice->CreateRootSignature(0, serializedRootSignature->GetBufferPointer(),
 		serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)))
 }
-//着色器，启动！
+
+// 编译着色器
 void MyApp::BuildShaders()
 {
 	mShaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "VS", "vs_5_1");
 	mShaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "PS", "ps_5_1");
 }
-//创建输入布局
+
+// 创建输入布局
 void MyApp::BuildInputLayout()
 {
 	mInputLayout =
@@ -339,7 +347,8 @@ void MyApp::BuildInputLayout()
 		{"TEXTURE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 	};
 }
-//创建网格体
+
+// 创建网格体
 void MyApp::BuildMeshGeometry()
 {
 	GeometryGenerator GeoGenerator;
@@ -369,12 +378,12 @@ void MyApp::BuildMeshGeometry()
 	std::vector<VertexConstants> vertices(totalVertexCount);
 	std::vector<std::uint16_t> indices;
 	UINT k = 0;
-	for (size_t i = 0; i < cylinder.Vertices.size(); i++,k++)
+	for (size_t i = 0; i < cylinder.Vertices.size(); ++i,++k)
 	{
 		vertices[k].pos = cylinder.Vertices[i].position;
 		vertices[k].normal = cylinder.Vertices[i].Normal;
 	}
-	for (size_t i = 0; i < ball.Vertices.size(); i++,k++)
+	for (size_t i = 0; i < ball.Vertices.size(); ++i,++k)
 	{
 		vertices[k].pos = ball.Vertices[i].position;
 		vertices[k].normal = ball.Vertices[i].Normal;
@@ -661,7 +670,7 @@ void MyApp::BuildConstantBufferViews()
 		
 	}
 }
-//创建渲染管线状态对象
+// 创建渲染管线状态对象
 void MyApp::BuildPSOs()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC OpaquePSODesc;
@@ -683,7 +692,6 @@ void MyApp::BuildPSOs()
 	drd.FillMode = D3D12_FILL_MODE_SOLID;
 	drd.CullMode = D3D12_CULL_MODE_BACK;
 	OpaquePSODesc.RasterizerState = drd;
-
 	OpaquePSODesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	OpaquePSODesc.InputLayout = { mInputLayout.data(),(UINT)mInputLayout.size() };
 	OpaquePSODesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -717,7 +725,7 @@ void MyApp::ChangePSOstate()
 		mIsWireframe = false;
 }
 //更新摄像头矩阵
-void MyApp::UpdateCamara()
+void MyApp::UpdateCamera()
 {
 	mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
 	mEyePos.z = mRadius * sinf(mPhi) * sinf(mTheta);
@@ -734,7 +742,7 @@ void MyApp::UpdateCamara()
 	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mView, view);
 }
-//更新物体常量缓冲区（世界矩阵）
+// 更新物体常量缓冲区（世界矩阵）
 void MyApp::UpdateObjectsConstBuffers()const
 {
 	auto currentObjectConstBuffer = mCurrentFrameResource->objectConstBuffer.get();
@@ -753,7 +761,7 @@ void MyApp::UpdateObjectsConstBuffers()const
 		}
 	}
 }
-//更新渲染过程常量
+// 更新渲染过程常量
 void MyApp::UpdatePassConstBuffers()const
 {
 	RenderingPassConstants mRenderingPassConstantsBuffer;
@@ -788,7 +796,8 @@ void MyApp::UpdatePassConstBuffers()const
 	auto currentPassConstsBuffer = mCurrentFrameResource->passConstBuffer.get();
 	currentPassConstsBuffer->CopyData(0, mRenderingPassConstantsBuffer);
 }
-//更新材质常量缓冲区
+
+// 更新材质常量缓冲区
 void MyApp::UpdateMaterialConstBuffers()const
 {
 	auto currentMaterialConstBuffer = mCurrentFrameResource->materialConstBuffer.get();
@@ -810,7 +819,7 @@ void MyApp::UpdateMaterialConstBuffers()const
 	}
 }
 
-//绘制渲染项
+// 绘制渲染项
 void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<RenderItem*>& renderItems)const
 {
 	for (size_t itemIndex = 0; itemIndex < renderItems.size(); itemIndex++)

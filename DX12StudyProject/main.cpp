@@ -9,13 +9,13 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     {
         MyApp myDXProject(hInstance);
         if (!myDXProject.Init())
-            return 0;
+            return 114;
 
         return myDXProject.Run();
     }
     catch (DxException& error)
     {
         MessageBox(nullptr, error.ErrorMessageString().c_str(), L"HR Failed", MB_OK);
-        return 0;
+        return -1;
     }
 }

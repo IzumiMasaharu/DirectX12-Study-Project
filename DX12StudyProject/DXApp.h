@@ -18,11 +18,10 @@ public:
 	virtual bool Init() = 0;
 	int Run();
 protected:
-	//初始化实现
+	// 初始化实现
 	bool InitWindowClass(WindowClass& WC,LPCTSTR windowclassName);//窗口类初始化
 	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);//窗口初始化重载1
-	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName,
-		int x, int y, int wx, int wy);//窗口初始化重载2
+	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName, int x, int y, int wx, int wy);//窗口初始化重载2
 	bool InitDirectX3D();//D3D初始化
 	void LogAdapters();//加载枚举所有显示适配器
 	void LogAdapterOutputs(IDXGIAdapter* adapter);//加载枚举所有显示输出
@@ -82,9 +81,9 @@ protected:
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;//交换链指针
 	static const int SwapChainBufferCount = 2;//交换链缓冲区数量
-	int mCurrentBackBuffer = 0;//当前后缓冲区编号
+	int mCurrentBackBuffer = 0;//当前后台缓冲区编号
 	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[SwapChainBufferCount];//交换链缓冲区指针
-	Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;//深度模板缓冲区指针
+	Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer; // 深度/模板缓冲区指针
 
 	UINT mRTVDescriptorSize = 0;//RTV描述符大小
 	UINT mDSVDescriptorSize = 0;//DSV描述符大小
@@ -95,7 +94,7 @@ protected:
 	D3D12_VIEWPORT mScreenViewport = {};//视口
 	D3D12_RECT mScissorRect = {};//裁剪矩形
 
-	//以下变量可在派生类中自行定义
+	// 以下变量可在派生类中自行定义
 	LPCTSTR mMainWndTitle=L"DefaultTitle";
 	D3D_DRIVER_TYPE md3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
 	DXGI_FORMAT mBackBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -103,7 +102,7 @@ protected:
 	int mClientWidth=800;
 	int mClientHeight=600;
 };
-//类：窗口类的声明
+// 类：窗口类的声明
 class DXApp::WindowClass
 {
 public:
@@ -118,7 +117,7 @@ private:
 	HINSTANCE hWndClassInst;
 	const wchar_t* windowclassName = nullptr;
 };
-//类：窗口的声明
+// 类：窗口的声明
 class DXApp::Window
 {
 public:
