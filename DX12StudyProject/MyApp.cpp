@@ -344,7 +344,7 @@ void MyApp::BuildInputLayout()
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
-		{"TEXTURE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 	};
 }
 
@@ -486,7 +486,7 @@ void MyApp::BuildImportedGeometry()
 
 	mGeos[geo->name] = std::move(geo);
 }
-//创建材质
+// 创建材质
 void MyApp::BuildMaterials()
 {
 	UINT MaterialIndex = 0;
@@ -509,7 +509,7 @@ void MyApp::BuildMaterials()
 	mMaterials[matGrass->name] = std::move(matGrass);
 	mMaterials[matGlass->name] = std::move(matGlass);
 }
-//创建纹理
+// 创建纹理
 void MyApp::BuildTexture()
 {
 	auto texStone = std::make_unique<Texture>();
@@ -521,8 +521,11 @@ void MyApp::BuildTexture()
 	texBrick->name = "brick";
 	texBrick->filename = L"../Texture/brick.dds";
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(), mCommandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap))
+
+	mTextures[texStone->name] = std::move(texStone);
+	mTextures[texBrick->name] = std::move(texBrick);
 }
-//创建渲染项
+// 创建渲染项
 void MyApp::BuildRenderItems()
 {
 	auto leftCylinderRenderItem = std::make_unique<RenderItem>();
@@ -594,13 +597,13 @@ void MyApp::BuildRenderItems()
 	for (auto& i: mAllRenderItems)
 		mOpaqueRenderItems.push_back(i.get());
 }
-//创建帧资源
+// 创建帧资源
 void MyApp::BuildFrameResources()
 {
 	for (int i = 0; i < gNumFrameResources; i++)
 		mFrameResources.push_back(std::make_unique<FrameResource>(md3dDevice.Get(), 1, (UINT)mAllRenderItems.size(), (UINT)mMaterials.size()));
 }
-//创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
+// 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
 void MyApp::BuildDescriptorHeaps()
 {
 	mPassCbvOffset = ((UINT)mOpaqueRenderItems.size() + (UINT)mMaterials.size()) * gNumFrameResources;
@@ -618,7 +621,7 @@ void MyApp::BuildDescriptorHeaps()
 	SRV_HEAP_DESC.NodeMask = 0;
 	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC,IID_PPV_ARGS(&mSrvDescriptorHeap)))
 }
-//创建常量缓冲区
+// 创建常量缓冲区
 void MyApp::BuildConstantBufferViews()
 {
 	UINT objConstantsBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(ObjectConstants));
@@ -710,13 +713,13 @@ void MyApp::BuildPSOs()
 	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&mPSOs["Wireframe"])))
 }
 
-//改变窗口的高度和宽度
+// 改变窗口的高度和宽度
 void MyApp::ChangeW_H(int width, int height)
 {
 	mClientWidth = width;
 	mClientHeight = height;
 }
-//更改PSO
+// 更改PSO
 void MyApp::ChangePSOstate()
 {
 	if (GetAsyncKeyState('1') & 0x8000)
@@ -724,7 +727,7 @@ void MyApp::ChangePSOstate()
 	else
 		mIsWireframe = false;
 }
-//更新摄像头矩阵
+// 更新摄像头矩阵
 void MyApp::UpdateCamera()
 {
 	mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
@@ -796,7 +799,6 @@ void MyApp::UpdatePassConstBuffers()const
 	auto currentPassConstsBuffer = mCurrentFrameResource->passConstBuffer.get();
 	currentPassConstsBuffer->CopyData(0, mRenderingPassConstantsBuffer);
 }
-
 // 更新材质常量缓冲区
 void MyApp::UpdateMaterialConstBuffers()const
 {
@@ -844,7 +846,7 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 	}
 }
 
-//获取指向MyApp类自身的指针
+// 获取指向MyApp类自身的指针
 const MyApp* MyApp::GetMyApp()const
 {
 	return this;

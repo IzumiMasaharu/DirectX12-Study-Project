@@ -72,7 +72,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;//围栏指针
 	UINT64 mCurrentFence = 0;//指示当前围栏值
 
-	bool m4xMSAAState = false;//是否开启4xMSAA抗锯齿技术
+	bool m4xMSAAState = true;//是否开启4xMSAA抗锯齿技术
 	UINT m4xMSAAQuality = 0;//4xMSAA抗锯齿质量级别
     
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;//命令队列指针

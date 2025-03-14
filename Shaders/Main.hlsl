@@ -47,7 +47,7 @@ struct VertexIn
 {
 	float3 pos	 :POSITION;
     float3 normal : NORMAL;
-    //float2 texture : TEXTURE;
+    float2 texture : TEXCOORD;
 };
 // 输出顶点数据
 struct VertexOut
