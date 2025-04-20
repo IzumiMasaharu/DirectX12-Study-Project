@@ -23,17 +23,16 @@ private:
 	void MouseMove(WPARAM ButtonState, int x, int y) override;
 	void MouseWheel(short zDelta) override;
 	
+	void LoadTexture(); // 载入纹理
 	void BuildRootSignature(); // 创建根签名
+	void BuildDescriptorHeaps(); // 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
 	void BuildShaders(); // 编译着色器
 	void BuildInputLayout(); // 创建输入布局
 	void BuildMeshGeometry(); // 创建网格体
 	void BuildImportedGeometry(); // 创建通过文件导入的模型
 	void BuildMaterials(); // 创建材质
-	void BuildTexture(); // 创建纹理
 	void BuildRenderItems(); // 创建渲染项
 	void BuildFrameResources(); // 创建帧资源
-	void BuildDescriptorHeaps(); // 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
-	void BuildConstantBufferViews(); // 创建常量缓冲区
 	void BuildPSOs(); // 创建渲染管线状态对象
 
 	void ChangeW_H(int width, int height);
@@ -47,40 +46,40 @@ private:
 public:
 	const MyApp* GetMyApp()const; // 获取指向MyApp类自身的指针
 private:
-	WindowClass WC1;
-	Window AppMainWin;
+	WindowClass windowClass;
+	Window appMainWnd;
 
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature = nullptr; // 根签名
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvDescriptorHeap = nullptr; // CBV描述符堆
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr; // SRV描述符堆
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr; // 根签名
 
-	std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout; // 输入布局
-	UINT mPassCbvOffset = 0; // 渲染过程常量缓冲区偏移量
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap = nullptr; // SRV描述符堆
 
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> mShaders; // 储存着色器的无序图
-	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeos; // 储存几何网格体的无序图
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> mPSOs; // 储存不同PSO的无序图
-	std::unordered_map<std::string, std::unique_ptr<Material>> mMaterials; // 存储材质的无序图
-	std::unordered_map<std::string, std::unique_ptr<Texture>> mTextures; // 存储纹理的无序图
+	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout; // 输入布局
+	UINT passCbvOffset = 0; // 渲染过程常量缓冲区偏移量
+
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> shaders; // 储存着色器的无序图
+	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> geos; // 储存几何网格体的无序图
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOs; // 储存不同PSO的无序图
+	std::unordered_map<std::string, std::unique_ptr<Material>> materials; // 存储材质的无序图
+	std::unordered_map<std::string, std::unique_ptr<Texture>> textures; // 存储纹理的无序图
 	
-	std::vector<std::unique_ptr<RenderItem>> mAllRenderItems; // 储存有所有渲染项
-	std::vector<RenderItem*> mOpaqueRenderItems; //
-	std::vector<RenderItem*> mTransparentRenderItems; //
+	std::vector<std::unique_ptr<RenderItem>> allRenderItems; // 储存有所有渲染项
+	std::vector<RenderItem*> opaqueRenderItems; // 储存不透明渲染项
+	std::vector<RenderItem*> transparentRenderItems; // 储存透明渲染项
 
-	UINT mCurrentFrameResourceIndex = 0; // 当前帧资源索引
-	std::vector<std::unique_ptr<FrameResource>> mFrameResources; // 全部帧资源
-	FrameResource* mCurrentFrameResource = nullptr; // 当前帧资源
+	UINT currentFrameResourceIndex = 0; // 当前帧资源索引
+	std::vector<std::unique_ptr<FrameResource>> frameResources; // 全部帧资源
+	FrameResource* currentFrameResource = nullptr; // 当前帧资源
 
-	POINT mLastMousePos;
+	POINT lastMousePosition;
 
-	bool mIsWireframe = false;
+	bool isWireframeEnabled = false;
 
-	DirectX::XMFLOAT3 mEyePos = { 0.0f,0.0f,0.0f };
-	float mTheta = 0; // 极点-原点在x-z面上投影与x轴正半轴夹角
-	float mPhi = DirectX::XM_PIDIV4; // 极点-原点连线与Y轴正半轴夹角
-	float mRadius = 15.0f; // 极径长
+	DirectX::XMFLOAT3 eyePosition = { 0.0f,0.0f,0.0f };
+	float theta = 0; // 极点-原点在x-z面上投影与x轴正半轴夹角
+	float phi = DirectX::XM_PIDIV4; // 极点-原点连线与Y轴正半轴夹角
+	float radius = 15.0f; // 极径长
 
-	DirectX::XMFLOAT4X4 mView = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 mProj = MathHelper::Identity4x4();
+	DirectX::XMFLOAT4X4 viewTransform = MathHelper::Identity4x4();
+	DirectX::XMFLOAT4X4 projectionTransform = MathHelper::Identity4x4();
 };
 

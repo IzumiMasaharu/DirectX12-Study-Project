@@ -10,9 +10,19 @@
 
 #include "Light.hlsl"
 
+Texture2D gDiffuseMap : register(t0);
+
+SamplerState gsamPointWrap : register(s0);
+SamplerState gsamPointClamp : register(s1);
+SamplerState gsamLinearWrap : register(s2);
+SamplerState gsamLinearClamp : register(s3);
+SamplerState gsamAnisotropicWrap : register(s4);
+SamplerState gsamAnisotropicClamp : register(s5);
+
 cbuffer cbPerObject : register(b0)
 {
-    float4x4 gWorld; // 物体世界变换矩阵
+    float4x4 gWorldTransform; // 物体世界变换矩阵
+    float4x4 gTextureTransform; // 纹理变换矩阵
 }
 cbuffer cbMaterial : register(b1)
 {
@@ -45,27 +55,30 @@ cbuffer cbPass : register(b2)
 // 输入顶点数据
 struct VertexIn
 {
-	float3 pos	 :POSITION;
-    float3 normal : NORMAL;
-    float2 texture : TEXCOORD;
+	float3 pos      : POSITION;
+    float3 normal   : NORMAL;
+    float2 texCoord : TEXCOORD;
 };
 // 输出顶点数据
 struct VertexOut
 {
-    float4 posH : SV_Position;
-    float3 posW : POSITION;
-    float3 normalW : NORMAL;
+    float4 posH     : SV_POSITION;
+    float3 posW     : POSITION;
+    float3 normalW  : NORMAL;
+	float2 texCoord : TEXCOORD;
 };
 
 // 顶点着色器
 VertexOut VS(VertexIn vin)
 {   
-    VertexOut vout;
+    VertexOut vout = (VertexOut)0.0f;
     
-    float4 pos = mul(float4(vin.pos, 1.0f), gWorld);
+    float4 pos = mul(float4(vin.pos, 1.0f), gWorldTransform);
     vout.posW = pos.xyz;
-    vout.normalW = mul(vin.normal, (float3x3) gWorld);
+    vout.normalW = mul(vin.normal, (float3x3) gWorldTransform);
     vout.posH = mul(pos, gViewProj);
+    float4 texC = mul(float4(vin.texCoord, 0.0f, 1.0f), gTextureTransform);
+    vout.texCoord = mul(texC, gMaterialTransform).xy;
     
     return vout;
 }
@@ -73,17 +86,18 @@ VertexOut VS(VertexIn vin)
 // 像素着色器
 float4 PS( VertexOut pin ) : SV_Target
 {   
+    float4 diffuseAlbedo = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.texCoord) * gDiffuseAlbedo;
     pin.normalW = normalize(pin.normalW);
     float3 toEyeW = normalize(gEyePosW - pin.posW);
     
     float4 ambientLight = gAmbientIlluminating * gDiffuseAlbedo;
     
-    Material material = { gDiffuseAlbedo, gFresneRf0, gRoughness };
+    Material material = { diffuseAlbedo, gFresneRf0, gRoughness };
     float3 shadowFactor = 1.0f;
     float4 directLight = ComputeAllLights(gLights, material, pin.posW, pin.normalW, toEyeW, shadowFactor);
     
-    float4 allLightIntensity = ambientLight + directLight;
-    allLightIntensity.a = gDiffuseAlbedo.a;
-    
-	return allLightIntensity;
+    float4 allLightColor = ambientLight + directLight;
+    allLightColor.a = gDiffuseAlbedo.a;
+
+    return allLightColor;
 }

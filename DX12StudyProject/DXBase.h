@@ -93,6 +93,9 @@ public:
 
     // 将二进制字符串写进Blob文件
     static Microsoft::WRL::ComPtr<ID3DBlob> LoadBinaryToBlob(const std::wstring& Binary_filename);
+
+    // 获取静态采样器
+    static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 };
 
 // 数学帮手，给我这种脑残用的
@@ -223,7 +226,7 @@ struct Material
 
     UINT materialConstBufferIndex = -1; // 该材质在常量缓冲区中的索引
     UINT diffuseSrvHeapIndex = -1; // 漫反射纹理在SRV堆中的索引
-    UINT normalSrvHeapIndex = -1;
+	UINT normalSrvHeapIndex = -1; // 法线纹理在SRV堆中的索引
     UINT numDirtyFrames = -1; // 待更新的帧资源数量
 
     DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f }; // 漫反射反照率

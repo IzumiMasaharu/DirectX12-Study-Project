@@ -55,52 +55,52 @@ public:
 protected:
 	static DXApp* mApp;//指向DXApp类的指针
 
-	GameTimer mGameTimer;
-	float FPS = 0.0f;
-	float MSPF = 0.0f;
+	GameTimer gameTimer;
+	float fps = 0.0f;
+	float mspf = 0.0f;
 
-	HINSTANCE mhAppInst = nullptr;//应用程序实例句柄
-	HWND mhWndHwnd = nullptr;//指向程序窗口的句柄（一般指向主窗口）
-	bool mAppPaused = false;//应用程序是否暂停
-	bool mMinimized = false;//是否最小化
-	bool mMaximized = false;//是否最大化
-	bool mResized = false;//窗口是否改变大小
-	bool mFullScreenState = false;//是否全屏
+	HINSTANCE appInstance = nullptr;//应用程序实例句柄
+	HWND mainWndHwnd = nullptr;//指向程序窗口的句柄（一般指向主窗口）
+	bool isAppPaused = false;//应用程序是否暂停
+	bool isWindowMinimized = false;//是否最小化
+	bool isWindowMaximized = false;//是否最大化
+	bool isWindowResized = false;//窗口是否改变大小
+	bool isWindowFullScreen = false;//是否全屏
 
-	Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;//Factory接口指针（Factory接口提供了一套创建DXGI的方法）
-	Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;//D3D设备指针
-	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;//围栏指针
-	UINT64 mCurrentFence = 0;//指示当前围栏值
+	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory;//Factory接口指针（Factory接口提供了一套创建DXGI的方法）
+	Microsoft::WRL::ComPtr<ID3D12Device> d3dDevice;//D3D设备指针
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence;//围栏指针
+	UINT64 currentFenceValue = 0;//指示当前围栏值
 
-	bool m4xMSAAState = true;//是否开启4xMSAA抗锯齿技术
-	UINT m4xMSAAQuality = 0;//4xMSAA抗锯齿质量级别
+	bool isMSAA4xOn = false;//是否开启4xMSAA抗锯齿技术
+	UINT MSAA4xQualityLevel = 0;//4xMSAA抗锯齿质量级别
     
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;//命令队列指针
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator;//命令分配器指针
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;//命令列表指针
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;//命令队列指针
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;//命令分配器指针
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;//命令列表指针
 
-	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;//交换链指针
+	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;//交换链指针
 	static const int SwapChainBufferCount = 2;//交换链缓冲区数量
-	int mCurrentBackBuffer = 0;//当前后台缓冲区编号
-	Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[SwapChainBufferCount];//交换链缓冲区指针
-	Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer; // 深度/模板缓冲区指针
+	int currentBackBuffer = 0;//当前后台缓冲区编号
+	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainBuffer[SwapChainBufferCount];//交换链缓冲区指针
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer; // 深度/模板缓冲区指针
 
-	UINT mRTVDescriptorSize = 0;//RTV描述符大小
-	UINT mDSVDescriptorSize = 0;//DSV描述符大小
-	UINT mCBV_SRV_UAVDescriptorSize = 0;//CBV、SRV、UAV描述符大小
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;//RTV描述符堆指针
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;//DSV描述符堆指针
+	UINT rtvDescriptorSize = 0;// RTV描述符大小
+	UINT dsvDescriptorSize = 0;// DSV描述符大小
+	UINT cbs_srv_uavDescriptorSize = 0;//CBV、SRV、UAV描述符大小
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap;//RTV描述符堆指针
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;//DSV描述符堆指针
 
-	D3D12_VIEWPORT mScreenViewport = {};//视口
-	D3D12_RECT mScissorRect = {};//裁剪矩形
+	D3D12_VIEWPORT screenViewport = {};//视口
+	D3D12_RECT scissorRect = {};//裁剪矩形
 
 	// 以下变量可在派生类中自行定义
-	LPCTSTR mMainWndTitle=L"DefaultTitle";
-	D3D_DRIVER_TYPE md3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
-	DXGI_FORMAT mBackBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
-	DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	int mClientWidth=800;
-	int mClientHeight=600;
+	LPCTSTR mainWndTitle=L"DefaultTitle";
+	D3D_DRIVER_TYPE d3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
+	DXGI_FORMAT backBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
+	DXGI_FORMAT depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	int clientWidth=800;
+	int clientHeight=600;
 };
 // 类：窗口类的声明
 class DXApp::WindowClass
@@ -114,8 +114,8 @@ public:
 	const wchar_t* GetWCName()const;//返回窗口类名称
 	HINSTANCE GetInstance()const;//返回窗口类实例句柄
 private:
-	HINSTANCE hWndClassInst;
-	const wchar_t* windowclassName = nullptr;
+	HINSTANCE wndClassInstance;
+	const wchar_t* windowClassName = nullptr;
 };
 // 类：窗口的声明
 class DXApp::Window
@@ -128,14 +128,14 @@ public:
 	Window() = default;
 	~Window();
 public:
-	const wchar_t* SetWndName(LPCTSTR WndName);//设置窗口名称
-	void SetWndPos(int x, int y, int wx, int wy);//设置窗口坐标数据
-	HWND GetWndHwnd()const;//获取窗口句柄
+	const wchar_t* SetWndName(LPCTSTR WndName);// 设置窗口名称
+	void SetWndPos(int x, int y, int wx, int wy);// 设置窗口坐标数据
+	HWND GetWndHwnd() const;// 获取窗口句柄
 private:
 	HWND wndHwnd = nullptr;
-	LPCTSTR pWindowName = nullptr;
-	int32_t mWin_x = 0;
-	int32_t mWin_y = 0;
-	int32_t mWin_wx = 0;
-	int32_t mWin_wy = 0;
+	LPCTSTR windowName = nullptr;
+	int32_t windowX = 0;
+	int32_t windowY = 0;
+	int32_t windowWidth = 0;
+	int32_t windowHeight = 0;
 };

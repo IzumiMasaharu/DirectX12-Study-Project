@@ -6,7 +6,8 @@
 // 与着色器绑定的世界视图投影矩阵
 struct ObjectConstants
 {
-    DirectX::XMFLOAT4X4 XMWorld = MathHelper::Identity4x4(); // 物体的世界变换矩阵
+    DirectX::XMFLOAT4X4 worldTransform = MathHelper::Identity4x4(); // 物体的世界变换矩阵
+	DirectX::XMFLOAT4X4 textureTransform = MathHelper::Identity4x4(); // 纹理变换矩阵 
 };
 
 // 与着色器绑定的材质结构体

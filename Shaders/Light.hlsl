@@ -28,6 +28,7 @@ float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
     float cosNormalLightAngle = saturate(dot(normal, lightVector));
     float r = 1.0f - cosNormalLightAngle;
     float3 reflectPercent = Rf0 + (1.0f - Rf0) * pow(r, 5);
+    
     return reflectPercent;
 }
 // 计算因漫反射与镜面反射而进入人眼的光量
