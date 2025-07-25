@@ -76,7 +76,7 @@ bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR windowclassName)
     wc.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hIconSm = nullptr;
-    wc.hIcon = static_cast<HICON>(LoadImage(appInstance, MAKEINTRESOURCE(CAT_RANA), IMAGE_ICON, 512, 512, LR_VGACOLOR));
+    wc.hIcon = static_cast<HICON>(LoadImage(appInstance, MAKEINTRESOURCE(RENDER), IMAGE_ICON, 512, 512, LR_VGACOLOR));
     wc.hIconSm = nullptr;
     wc.lpfnWndProc = DXAppWndProc;
     wc.lpszMenuName = nullptr;
