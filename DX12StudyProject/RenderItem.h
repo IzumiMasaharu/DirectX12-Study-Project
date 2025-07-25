@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DXBase.h"
 
 const UINT gNumFrameResources = 3; // 程序所用帧资源总数

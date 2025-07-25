@@ -1,4 +1,4 @@
-#include "GameTimer.h"
+﻿#include "GameTimer.h"
 
 GameTimer::GameTimer()
 {

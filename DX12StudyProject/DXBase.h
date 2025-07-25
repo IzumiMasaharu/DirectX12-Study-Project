@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"D3D12.lib")

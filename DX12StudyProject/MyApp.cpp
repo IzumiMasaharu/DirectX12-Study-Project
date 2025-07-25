@@ -1,4 +1,4 @@
-#include "MyApp.h"
+﻿#include "MyApp.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;

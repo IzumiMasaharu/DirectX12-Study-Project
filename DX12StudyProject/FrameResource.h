@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #define MAX_NUM_LIGHTS 8
 #include "DXBase.h"
 #include "UploadBuffer.h"
