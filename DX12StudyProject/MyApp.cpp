@@ -304,12 +304,12 @@ void MyApp::LoadTexture()
 {
 	auto texStone = std::make_unique<Texture>();
 	texStone->name = "stone";
-	texStone->filename = L"../Texture/stone.dds";
+	texStone->filename = L"../Resources/Textures/stone.dds";
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(d3dDevice.Get(), commandList.Get(), texStone->filename.c_str(), texStone->resource, texStone->uploadHeap))
 
 	auto texBrick = std::make_unique<Texture>();
 	texBrick->name = "brick";
-	texBrick->filename = L"../Texture/bricks.dds";
+	texBrick->filename = L"../Resources/Textures/bricks.dds";
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(d3dDevice.Get(), commandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap))
 
 	textures[texStone->name] = std::move(texStone);
@@ -458,11 +458,11 @@ void MyApp::BuildMeshGeometry()
 }
 void MyApp::BuildImportedGeometry()
 {
-	std::ifstream fin("../Models/skull.txt");
+	std::ifstream fin("../Resources/Models/skull.txt");
 
 	if (!fin)
 	{
-		MessageBox(nullptr, L"Models/skull.txt not found.", nullptr, 0);
+		MessageBox(nullptr, L"../Resources/Models/skull.txt not found.", nullptr, 0);
 		return;
 	}
 
