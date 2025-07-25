@@ -157,7 +157,7 @@
     <ResourceCompile Include="DX12StudyProject.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\ico\Cat_Rana.ico" />
+    <Image Include="..\Resources\Ico\Render.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,7 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ 生成的包含文件。
 // 供 DX12StudyProject.rc 使用
-#define CAT_RANA                        101
+#define RENDER                        101
 
 // Next default values for new objects
 // 

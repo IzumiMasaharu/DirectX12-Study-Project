@@ -81,7 +81,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\ico\Cat_Rana.ico">
+    <Image Include="..\Resources\Ico\Render.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
