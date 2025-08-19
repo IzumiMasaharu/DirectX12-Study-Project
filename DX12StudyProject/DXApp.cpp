@@ -133,7 +133,7 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR p
     AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
     // 创建窗口
     Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
-        Wnd.windowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
+        Wnd.windowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME,
         Wnd.windowX, Wnd.windowY, Wnd.windowWidth, Wnd.windowHeight,nullptr, nullptr, WC.GetInstance(), nullptr);
 
     if (!Wnd.wndHwnd)
@@ -518,7 +518,7 @@ DXApp::WindowClass::~WindowClass()
     UnregisterClass(windowClassName, GetInstance());
 }
 // 设置窗口类名称
-const wchar_t* DXApp::WindowClass::SetWCName(LPCTSTR WCName)
+const wchar_t* DXApp::WindowClass::SetWCName(LPCWSTR WCName)
 {
     windowClassName = WCName;
     return windowClassName;
@@ -541,7 +541,7 @@ DXApp::Window::~Window()
         DestroyWindow(wndHwnd);
 }
 // 设置窗口名称
-const wchar_t* DXApp::Window::SetWndName(LPCTSTR WndName)
+const wchar_t* DXApp::Window::SetWndName(LPCWSTR WndName)
 {
     windowName = WndName;
     return windowName;

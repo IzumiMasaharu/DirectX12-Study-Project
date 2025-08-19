@@ -14,7 +14,7 @@ float CircleRun(float x, float c)
 
 MyApp::MyApp(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
 {
-	mainWndTitle = L"Rikki-Rana-Render";
+	mainWndTitle = L"Mayohoshi Render";
 	d3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 	backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -138,7 +138,7 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 // 应用程序初始化
 bool MyApp::Init()
 {
-	if(!DXApp::InitWindowClass(windowClass,L"JustTest"))
+	if(!DXApp::InitWindowClass(windowClass,L"Render Main Window Class"))
 		return false;
 	if (!DXApp::InitWindow(appMainWnd, windowClass, mainWndTitle,100,100,800,600))
 		return false;
@@ -182,7 +182,7 @@ void MyApp::Resize()
 	screenViewport.MinDepth = 0.0f;
 	scissorRect = { 0,0,clientWidth,clientHeight };
 
-	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, W_H_Ratio(), 1.0f, 1000.0f);
+	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, W_H_Ratio(), 1.0f, 100.0f);
 	XMStoreFloat4x4(&projectionTransform, P);
 }
 
@@ -211,9 +211,9 @@ void MyApp::Update(const GameTimer& GTimer)
 	UpdatePassConstBuffers();
 
 	std::ostringstream os;
-	os << "Rikki-Rana-Render " << "FPS:" << fps;
+	os << WstringToAnsi(mainWndTitle) << " FPS:" << fps;
 
-	SetWindowText(mainWndHwnd, AnsiToWstring(os.str().c_str()).c_str());
+	SetWindowText(mainWndHwnd, AnsiToWstring(os.str()).c_str());
 }
 
 // 绘制帧画面
@@ -632,6 +632,10 @@ void MyApp::BuildFrameResources()
 // 创建渲染管线状态对象
 void MyApp::BuildPSOs()
 {
+	CD3DX12_RASTERIZER_DESC drd(D3D12_DEFAULT);
+	drd.FillMode = D3D12_FILL_MODE_SOLID;
+	drd.CullMode = D3D12_CULL_MODE_BACK;
+
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC OpaquePSODesc;
 	ZeroMemory(&OpaquePSODesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	OpaquePSODesc.pRootSignature = rootSignature.Get();
@@ -647,9 +651,6 @@ void MyApp::BuildPSOs()
 	};
 	OpaquePSODesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	OpaquePSODesc.SampleMask = UINT_MAX;
-	CD3DX12_RASTERIZER_DESC drd(D3D12_DEFAULT);
-	drd.FillMode = D3D12_FILL_MODE_SOLID;
-	drd.CullMode = D3D12_CULL_MODE_BACK;
 	OpaquePSODesc.RasterizerState = drd;
 	OpaquePSODesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	OpaquePSODesc.InputLayout = { inputLayout.data(),(UINT)inputLayout.size() };
@@ -662,6 +663,21 @@ void MyApp::BuildPSOs()
 	OpaquePSODesc.NodeMask = 0;
 	OpaquePSODesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&OpaquePSODesc, IID_PPV_ARGS(&PSOs["Solid"])))
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = OpaquePSODesc;
+	D3D12_RENDER_TARGET_BLEND_DESC transparentBlendDesc;
+	transparentBlendDesc.BlendEnable = true;
+	transparentBlendDesc.LogicOpEnable = false;
+	transparentBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	transparentBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	transparentBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	transparentBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	transparentBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	transparentBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	transparentBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	transparentBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	transparentPSODesc.BlendState.RenderTarget[0] = transparentBlendDesc;
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&transparentPSODesc, IID_PPV_ARGS(&PSOs["Transparent"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC WireframePSODesc = OpaquePSODesc;
 	drd.FillMode = D3D12_FILL_MODE_WIREFRAME;
@@ -746,7 +762,7 @@ void MyApp::UpdatePassConstBuffers()const
 	mRenderingPassConstantsBuffer.renderTargetSize = XMFLOAT2((float)clientWidth, (float)clientHeight);
 	mRenderingPassConstantsBuffer.invRenderTargetSize = XMFLOAT2(1.0f / clientWidth, 1.0f / clientHeight);
 	mRenderingPassConstantsBuffer.nearZ = 1.0f;
-	mRenderingPassConstantsBuffer.farZ = 1000.0f;
+	mRenderingPassConstantsBuffer.farZ = 100.0f;
 	mRenderingPassConstantsBuffer.totalTime = gameTimer.TotalTime();
 	mRenderingPassConstantsBuffer.deltaTime = gameTimer.DeltaTime();
 	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };

@@ -50,17 +50,47 @@ inline void d3dSetDebugName(ID3D12DeviceChild* obj, const char* name)
 // 将string转为wstring
 inline std::wstring AnsiToWstring(const std::string& str)
 {
-    WCHAR buffer[512];
-    MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, buffer, 512);
-    return std::wstring(buffer);
+    if (str.empty())
+        return {};
+
+    // 第一次调用，获取需要的 wchar_t 数量（包括终止符）
+    int sizeNeeded = MultiByteToWideChar(CP_ACP, 0, str.c_str(), (int)str.size(),
+        nullptr, 0);
+
+    std::wstring result(sizeNeeded, L'\0');
+
+    // 第二次调用，真正转换
+    MultiByteToWideChar(CP_ACP, 0, str.c_str(), (int)str.size(),
+        &result[0], sizeNeeded);
+
+    return result;
 }
+// 将wstring转为string
+inline std::string WstringToAnsi(const std::wstring& str)
+{
+    if (str.empty())
+        return {};
+
+    int sizeNeeded = WideCharToMultiByte(CP_ACP, 0, str.c_str(),
+        (int)str.size(),
+        nullptr, 0, nullptr, nullptr);
+
+    std::string result(sizeNeeded, '\0');
+
+    WideCharToMultiByte(CP_ACP, 0, str.c_str(),
+        (int)str.size(),
+        &result[0], sizeNeeded, nullptr, nullptr);
+
+    return result;
+}
+
 
 class DxException
 {
 public:
     DxException() = default;
     DxException(HRESULT hr, const std::wstring& function_name, const std::wstring& file_name, UINT line_num);
-public:
+
     std::wstring ErrorMessageString()const; // 读取错误信息，并将错误信息转化为可输出的字符串
 public:
     HRESULT errorCode = S_OK;

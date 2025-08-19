@@ -95,7 +95,7 @@ protected:
 	D3D12_RECT scissorRect = {};//裁剪矩形
 
 	// 以下变量可在派生类中自行定义
-	LPCTSTR mainWndTitle=L"DefaultTitle";
+	LPCWSTR mainWndTitle=L"DefaultTitle";
 	D3D_DRIVER_TYPE d3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
 	DXGI_FORMAT backBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -110,7 +110,7 @@ public:
 	explicit WindowClass(HINSTANCE hInstance);
 	~WindowClass();
 public:
-	const wchar_t* SetWCName(LPCTSTR WCName);//设置窗口类名称
+	const wchar_t* SetWCName(LPCWSTR WCName);//设置窗口类名称
 	const wchar_t* GetWCName()const;//返回窗口类名称
 	HINSTANCE GetInstance()const;//返回窗口类实例句柄
 private:
@@ -128,12 +128,12 @@ public:
 	Window() = default;
 	~Window();
 public:
-	const wchar_t* SetWndName(LPCTSTR WndName);// 设置窗口名称
+	const wchar_t* SetWndName(LPCWSTR WndName);// 设置窗口名称
 	void SetWndPos(int x, int y, int wx, int wy);// 设置窗口坐标数据
 	HWND GetWndHwnd() const;// 获取窗口句柄
 private:
 	HWND wndHwnd = nullptr;
-	LPCTSTR windowName = nullptr;
+	LPCWSTR windowName = nullptr;
 	int32_t windowX = 0;
 	int32_t windowY = 0;
 	int32_t windowWidth = 0;
