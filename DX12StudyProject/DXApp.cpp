@@ -10,7 +10,7 @@ LRESULT CALLBACK DXAppWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return DXApp::GetApp()->MessageProc(hwnd, msg, wParam, lParam);
 }
 
-DXApp::DXApp(HINSTANCE hInstance):appInstance(hInstance)
+DXApp::DXApp(HINSTANCE hInstance) :appInstance(hInstance)
 {
     assert(mApp == nullptr);
     mApp = this;
@@ -94,7 +94,7 @@ bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR windowclassName)
 
 // 初始化窗口（两种重载形式）
 // 无指定大小的窗口
-bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pWndName)
+bool DXApp::InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName)
 {
     Wnd.SetWndName(pWndName);
 
@@ -103,15 +103,19 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pW
     int width = R.right - R.left;
     int height = R.bottom - R.top;
     // 创建窗口
-    Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
+    Wnd.wndHwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TRANSPARENT, WC.GetWCName(),
         Wnd.windowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
         CW_USEDEFAULT, CW_USEDEFAULT, width, height,
-        nullptr , nullptr, WC.GetInstance(),nullptr);
+        nullptr, nullptr, WC.GetInstance(), nullptr);
 
     if (!Wnd.wndHwnd)
     {
         MessageBox(nullptr, L"CreateWindow Failed.", nullptr, 0);
         return false;
+    }
+    else
+    {
+        SetLayeredWindowAttributes(Wnd.wndHwnd, RGB(0, 0, 0), 255, LWA_COLORKEY);
     }
     if (!mainWndHwnd)
         mainWndHwnd = Wnd.wndHwnd;
@@ -119,11 +123,11 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pW
     // 展示窗口
     ShowWindow(mainWndHwnd, SW_SHOW);
     UpdateWindow(mainWndHwnd);
-    
+
     return true;
 }
 // 指定大小的窗口
-bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR pWndName, int x, int y, int wx, int wy)
+bool DXApp::InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName, int x, int y, int wx, int wy)
 {
     // 设置窗口名称与位置
     Wnd.SetWndName(pWndName);
@@ -132,20 +136,44 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR p
     RECT R = { 0, 0, Wnd.windowWidth, Wnd.windowHeight };
     AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
     // 创建窗口
-    Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
-        Wnd.windowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
-        Wnd.windowX, Wnd.windowY, Wnd.windowWidth, Wnd.windowHeight,nullptr, nullptr, WC.GetInstance(), nullptr);
+    Wnd.wndHwnd = CreateWindowEx(WS_EX_NOREDIRECTIONBITMAP | WS_EX_TOPMOST, WC.GetWCName(),
+        Wnd.windowName, WS_OVERLAPPEDWINDOW,
+        Wnd.windowX, Wnd.windowY, Wnd.windowWidth, Wnd.windowHeight, nullptr, nullptr, WC.GetInstance(), nullptr);
 
     if (!Wnd.wndHwnd)
     {
         MessageBox(nullptr, L"CreateWindow Failed.", nullptr, 0);
         return false;
     }
-    if (!mainWndHwnd) 
+
+    if (!mainWndHwnd)
         mainWndHwnd = Wnd.wndHwnd;
+
+    /*DWM_BLURBEHIND db{};
+    db.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
+    db.hRgnBlur = CreateRectRgn(0, 0, -1, -1);
+    db.fEnable = true;
+    DwmEnableBlurBehindWindow(mainWndHwnd, &db);
+
+    SetWindowLong(mainWndHwnd, GWL_EXSTYLE, GetWindowLong(mainWndHwnd,GWL_EXSTYLE));*/
+
     // 展示窗口
     ShowWindow(mainWndHwnd, SW_SHOW);
     UpdateWindow(mainWndHwnd);
+
+    return true;
+}
+
+bool DXApp::SetTrans()
+{
+    /*BOOL dwmEnabled = false;
+    DwmIsCompositionEnabled(&dwmEnabled);
+
+    MARGINS margins = { -1 };
+    DwmExtendFrameIntoClientArea(mainWndHwnd, &margins);
+
+    DWMNCRENDERINGPOLICY policy = DWMNCRP_ENABLED;
+    DwmSetWindowAttribute(mainWndHwnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof(policy));*/
 
     return true;
 }
@@ -154,51 +182,50 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR p
 bool DXApp::InitDirectX3D()
 {
     // 启动D3D调试层
-    #if defined(DEBUG)||defined(_DEBUG)
+#if defined(DEBUG)||defined(_DEBUG)
     {
         ComPtr<ID3D12Debug> debugCotroller;
         ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugCotroller)));
         debugCotroller->EnableDebugLayer();
     }
-    #endif
-    // 创建DXGI Factory
-    ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)))
-    // 创建硬件D3D设备
-    HRESULT hardwareResulte = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice));
-    // 若创建失败，回退至WARP设备
-    if (FAILED(hardwareResulte))
-    {
-        ComPtr<IDXGIAdapter> pWARPAdapter;
-        ThrowIfFailed(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWARPAdapter)))
+#endif
+// 创建DXGI Factory
+ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)))
+// 创建硬件D3D设备
+HRESULT hardwareResulte = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice));
+// 若创建失败，回退至WARP设备
+if (FAILED(hardwareResulte))
+{
+    ComPtr<IDXGIAdapter> pWARPAdapter;
+    ThrowIfFailed(dxgiFactory->EnumAdapters(0, &pWARPAdapter))
         ThrowIfFailed(D3D12CreateDevice(pWARPAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice)))
-    }
-    // 创建围栏
-    ThrowIfFailed(d3dDevice->CreateFence(currentFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)))
-    
-    // 检测MSAA级别支持
-    D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS mQualityLevel;
-    mQualityLevel.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
-    mQualityLevel.Format = backBufferFormat;
-    mQualityLevel.NumQualityLevels = 0;
-    mQualityLevel.SampleCount = 4;
-    ThrowIfFailed(d3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &mQualityLevel, sizeof(mQualityLevel)))
-    MSAA4xQualityLevel = mQualityLevel.NumQualityLevels;
-    assert(MSAA4xQualityLevel > 0 && "当前MSAA级别不可用");
+}
+// 创建围栏
+ThrowIfFailed(d3dDevice->CreateFence(currentFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)))
 
-    // 获取描述符大小
-    rtvDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-    dsvDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-    cbs_srv_uavDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+// 检测MSAA级别支持
+D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS mQualityLevel;
+mQualityLevel.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
+mQualityLevel.Format = backBufferFormat;
+mQualityLevel.NumQualityLevels = 0;
+mQualityLevel.SampleCount = 4;
+ThrowIfFailed(d3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &mQualityLevel, sizeof(mQualityLevel)))
+MSAA4xQualityLevel = mQualityLevel.NumQualityLevels;
+assert(MSAA4xQualityLevel > 0 && "当前MSAA级别不可用");
+
+// 获取描述符大小
+rtvDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+dsvDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+cbs_srv_uavDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 #ifdef _DEBUG
-    //LogAdapters();
+//LogAdapters();
 #endif
+CreateCmdObjects();
+CreateSwapChain();
+Create_DSV_RTV_DescriptorHeaps();
 
-    CreateCmdObjects();
-    CreateSwapChain();
-    Create_DSV_RTV_DescriptorHeaps();
-
-    return true;
+return true;
 }
 
 // 创建命令队列、命令分配器、命令列表
@@ -211,50 +238,52 @@ void DXApp::CreateCmdObjects()
 
     // 创建
     ThrowIfFailed(d3dDevice->CreateCommandQueue(&qd, IID_PPV_ARGS(&commandQueue)))
-    ThrowIfFailed(d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS( commandAllocator.GetAddressOf())))
-    ThrowIfFailed(d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(commandList.GetAddressOf())))
+        ThrowIfFailed(d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(commandAllocator.GetAddressOf())))
+        ThrowIfFailed(d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(commandList.GetAddressOf())))
 
-    commandList->Close();
+        commandList->Close();
+
+    ThrowIfFailed(DCompositionCreateDevice(nullptr, __uuidof(IDCompositionDevice), (void**)&dcompDevice));
+    ThrowIfFailed(dcompDevice->CreateTargetForHwnd(mainWndHwnd, TRUE, &dcompTarget));
+    ThrowIfFailed(dcompDevice->CreateVisual(&dcompVisual));
 }
 
 // 创建交换链
 void DXApp::CreateSwapChain()
 {
-    // 释放之前所创建的的交换链，重新创建
     swapChain.Reset();
-    // 填写描述所创建交换链的结构体
-    DXGI_SWAP_CHAIN_DESC scd;
-    scd.BufferDesc.Width = clientWidth;
-    scd.BufferDesc.Height = clientHeight;
-    scd.BufferDesc.Format = backBufferFormat; // 显示格式
-    scd.BufferDesc.RefreshRate.Numerator = 120; // 最高刷新率
-    scd.BufferDesc.RefreshRate.Denominator = 1; // 最低刷新率
-    scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED; // 是否缩放
-    scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; // 逐行扫描还是隔行扫描
-    scd.SampleDesc.Count = isMSAA4xOn ? 4 : 1; // 多重采样采样数量
-    scd.SampleDesc.Quality = isMSAA4xOn ? (MSAA4xQualityLevel - 1) : 0; // 多重采样质量级别
+    // 描述结构体
+    DXGI_SWAP_CHAIN_DESC1 scd = {};
+    scd.Width = clientWidth;
+    scd.Height = clientHeight;
+    scd.Format = backBufferFormat;
+    scd.Scaling = DXGI_SCALING_STRETCH;
+    scd.SampleDesc.Count = 1;
+    scd.SampleDesc.Quality = 0;
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     scd.BufferCount = SwapChainBufferCount;
-    scd.Windowed = true; // 窗口显示还是全屏显示
-    scd.OutputWindow = mainWndHwnd; // 图像输出窗口句柄
-    scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+    scd.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
 
-    ThrowIfFailed(dxgiFactory->CreateSwapChain(commandQueue.Get(), &scd, swapChain.GetAddressOf()))
+    // 创建交换链
+    ThrowIfFailed(dxgiFactory->CreateSwapChainForComposition(commandQueue.Get(), &scd, nullptr, swapChain.GetAddressOf()));
+
+    ThrowIfFailed(dcompVisual->SetContent(swapChain.Get()));
+    ThrowIfFailed(dcompTarget->SetRoot(dcompVisual.Get()));
 }
 
 // 创建描述符堆(RTV和DSV)
 void DXApp::Create_DSV_RTV_DescriptorHeaps()
 {
     // 创建RTV描述符堆
-    D3D12_DESCRIPTOR_HEAP_DESC RTVHeapDesc ;
+    D3D12_DESCRIPTOR_HEAP_DESC RTVHeapDesc;
     RTVHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     RTVHeapDesc.NodeMask = 0;
     RTVHeapDesc.NumDescriptors = SwapChainBufferCount;
     RTVHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&RTVHeapDesc, IID_PPV_ARGS(rtvHeap.GetAddressOf())))
-    // 创建DSV描述符堆
-    D3D12_DESCRIPTOR_HEAP_DESC DSVHeapDesc ;
+        // 创建DSV描述符堆
+        D3D12_DESCRIPTOR_HEAP_DESC DSVHeapDesc;
     DSVHeapDesc.NumDescriptors = 1;
     DSVHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
     DSVHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
@@ -342,18 +371,18 @@ void DXApp::FlushCommandQueue()
     // 围栏法
     currentFenceValue++;
     ThrowIfFailed(commandQueue->Signal(fence.Get(), currentFenceValue))
-    if (fence->GetCompletedValue() < currentFenceValue)
-    {
-        HANDLE EventHandle = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
-
-        ThrowIfFailed(fence->SetEventOnCompletion(currentFenceValue, EventHandle))
-
-        if (EventHandle)
+        if (fence->GetCompletedValue() < currentFenceValue)
         {
-            WaitForSingleObject(EventHandle, INFINITE);
-            CloseHandle(EventHandle);
+            HANDLE EventHandle = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
+
+            ThrowIfFailed(fence->SetEventOnCompletion(currentFenceValue, EventHandle))
+
+                if (EventHandle)
+                {
+                    WaitForSingleObject(EventHandle, INFINITE);
+                    CloseHandle(EventHandle);
+                }
         }
-    }
 }
 
 // 获取指向当前缓冲区的指针
@@ -425,30 +454,30 @@ void DXApp::Resize()
     OptiClear.Format = depthStencilFormat;
     OptiClear.DepthStencil.Depth = 1.0f;
     OptiClear.DepthStencil.Stencil = 0;
-    
+
     ThrowIfFailed(d3dDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
         &DSD, D3D12_RESOURCE_STATE_COMMON,
         &OptiClear, IID_PPV_ARGS(depthStencilBuffer.GetAddressOf())))
 
-    d3dDevice->CreateDepthStencilView(depthStencilBuffer.Get(),
-                                        nullptr, 
-                                        DepthStencilBufferView());
+        d3dDevice->CreateDepthStencilView(depthStencilBuffer.Get(),
+            nullptr,
+            DepthStencilBufferView());
 
-    commandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(depthStencilBuffer.Get(),
-                                    D3D12_RESOURCE_STATE_COMMON,
-                                    D3D12_RESOURCE_STATE_DEPTH_WRITE));
+    commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(depthStencilBuffer.Get(),
+        D3D12_RESOURCE_STATE_COMMON,
+        D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
     ThrowIfFailed(commandList->Close())
-    ID3D12CommandList* CmdList[] = { commandList.Get() };
-    commandQueue->ExecuteCommandLists(_countof(CmdList),CmdList);
+        ID3D12CommandList* CmdList[] = { commandList.Get() };
+    commandQueue->ExecuteCommandLists(_countof(CmdList), CmdList);
     FlushCommandQueue();
 }
 
 // 处理鼠标信息（可被派生类覆写）
-void DXApp::MouseDown(WPARAM ButtonState, int x, int y){ return; }
-void DXApp::MouseUp(WPARAM ButtonState, int x, int y){ return; }
-void DXApp::MouseMove(WPARAM ButtonState, int x, int y){ return; }
+void DXApp::MouseDown(WPARAM ButtonState, int x, int y) { return; }
+void DXApp::MouseUp(WPARAM ButtonState, int x, int y) { return; }
+void DXApp::MouseMove(WPARAM ButtonState, int x, int y) { return; }
 void DXApp::MouseWheel(short zDelta) { return; }
 
 // 获取DXApp类实例的句柄
@@ -511,7 +540,8 @@ void DXApp::CalculateFPS_MSPF()
 
 // 构造窗口类
 DXApp::WindowClass::WindowClass(HINSTANCE hInstance) :wndClassInstance(hInstance)
-{}
+{
+}
 // 注销窗口类
 DXApp::WindowClass::~WindowClass()
 {

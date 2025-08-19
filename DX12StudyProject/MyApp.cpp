@@ -5,7 +5,7 @@ using namespace Microsoft::WRL;
 
 float CircleRun(float x, float c)
 {
-	float res = abs(fmod(x, 2*c));
+	float res = abs(fmod(x, 2 * c));
 	if (res < c)
 		return res;
 	else
@@ -138,30 +138,32 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 // 应用程序初始化
 bool MyApp::Init()
 {
-	if(!DXApp::InitWindowClass(windowClass,L"JustTest"))
+	if (!DXApp::InitWindowClass(windowClass, L"JustTest"))
 		return false;
-	if (!DXApp::InitWindow(appMainWnd, windowClass, mainWndTitle,100,100,800,600))
+	if (!DXApp::InitWindow(appMainWnd, windowClass, mainWndTitle, 100, 100, 800, 600))
 		return false;
-    if(!DXApp::InitDirectX3D())
+	if (!DXApp::InitDirectX3D())
 		return false;
 	Resize();
+	if (!DXApp::SetTrans())
+		return false;
 
 	ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr))
 
-	LoadTexture(); 
-	BuildRootSignature(); 
-	BuildDescriptorHeaps(); 
-	BuildShaders(); 
-	BuildInputLayout(); 
-	BuildMeshGeometry(); 
-	BuildImportedGeometry(); 
-	BuildMaterials(); 
-	BuildRenderItems(); 
-	BuildFrameResources(); 
-	BuildPSOs(); 
+		LoadTexture();
+	BuildRootSignature();
+	BuildDescriptorHeaps();
+	BuildShaders();
+	BuildInputLayout();
+	BuildMeshGeometry();
+	BuildImportedGeometry();
+	BuildMaterials();
+	BuildRenderItems();
+	BuildFrameResources();
+	BuildPSOs();
 
 	ThrowIfFailed(commandList->Close())
-	ID3D12CommandList* cmdsLists[] = { commandList.Get() };
+		ID3D12CommandList* cmdsLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
 
@@ -182,7 +184,7 @@ void MyApp::Resize()
 	screenViewport.MinDepth = 0.0f;
 	scissorRect = { 0,0,clientWidth,clientHeight };
 
-	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, W_H_Ratio(), 1.0f, 1000.0f);
+	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, W_H_Ratio(), 0.1f, 100.0f);
 	XMStoreFloat4x4(&projectionTransform, P);
 }
 
@@ -199,11 +201,11 @@ void MyApp::Update(const GameTimer& GTimer)
 	{
 		HANDLE event = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
 		ThrowIfFailed(fence->SetEventOnCompletion(currentFrameResource->fence, event))
-		if (event)
-		{
-			WaitForSingleObject(event, INFINITE);
-			CloseHandle(event);
-		}
+			if (event)
+			{
+				WaitForSingleObject(event, INFINITE);
+				CloseHandle(event);
+			}
 	}
 
 	UpdateMaterialConstBuffers();
@@ -222,10 +224,11 @@ void MyApp::Draw(const GameTimer& GTimer)
 	auto cmdListAllocator = currentFrameResource->commandAllocator;
 
 	ThrowIfFailed(cmdListAllocator->Reset())
-	if (isWireframeEnabled)
-		commandList->Reset(cmdListAllocator.Get(), PSOs["Wireframe"].Get());
-	else
-		commandList->Reset(cmdListAllocator.Get(), PSOs["Solid"].Get());
+		/*if (isWireframeEnabled)
+			commandList->Reset(cmdListAllocator.Get(), PSOs["Wireframe"].Get());
+		else
+			commandList->Reset(cmdListAllocator.Get(), PSOs["Solid"].Get());*/
+		commandList->Reset(cmdListAllocator.Get(), PSOs["Transparent"].Get());
 
 	commandList->RSSetViewports(1, &screenViewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
@@ -233,10 +236,11 @@ void MyApp::Draw(const GameTimer& GTimer)
 	commandList->ResourceBarrier(1,
 		&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	commandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0, nullptr);
-	commandList->ClearDepthStencilView(DepthStencilBufferView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-
 	commandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilBufferView());
+
+	const float color[] = { 0.0f,0.5f,0.0f,0.5f };
+	commandList->ClearRenderTargetView(CurrentBackBufferView(), color, 0, nullptr);
+	commandList->ClearDepthStencilView(DepthStencilBufferView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap.Get() };
 	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
@@ -253,10 +257,11 @@ void MyApp::Draw(const GameTimer& GTimer)
 
 	ThrowIfFailed(commandList->Close())
 
-	ID3D12CommandList* CommandList[] = { commandList.Get() };
-	commandQueue->ExecuteCommandLists(_countof(CommandList), CommandList); 
+		ID3D12CommandList* CommandList[] = { commandList.Get() };
+	commandQueue->ExecuteCommandLists(_countof(CommandList), CommandList);
 
-	ThrowIfFailed(swapChain->Present(0, 0))
+	ThrowIfFailed(swapChain->Present(1, 0));
+	ThrowIfFailed(dcompDevice->Commit());
 
 	currentBackBuffer = (currentBackBuffer + 1) % SwapChainBufferCount;
 	currentFrameResource->fence = ++currentFenceValue;
@@ -307,12 +312,12 @@ void MyApp::LoadTexture()
 	texStone->filename = L"../Resources/Textures/stone.dds";
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(d3dDevice.Get(), commandList.Get(), texStone->filename.c_str(), texStone->resource, texStone->uploadHeap))
 
-	auto texBrick = std::make_unique<Texture>();
+		auto texBrick = std::make_unique<Texture>();
 	texBrick->name = "brick";
 	texBrick->filename = L"../Resources/Textures/bricks.dds";
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(d3dDevice.Get(), commandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap))
 
-	textures[texStone->name] = std::move(texStone);
+		textures[texStone->name] = std::move(texStone);
 	textures[texBrick->name] = std::move(texBrick);
 }
 // 创建根签名
@@ -354,7 +359,7 @@ void MyApp::BuildDescriptorHeaps()
 	SRV_HEAP_DESC.NodeMask = 0;
 	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC, IID_PPV_ARGS(&srvDescriptorHeap)))
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 	auto stoneTex = textures["stone"]->resource;
 	auto brickTex = textures["brick"]->resource;
@@ -394,7 +399,7 @@ void MyApp::BuildMeshGeometry()
 	GeometryGenerator GeoGenerator;
 	GeometryGenerator::MeshData cylinder = GeoGenerator.CreateCylinder(1.0f, 0.56f, 4.0f, 100, 20);
 	GeometryGenerator::MeshData ball = GeoGenerator.CreateBall(1.0f, 50, 50);
-	
+
 	UINT CylinderVertexOffset = 0;
 	auto BallVertexOffset = (UINT)cylinder.Vertices.size();
 	UINT CylinderIndexOffset = 0;
@@ -416,13 +421,13 @@ void MyApp::BuildMeshGeometry()
 	std::vector<VertexConstants> vertices(totalVertexCount);
 	std::vector<std::uint16_t> indices;
 	UINT k = 0;
-	for (size_t i = 0; i < cylinder.Vertices.size(); ++i,++k)
+	for (size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].pos = cylinder.Vertices[i].position;
 		vertices[k].normal = cylinder.Vertices[i].Normal;
 		vertices[k].texture = cylinder.Vertices[i].Texture;
 	}
-	for (size_t i = 0; i < ball.Vertices.size(); ++i,++k)
+	for (size_t i = 0; i < ball.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].pos = ball.Vertices[i].position;
 		vertices[k].normal = ball.Vertices[i].Normal;
@@ -439,9 +444,9 @@ void MyApp::BuildMeshGeometry()
 	Geo->name = "Geo";
 
 	ThrowIfFailed(D3DCreateBlob(vertexBufferByteSize, &Geo->vertexBufferCPU))
-	CopyMemory(Geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vertexBufferByteSize);
+		CopyMemory(Geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vertexBufferByteSize);
 	ThrowIfFailed(D3DCreateBlob(indexBufferByteSize, &Geo->indexBufferCPU))
-	CopyMemory(Geo->indexBufferCPU->GetBufferPointer(),indices.data(), indexBufferByteSize);
+		CopyMemory(Geo->indexBufferCPU->GetBufferPointer(), indices.data(), indexBufferByteSize);
 
 	Geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), vertices.data(), vertexBufferByteSize, Geo->vertexBufferUploader);
 	Geo->indexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), indices.data(), indexBufferByteSize, Geo->indexBufferUploader);
@@ -563,7 +568,7 @@ void MyApp::BuildRenderItems()
 
 	XMMATRIX leftCylinderWorld = XMMatrixTranslation(0.0f, +0.0f, -2.0f);
 	XMMATRIX leftBallWorld = XMMatrixTranslation(0.0f, +2.96f, -2.0f);
-	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f ,+2.0f );
+	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f, +2.0f);
 	XMMATRIX rightBallWorld = XMMatrixTranslation(0.0f, +2.96f, +2.0f);
 
 	XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
@@ -603,7 +608,7 @@ void MyApp::BuildRenderItems()
 	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
 	auto skullRenderItem = std::make_unique<RenderItem>();
-	XMMATRIX skullWorld = XMMatrixScaling(0.25f, 0.25f, 0.25f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, 3*MathHelper::Pi / 2);
+	XMMATRIX skullWorld = XMMatrixScaling(0.25f, 0.25f, 0.25f) * XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, 3 * MathHelper::Pi / 2);
 
 	XMStoreFloat4x4(&skullRenderItem->worldTransform, skullWorld);
 	skullRenderItem->objectConstBufferIndex = GeoObjectIndex++;
@@ -620,7 +625,7 @@ void MyApp::BuildRenderItems()
 	allRenderItems.push_back(std::move(rightBallRenderItem));
 	allRenderItems.push_back(std::move(skullRenderItem));
 
-	for (auto& i: allRenderItems)
+	for (auto& i : allRenderItems)
 		opaqueRenderItems.push_back(i.get());
 }
 // 创建帧资源
@@ -661,12 +666,27 @@ void MyApp::BuildPSOs()
 	OpaquePSODesc.SampleDesc.Quality = isMSAA4xOn ? (MSAA4xQualityLevel - 1) : 0;
 	OpaquePSODesc.NodeMask = 0;
 	OpaquePSODesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&OpaquePSODesc, IID_PPV_ARGS(&PSOs["Solid"])))
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&OpaquePSODesc, IID_PPV_ARGS(&PSOs["Solid"])));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = OpaquePSODesc;
+	D3D12_RENDER_TARGET_BLEND_DESC transparentBlendDesc;
+	transparentBlendDesc.BlendEnable = true;
+	transparentBlendDesc.LogicOpEnable = false;
+	transparentBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	transparentBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	transparentBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	transparentBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	transparentBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	transparentBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	transparentBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	transparentBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	transparentPSODesc.BlendState.RenderTarget[0] = transparentBlendDesc;
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&transparentPSODesc, IID_PPV_ARGS(&PSOs["Transparent"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC WireframePSODesc = OpaquePSODesc;
 	drd.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	WireframePSODesc.RasterizerState = drd;
-	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&PSOs["Wireframe"])))
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&PSOs["Wireframe"])));
 }
 
 // 改变窗口的高度和宽度
@@ -714,7 +734,7 @@ void MyApp::UpdateObjectsConstBuffers()const
 			XMMATRIX textureTransform = XMLoadFloat4x4(&it->textureTransform);
 
 			ObjectConstants objectconstant;
-			XMStoreFloat4x4(&objectconstant.worldTransform,  XMMatrixTranspose(worldTransform));
+			XMStoreFloat4x4(&objectconstant.worldTransform, XMMatrixTranspose(worldTransform));
 			XMStoreFloat4x4(&objectconstant.textureTransform, XMMatrixTranspose(textureTransform));
 
 			currentObjectConstBuffer->CopyData(it->objectConstBufferIndex, objectconstant);
@@ -730,7 +750,7 @@ void MyApp::UpdatePassConstBuffers()const
 
 	XMMATRIX view = XMLoadFloat4x4(&viewTransform);
 	XMMATRIX proj = XMLoadFloat4x4(&projectionTransform);
-	XMMATRIX viewProj=XMMatrixMultiply(view,proj);
+	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
 	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
 	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
@@ -752,7 +772,7 @@ void MyApp::UpdatePassConstBuffers()const
 	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };
 
 	mRenderingPassConstantsBuffer.lights[0].rgbIntensity = { 1.0f,1.0f,1.0f };
-	mRenderingPassConstantsBuffer.lights[0].position = { 10.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi),0.0f,0.0f};
+	mRenderingPassConstantsBuffer.lights[0].position = { 10.0f * sinf(gameTimer.TotalTime() * MathHelper::Pi),0.0f,0.0f };
 	mRenderingPassConstantsBuffer.lights[0].direction = { 1.0f,0.0f,0.0f };
 
 	auto currentPassConstsBuffer = currentFrameResource->passConstBuffer.get();
@@ -766,7 +786,7 @@ void MyApp::UpdateMaterialConstBuffers()const
 	for (auto& it : materials)
 	{
 		Material* mat = it.second.get();
-		if(mat->numDirtyFrames > 0)
+		if (mat->numDirtyFrames > 0)
 		{
 			MaterialConstants materialConstant;
 			materialConstant.diffuseAlbedo = mat->diffuseAlbedo;

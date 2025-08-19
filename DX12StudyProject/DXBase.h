@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#pragma comment(lib,"dwmapi.lib")
+#pragma comment(lib,"dcomp.lib")
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"D3D12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -15,6 +17,8 @@
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <dxgi1_4.h>
+#include <dwmapi.h>
+#include <dcomp.h>
 #include <D3Dcompiler.h>
 #include <d3d12.h>
 #include <float.h>
@@ -82,7 +86,7 @@ public:
         Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
 
     // 将数据大小字节对齐为256b以适配常量缓冲区
-    static UINT ConstUploadBufferByteSize256Alignment(UINT ByteSize); 
+    static UINT ConstUploadBufferByteSize256Alignment(UINT ByteSize);
 
     // 在线编译着色器
     static Microsoft::WRL::ComPtr<ID3DBlob> CompileShaderOnline(
@@ -226,7 +230,7 @@ struct Material
 
     UINT materialConstBufferIndex = -1; // 该材质在常量缓冲区中的索引
     UINT diffuseSrvHeapIndex = -1; // 漫反射纹理在SRV堆中的索引
-	UINT normalSrvHeapIndex = -1; // 法线纹理在SRV堆中的索引
+    UINT normalSrvHeapIndex = -1; // 法线纹理在SRV堆中的索引
     UINT numDirtyFrames = -1; // 待更新的帧资源数量
 
     DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f }; // 漫反射反照率

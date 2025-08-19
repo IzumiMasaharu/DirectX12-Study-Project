@@ -12,16 +12,17 @@ protected:
 	DXApp(const DXApp& rhs) = delete;
 	virtual ~DXApp();
 protected:
-	DXApp operator=(const DXApp& rhs) = delete;
+	DXApp* operator=(const DXApp& rhs) = delete;
 public:
 	virtual LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);//消息过程处理函数（需通过派生类覆写）
 	virtual bool Init() = 0;
 	int Run();
 protected:
 	// 初始化实现
-	bool InitWindowClass(WindowClass& WC,LPCTSTR windowclassName);//窗口类初始化
+	bool InitWindowClass(WindowClass& WC, LPCTSTR windowclassName);//窗口类初始化
 	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);//窗口初始化重载1
 	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName, int x, int y, int wx, int wy);//窗口初始化重载2
+	bool SetTrans();
 	bool InitDirectX3D();//D3D初始化
 	void LogAdapters();//加载枚举所有显示适配器
 	void LogAdapterOutputs(IDXGIAdapter* adapter);//加载枚举所有显示输出
@@ -29,7 +30,7 @@ protected:
 	void CreateCmdObjects();//创建命令队列、命令分配器、命令列表
 	void CreateSwapChain();//创建交换链
 	void Create_DSV_RTV_DescriptorHeaps();//创建描述符堆(RTV和DSV)
-	
+
 	void FlushCommandQueue();//刷新命令队列
 	ID3D12Resource* CurrentBackBuffer()const;//获取指向当前缓冲区的指针
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView()const;//获取当前后台缓冲区的RTV
@@ -67,19 +68,23 @@ protected:
 	bool isWindowResized = false;//窗口是否改变大小
 	bool isWindowFullScreen = false;//是否全屏
 
-	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory;//Factory接口指针（Factory接口提供了一套创建DXGI的方法）
+	Microsoft::WRL::ComPtr<IDXGIFactory2> dxgiFactory;//Factory接口指针（Factory接口提供了一套创建DXGI的方法）
 	Microsoft::WRL::ComPtr<ID3D12Device> d3dDevice;//D3D设备指针
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;//围栏指针
 	UINT64 currentFenceValue = 0;//指示当前围栏值
 
 	bool isMSAA4xOn = false;//是否开启4xMSAA抗锯齿技术
 	UINT MSAA4xQualityLevel = 0;//4xMSAA抗锯齿质量级别
-    
+
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue;//命令队列指针
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;//命令分配器指针
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;//命令列表指针
 
-	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;//交换链指针
+	Microsoft::WRL::ComPtr<IDCompositionDevice> dcompDevice;
+	Microsoft::WRL::ComPtr<IDCompositionTarget> dcompTarget;
+	Microsoft::WRL::ComPtr<IDCompositionVisual> dcompVisual;
+
+	Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain;//交换链指针
 	static const int SwapChainBufferCount = 2;//交换链缓冲区数量
 	int currentBackBuffer = 0;//当前后台缓冲区编号
 	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainBuffer[SwapChainBufferCount];//交换链缓冲区指针
@@ -95,12 +100,12 @@ protected:
 	D3D12_RECT scissorRect = {};//裁剪矩形
 
 	// 以下变量可在派生类中自行定义
-	LPCTSTR mainWndTitle=L"DefaultTitle";
-	D3D_DRIVER_TYPE d3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
-	DXGI_FORMAT backBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
+	LPCTSTR mainWndTitle = L"DefaultTitle";
+	D3D_DRIVER_TYPE d3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
+	DXGI_FORMAT backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	int clientWidth=800;
-	int clientHeight=600;
+	int clientWidth = 800;
+	int clientHeight = 600;
 };
 // 类：窗口类的声明
 class DXApp::WindowClass
@@ -123,7 +128,8 @@ class DXApp::Window
 public:
 	friend bool DXApp::InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);
 	friend bool DXApp::InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName,
-							int x, int y, int wx, int wy);
+		int x, int y, int wx, int wy);
+	friend bool DXApp::SetTrans();
 public:
 	Window() = default;
 	~Window();
