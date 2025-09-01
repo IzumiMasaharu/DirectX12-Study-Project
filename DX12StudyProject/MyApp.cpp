@@ -21,6 +21,14 @@ MyApp::MyApp(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
 	clientWidth = 1000;
 	clientHeight = 600;
 }
+MyApp::~MyApp()
+{
+	isRenderThreadRunning = false;
+	if (renderThread.joinable())
+		renderThread.join();
+	if(d3dDevice!=nullptr)
+		FlushCommandQueue();
+}
 
 // 消息过程处理函数
 LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -28,79 +36,29 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_ACTIVATE:
-		if (LOWORD(wParam) == WA_INACTIVE)
+		if (HIWORD(wParam) == 0) // 激活渲染线程
+			isRenderPaused = false;
+		else
+			isRenderPaused = true;
+		return 0;
+	case WM_SIZE:
+	{
+		if (wParam == SIZE_MINIMIZED)
 		{
-			isAppPaused = true;
-			gameTimer.Stop();
+			isRenderPaused = true;
 		}
 		else
 		{
-			isAppPaused = false;
-			gameTimer.Start();
+			isRenderPaused = false;
+			resizeInfo.newWidth = LOWORD(lParam);
+			resizeInfo.newHeight = HIWORD(lParam);
+			resizeInfo.isResized = true;
 		}
 		return 0;
-	case WM_SIZE:
-		clientWidth = LOWORD(lParam);
-		clientHeight = HIWORD(lParam);
-		if (d3dDevice)
-		{
-			if (wParam == SIZE_MINIMIZED)
-			{
-				isAppPaused = true;
-				isWindowMinimized = true;
-				isWindowMaximized = false;
-			}
-			else if (wParam == SIZE_MAXIMIZED)
-			{
-				isAppPaused = false;
-				isWindowMinimized = false;
-				isWindowMaximized = true;
-				Resize();
-			}
-			else if (wParam == SIZE_RESTORED)
-			{
-				if (isWindowMinimized)
-				{
-					isAppPaused = false;
-					isWindowMinimized = false;
-					Resize();
-				}
-				else if (isWindowMaximized)
-				{
-					isAppPaused = false;
-					isWindowMaximized = false;
-					Resize();
-				}
-				else if (isWindowResized)
-				{
-					Resize();
-				}
-				else
-				{
-					Resize();
-				}
-			}
-		}
-		return 0;
-	case WM_ENTERSIZEMOVE:
-		isAppPaused = true;
-		isWindowResized = true;
-		gameTimer.Stop();
-		return 0;
-	case WM_EXITSIZEMOVE:
-		isAppPaused = false;
-		isWindowResized = false;
-		gameTimer.Start();
-		Resize();
-		return 0;
+	}
 	case WM_DESTROY:
+		isRenderThreadRunning = false;
 		PostQuitMessage(0);
-		return 0;
-	case WM_MENUCHAR:
-		return MAKELRESULT(0, MNC_CLOSE);
-	case WM_GETMINMAXINFO:
-		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
-		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
 		return 0;
 	case WM_LBUTTONDOWN:
 		MouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
@@ -125,11 +83,7 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			PostQuitMessage(0);
 		}
-		else if ((int)wParam == VK_F2)
-			Set4xMSAAState(!isMSAA4xOn);
 		return 0;
-	default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -144,10 +98,8 @@ bool MyApp::Init()
 		return false;
     if(!DXApp::InitDirectX3D())
 		return false;
-	Resize();
 
-	ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr))
-
+	ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
 	LoadTexture(); 
 	BuildRootSignature(); 
 	BuildDescriptorHeaps(); 
@@ -165,7 +117,38 @@ bool MyApp::Init()
 	commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
 
+	isRenderThreadRunning = true;
+	isRenderPaused = false;
+	renderThread = std::thread(&MyApp::RenderLoop, this);
+
 	return true;
+}
+
+// 渲染线程循环
+void MyApp::RenderLoop()
+{
+	while (isRenderThreadRunning)
+	{
+		if (resizeInfo.isResized.load(std::memory_order_relaxed))
+		{
+			clientWidth = resizeInfo.newWidth.load();
+			clientHeight = resizeInfo.newHeight.load();
+			// 防止 0 尺寸 避免除0问题
+			if (clientWidth > 0 && clientHeight > 0)
+				Resize();
+
+			resizeInfo.isResized = false;
+		}
+
+		gameTimer.Tick();
+
+		if (!isRenderPaused)
+		{
+			CalculateFPS_MSPF();
+			Update(gameTimer);
+			Draw(gameTimer);
+		}
+	}
 }
 
 // 窗口大小重新适配

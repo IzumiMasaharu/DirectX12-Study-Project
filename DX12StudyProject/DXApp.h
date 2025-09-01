@@ -64,7 +64,6 @@ protected:
 	bool isAppPaused = false;//应用程序是否暂停
 	bool isWindowMinimized = false;//是否最小化
 	bool isWindowMaximized = false;//是否最大化
-	bool isWindowResized = false;//窗口是否改变大小
 	bool isWindowFullScreen = false;//是否全屏
 
 	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory;//Factory接口指针（Factory接口提供了一套创建DXGI的方法）
@@ -99,8 +98,8 @@ protected:
 	D3D_DRIVER_TYPE d3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
 	DXGI_FORMAT backBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	int clientWidth=800;
-	int clientHeight=600;
+	int clientWidth=500;
+	int clientHeight=500;
 };
 // 类：窗口类的声明
 class DXApp::WindowClass

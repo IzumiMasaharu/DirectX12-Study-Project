@@ -1,4 +1,8 @@
-﻿#include "DXApp.h"
+﻿#include <thread>
+#include <atomic>
+#include <chrono>
+
+#include "DXApp.h"
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
 #include "GeometryGenerator.h"
@@ -9,10 +13,21 @@ class MyApp : public DXApp
 {
 public:
 	explicit MyApp(HINSTANCE hInstace);
-	~MyApp() = default;
+	~MyApp();
 public:
 	LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 	bool Init() override;
+private:
+	void RenderLoop();                 // 渲染线程主循环
+	std::thread renderThread;
+	std::atomic<bool> isRenderThreadRunning{ false };
+	std::atomic<bool> isRenderPaused{ false };
+
+	struct ResizeInfoForRenderThread {
+		std::atomic<bool> isResized{ false };
+		std::atomic<int>  newWidth{ 0 };
+		std::atomic<int>  newHeight{ 0 };
+	} resizeInfo;
 private:
 	void Resize() override;
 	void Update(const GameTimer& GTimer) override;

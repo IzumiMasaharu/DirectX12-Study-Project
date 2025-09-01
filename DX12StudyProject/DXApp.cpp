@@ -32,29 +32,12 @@ int DXApp::Run()
 {
     MSG msg = { nullptr };
 
-    gameTimer.Reset();
-
     while (msg.message != WM_QUIT)
     {
         if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }
-        else
-        {
-            gameTimer.Tick();
-
-            if (!isAppPaused)
-            {
-                CalculateFPS_MSPF();
-                Update(gameTimer);
-                Draw(gameTimer);
-            }
-            else
-            {
-                Sleep(100);
-            }
         }
     }
 
@@ -153,14 +136,14 @@ bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR p
 // 初始化DirectX 3D
 bool DXApp::InitDirectX3D()
 {
-    // 启动D3D调试层
-    #if defined(DEBUG)||defined(_DEBUG)
+// 启动D3D调试层
+#if defined(DEBUG)||defined(_DEBUG)
     {
         ComPtr<ID3D12Debug> debugCotroller;
         ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugCotroller)));
         debugCotroller->EnableDebugLayer();
     }
-    #endif
+#endif
     // 创建DXGI Factory
     ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)))
     // 创建硬件D3D设备
@@ -191,7 +174,7 @@ bool DXApp::InitDirectX3D()
     cbs_srv_uavDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 #ifdef _DEBUG
-    //LogAdapters();
+    LogAdapters();
 #endif
 
     CreateCmdObjects();
@@ -406,6 +389,7 @@ void DXApp::Resize()
         //将RTV描述符堆句柄向后偏移一位
         RTVHeapHandle.Offset(1, rtvDescriptorSize);
     }
+    
     // 为深度缓冲区创建DSV标识符
     D3D12_RESOURCE_DESC DSD;
     DSD.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
