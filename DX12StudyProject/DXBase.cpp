@@ -32,12 +32,12 @@ ComPtr<ID3D12Resource> DXBase::CreateDefaultBuffer(
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
         D3D12_RESOURCE_STATE_COMMON,
-        nullptr, IID_PPV_ARGS(defaultBuffer.GetAddressOf())))
+        nullptr, IID_PPV_ARGS(defaultBuffer.GetAddressOf())));
     ThrowIfFailed(device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
         D3D12_RESOURCE_STATE_COMMON,
-        nullptr,IID_PPV_ARGS(uploadBuffer.GetAddressOf())))
+        nullptr,IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
 
 	// 描述上传到DefaultBuffer的数据
     D3D12_SUBRESOURCE_DATA subResourceData = {};
@@ -86,7 +86,7 @@ ComPtr<ID3DBlob> DXBase::CompileShaderOnline(
 	if (errors != nullptr)
 		OutputDebugStringA((char*)errors->GetBufferPointer());
 
-	ThrowIfFailed(hr)
+	ThrowIfFailed(hr);
 
 	return byteCode;
 }
@@ -101,7 +101,7 @@ ComPtr<ID3DBlob> DXBase::LoadBinaryToBlob(const std::wstring& Binary_filename)
 	fin.seekg(0, std::ios_base::beg);
 
 	ComPtr<ID3DBlob> blob;
-	ThrowIfFailed(D3DCreateBlob(size, blob.GetAddressOf()))
+	ThrowIfFailed(D3DCreateBlob(size, blob.GetAddressOf()));
 
 	fin.read((char*)blob->GetBufferPointer(), size);
 	fin.close();

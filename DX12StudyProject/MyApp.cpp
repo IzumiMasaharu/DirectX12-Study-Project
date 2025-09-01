@@ -112,7 +112,7 @@ bool MyApp::Init()
 	BuildFrameResources(); 
 	BuildPSOs(); 
 
-	ThrowIfFailed(commandList->Close())
+	ThrowIfFailed(commandList->Close());
 	ID3D12CommandList* cmdsLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
@@ -181,7 +181,7 @@ void MyApp::Update(const GameTimer& GTimer)
 	if (currentFrameResource->fence != 0 && fence->GetCompletedValue() < currentFrameResource->fence)
 	{
 		HANDLE event = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
-		ThrowIfFailed(fence->SetEventOnCompletion(currentFrameResource->fence, event))
+		ThrowIfFailed(fence->SetEventOnCompletion(currentFrameResource->fence, event));
 		if (event)
 		{
 			WaitForSingleObject(event, INFINITE);
@@ -204,7 +204,7 @@ void MyApp::Draw(const GameTimer& GTimer)
 {
 	auto cmdListAllocator = currentFrameResource->commandAllocator;
 
-	ThrowIfFailed(cmdListAllocator->Reset())
+	ThrowIfFailed(cmdListAllocator->Reset());
 	if (isWireframeEnabled)
 		commandList->Reset(cmdListAllocator.Get(), PSOs["Wireframe"].Get());
 	else
@@ -234,12 +234,12 @@ void MyApp::Draw(const GameTimer& GTimer)
 	commandList->ResourceBarrier(1,
 		&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
-	ThrowIfFailed(commandList->Close())
+	ThrowIfFailed(commandList->Close());
 
 	ID3D12CommandList* CommandList[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(_countof(CommandList), CommandList); 
 
-	ThrowIfFailed(swapChain->Present(0, 0))
+	ThrowIfFailed(swapChain->Present(0, 0));
 
 	currentBackBuffer = (currentBackBuffer + 1) % SwapChainBufferCount;
 	currentFrameResource->fence = ++currentFenceValue;
@@ -288,12 +288,14 @@ void MyApp::LoadTexture()
 	auto texStone = std::make_unique<Texture>();
 	texStone->name = "stone";
 	texStone->filename = L"../Resources/Textures/stone.dds";
-	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(d3dDevice.Get(), commandList.Get(), texStone->filename.c_str(), texStone->resource, texStone->uploadHeap))
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
+		d3dDevice.Get(), commandList.Get(), texStone->filename.c_str(), texStone->resource, texStone->uploadHeap));
 
 	auto texBrick = std::make_unique<Texture>();
 	texBrick->name = "brick";
 	texBrick->filename = L"../Resources/Textures/bricks.dds";
-	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(d3dDevice.Get(), commandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap))
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
+		d3dDevice.Get(), commandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap));
 
 	textures[texStone->name] = std::move(texStone);
 	textures[texBrick->name] = std::move(texBrick);
@@ -322,10 +324,10 @@ void MyApp::BuildRootSignature()
 
 	if (errorBlob != nullptr)
 		::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-	ThrowIfFailed(hr)
+	ThrowIfFailed(hr);
 
-		ThrowIfFailed(d3dDevice->CreateRootSignature(0, serializedRootSignature->GetBufferPointer(),
-			serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)))
+	ThrowIfFailed(d3dDevice->CreateRootSignature(0, serializedRootSignature->GetBufferPointer(),
+			serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 }
 // 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
 void MyApp::BuildDescriptorHeaps()
@@ -335,7 +337,7 @@ void MyApp::BuildDescriptorHeaps()
 	SRV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	SRV_HEAP_DESC.NumDescriptors = 2;
 	SRV_HEAP_DESC.NodeMask = 0;
-	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC, IID_PPV_ARGS(&srvDescriptorHeap)))
+	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC, IID_PPV_ARGS(&srvDescriptorHeap)));
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
@@ -421,10 +423,10 @@ void MyApp::BuildMeshGeometry()
 	auto Geo = std::make_unique<MeshGeometry>();
 	Geo->name = "Geo";
 
-	ThrowIfFailed(D3DCreateBlob(vertexBufferByteSize, &Geo->vertexBufferCPU))
+	ThrowIfFailed(D3DCreateBlob(vertexBufferByteSize, &Geo->vertexBufferCPU));
 	CopyMemory(Geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vertexBufferByteSize);
-	ThrowIfFailed(D3DCreateBlob(indexBufferByteSize, &Geo->indexBufferCPU))
-	CopyMemory(Geo->indexBufferCPU->GetBufferPointer(),indices.data(), indexBufferByteSize);
+	ThrowIfFailed(D3DCreateBlob(indexBufferByteSize, &Geo->indexBufferCPU));
+	CopyMemory(Geo->indexBufferCPU->GetBufferPointer(), indices.data(), indexBufferByteSize);
 
 	Geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), vertices.data(), vertexBufferByteSize, Geo->vertexBufferUploader);
 	Geo->indexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), indices.data(), indexBufferByteSize, Geo->indexBufferUploader);
@@ -553,7 +555,7 @@ void MyApp::BuildRenderItems()
 	leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	leftCylinderRenderItem->material = materials["Grass"].get();
 	leftCylinderRenderItem->Geo = geos["Geo"].get();
-	leftCylinderRenderItem->primitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	leftCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	leftCylinderRenderItem->indexCount = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
 	leftCylinderRenderItem->indexStartLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
 	leftCylinderRenderItem->vertexBaseLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
@@ -562,7 +564,7 @@ void MyApp::BuildRenderItems()
 	leftBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	leftBallRenderItem->material = materials["Grass"].get();
 	leftBallRenderItem->Geo = geos["Geo"].get();
-	leftBallRenderItem->primitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	leftBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	leftBallRenderItem->indexCount = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
 	leftBallRenderItem->indexStartLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
 	leftBallRenderItem->vertexBaseLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
@@ -571,7 +573,7 @@ void MyApp::BuildRenderItems()
 	rightCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	rightCylinderRenderItem->material = materials["Grass"].get();
 	rightCylinderRenderItem->Geo = geos["Geo"].get();
-	rightCylinderRenderItem->primitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	rightCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	rightCylinderRenderItem->indexCount = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
 	rightCylinderRenderItem->indexStartLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
 	rightCylinderRenderItem->vertexBaseLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
@@ -580,7 +582,7 @@ void MyApp::BuildRenderItems()
 	rightBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	rightBallRenderItem->material = materials["Grass"].get();
 	rightBallRenderItem->Geo = geos["Geo"].get();
-	rightBallRenderItem->primitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	rightBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	rightBallRenderItem->indexCount = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
 	rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
 	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
@@ -592,7 +594,7 @@ void MyApp::BuildRenderItems()
 	skullRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	skullRenderItem->material = materials["Glass"].get();
 	skullRenderItem->Geo = geos["skullGeo"].get();
-	skullRenderItem->primitiveType = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	skullRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	skullRenderItem->indexCount = skullRenderItem->Geo->submeshList["skull"].indexCount;
 	skullRenderItem->indexStartLocation = skullRenderItem->Geo->submeshList["skull"].indexStartLocation;
 	skullRenderItem->vertexBaseLocation = skullRenderItem->Geo->submeshList["skull"].vertexBaseLocation;
@@ -645,7 +647,7 @@ void MyApp::BuildPSOs()
 	OpaquePSODesc.SampleDesc.Quality = isMSAA4xOn ? (MSAA4xQualityLevel - 1) : 0;
 	OpaquePSODesc.NodeMask = 0;
 	OpaquePSODesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&OpaquePSODesc, IID_PPV_ARGS(&PSOs["Solid"])))
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&OpaquePSODesc, IID_PPV_ARGS(&PSOs["Solid"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = OpaquePSODesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparentBlendDesc;
@@ -665,7 +667,7 @@ void MyApp::BuildPSOs()
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC WireframePSODesc = OpaquePSODesc;
 	drd.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	WireframePSODesc.RasterizerState = drd;
-	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&PSOs["Wireframe"])))
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&PSOs["Wireframe"])));
 }
 
 // 改变窗口的高度和宽度

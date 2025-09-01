@@ -145,18 +145,18 @@ bool DXApp::InitDirectX3D()
     }
 #endif
     // 创建DXGI Factory
-    ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)))
+    (CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)))
     // 创建硬件D3D设备
     HRESULT hardwareResulte = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice));
     // 若创建失败，回退至WARP设备
     if (FAILED(hardwareResulte))
     {
         ComPtr<IDXGIAdapter> pWARPAdapter;
-        ThrowIfFailed(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWARPAdapter)))
-        ThrowIfFailed(D3D12CreateDevice(pWARPAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice)))
+        ThrowIfFailed(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWARPAdapter)));
+        ThrowIfFailed(D3D12CreateDevice(pWARPAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice)));
     }
     // 创建围栏
-    ThrowIfFailed(d3dDevice->CreateFence(currentFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)))
+    ThrowIfFailed(d3dDevice->CreateFence(currentFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
     
     // 检测MSAA级别支持
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS mQualityLevel;
@@ -164,7 +164,7 @@ bool DXApp::InitDirectX3D()
     mQualityLevel.Format = backBufferFormat;
     mQualityLevel.NumQualityLevels = 0;
     mQualityLevel.SampleCount = 4;
-    ThrowIfFailed(d3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &mQualityLevel, sizeof(mQualityLevel)))
+    ThrowIfFailed(d3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &mQualityLevel, sizeof(mQualityLevel)));
     MSAA4xQualityLevel = mQualityLevel.NumQualityLevels;
     assert(MSAA4xQualityLevel > 0 && "当前MSAA级别不可用");
 
@@ -193,9 +193,9 @@ void DXApp::CreateCmdObjects()
     qd.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
     // 创建
-    ThrowIfFailed(d3dDevice->CreateCommandQueue(&qd, IID_PPV_ARGS(&commandQueue)))
-    ThrowIfFailed(d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS( commandAllocator.GetAddressOf())))
-    ThrowIfFailed(d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(commandList.GetAddressOf())))
+    ThrowIfFailed(d3dDevice->CreateCommandQueue(&qd, IID_PPV_ARGS(&commandQueue)));
+    ThrowIfFailed(d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS( commandAllocator.GetAddressOf())));
+    ThrowIfFailed(d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(commandList.GetAddressOf())));
 
     commandList->Close();
 }
@@ -223,7 +223,7 @@ void DXApp::CreateSwapChain()
     scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-    ThrowIfFailed(dxgiFactory->CreateSwapChain(commandQueue.Get(), &scd, swapChain.GetAddressOf()))
+    ThrowIfFailed(dxgiFactory->CreateSwapChain(commandQueue.Get(), &scd, swapChain.GetAddressOf()));
 }
 
 // 创建描述符堆(RTV和DSV)
@@ -235,14 +235,14 @@ void DXApp::Create_DSV_RTV_DescriptorHeaps()
     RTVHeapDesc.NodeMask = 0;
     RTVHeapDesc.NumDescriptors = SwapChainBufferCount;
     RTVHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-    ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&RTVHeapDesc, IID_PPV_ARGS(rtvHeap.GetAddressOf())))
+    ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&RTVHeapDesc, IID_PPV_ARGS(rtvHeap.GetAddressOf())));
     // 创建DSV描述符堆
     D3D12_DESCRIPTOR_HEAP_DESC DSVHeapDesc ;
     DSVHeapDesc.NumDescriptors = 1;
     DSVHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
     DSVHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     DSVHeapDesc.NodeMask = 0;
-    ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&DSVHeapDesc, IID_PPV_ARGS(dsvHeap.GetAddressOf())))
+    ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&DSVHeapDesc, IID_PPV_ARGS(dsvHeap.GetAddressOf())));
 }
 
 // 加载枚举所有显示适配器
@@ -324,12 +324,12 @@ void DXApp::FlushCommandQueue()
 {
     // 围栏法
     currentFenceValue++;
-    ThrowIfFailed(commandQueue->Signal(fence.Get(), currentFenceValue))
+    ThrowIfFailed(commandQueue->Signal(fence.Get(), currentFenceValue));
     if (fence->GetCompletedValue() < currentFenceValue)
     {
         HANDLE EventHandle = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
 
-        ThrowIfFailed(fence->SetEventOnCompletion(currentFenceValue, EventHandle))
+        ThrowIfFailed(fence->SetEventOnCompletion(currentFenceValue, EventHandle));
 
         if (EventHandle)
         {
@@ -413,7 +413,7 @@ void DXApp::Resize()
     ThrowIfFailed(d3dDevice->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
         &DSD, D3D12_RESOURCE_STATE_COMMON,
-        &OptiClear, IID_PPV_ARGS(depthStencilBuffer.GetAddressOf())))
+        &OptiClear, IID_PPV_ARGS(depthStencilBuffer.GetAddressOf())));
 
     d3dDevice->CreateDepthStencilView(depthStencilBuffer.Get(),
                                         nullptr, 
@@ -423,7 +423,7 @@ void DXApp::Resize()
                                     D3D12_RESOURCE_STATE_COMMON,
                                     D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
-    ThrowIfFailed(commandList->Close())
+    ThrowIfFailed(commandList->Close());
     ID3D12CommandList* CmdList[] = { commandList.Get() };
     commandQueue->ExecuteCommandLists(_countof(CmdList),CmdList);
     FlushCommandQueue();
