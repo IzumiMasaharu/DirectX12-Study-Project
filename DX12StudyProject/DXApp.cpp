@@ -145,7 +145,7 @@ bool DXApp::InitDirectX3D()
     }
 #endif
     // 创建DXGI Factory
-    (CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)))
+    ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)));
     // 创建硬件D3D设备
     HRESULT hardwareResulte = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice));
     // 若创建失败，回退至WARP设备
