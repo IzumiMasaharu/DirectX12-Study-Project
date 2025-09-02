@@ -229,7 +229,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGird(float length, float wi
 			girdVertex.Tangent = XMFLOAT3(1.0f, 0.0f, 0.0f);
 			girdVertex.Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-			MeshGirdData.Vertices.push_back(girdVertex);
+			MeshGirdData.Vertices[zi*xPointNum+xi]=girdVertex;
 		}
 	}
 
