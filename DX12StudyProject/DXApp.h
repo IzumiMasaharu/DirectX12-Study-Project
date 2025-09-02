@@ -2,6 +2,11 @@
 #include "GameTimer.h"
 #include "resource.h"
 
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
+
 class DXApp
 {
 protected:
@@ -17,6 +22,8 @@ public:
 	virtual LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);//消息过程处理函数（需通过派生类覆写）
 	virtual bool Init() = 0;
 	int Run();
+	void ControlLoop();
+	virtual void RenderLoop()=0;
 protected:
 	// 初始化实现
 	bool InitWindowClass(WindowClass& WC,LPCTSTR windowclassName);//窗口类初始化
@@ -55,13 +62,24 @@ public:
 protected:
 	static DXApp* mApp;//指向DXApp类的指针
 
+	std::thread controlThread;
+	std::atomic<bool> isAppRunning{ false };
+	std::atomic<bool> isAppPaused{ false };
+
+	std::thread renderThread;
+	std::mutex renderMutex;
+	std::condition_variable renderCV;
+	std::atomic<bool> isFrameReady{ false };
+	std::atomic<bool> isFrameRendered{ true };
+	std::atomic<bool> isRenderThreadRunning{ false };
+	std::atomic<bool> isRenderPaused{ false };
+
 	GameTimer gameTimer;
 	float fps = 0.0f;
 	float mspf = 0.0f;
 
 	HINSTANCE appInstance = nullptr;//应用程序实例句柄
 	HWND mainWndHwnd = nullptr;//指向程序窗口的句柄（一般指向主窗口）
-	bool isAppPaused = false;//应用程序是否暂停
 	bool isWindowMinimized = false;//是否最小化
 	bool isWindowMaximized = false;//是否最大化
 	bool isWindowFullScreen = false;//是否全屏

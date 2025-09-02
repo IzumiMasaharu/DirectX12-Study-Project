@@ -1,8 +1,4 @@
-﻿#include <thread>
-#include <atomic>
-#include <chrono>
-
-#include "DXApp.h"
+﻿#include "DXApp.h"
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
 #include "GeometryGenerator.h"
@@ -18,17 +14,8 @@ public:
 	LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 	bool Init() override;
 private:
-	void RenderLoop();                 // 渲染线程主循环
-	std::thread renderThread;
-	std::atomic<bool> isRenderThreadRunning{ false };
-	std::atomic<bool> isRenderPaused{ false };
+	void RenderLoop() override;                 // 渲染线程主循环
 
-	struct ResizeInfoForRenderThread {
-		std::atomic<bool> isResized{ false };
-		std::atomic<int>  newWidth{ 0 };
-		std::atomic<int>  newHeight{ 0 };
-	} resizeInfo;
-private:
 	void Resize() override;
 	void Update(const GameTimer& GTimer) override;
 	void Draw(const GameTimer& GTimer) override;
@@ -50,7 +37,6 @@ private:
 	void BuildFrameResources(); // 创建帧资源
 	void BuildPSOs(); // 创建渲染管线状态对象
 
-	void ChangeW_H(int width, int height);
 	void ChangePSOstate();
 	void UpdateCamera(); // 更新摄像头矩阵
 	void UpdateObjectsConstBuffers()const; // 更新常量缓冲区（世界矩阵）
@@ -63,6 +49,11 @@ public:
 private:
 	WindowClass windowClass;
 	Window appMainWnd;
+	struct ResizeInfoForRenderThread {
+		std::atomic<bool> isResized{ false };
+		std::atomic<int>  newWidth{ 0 };
+		std::atomic<int>  newHeight{ 0 };
+	} resizeInfo;
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr; // 根签名
 

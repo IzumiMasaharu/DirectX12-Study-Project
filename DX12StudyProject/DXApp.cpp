@@ -39,9 +39,41 @@ int DXApp::Run()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+		else
+		{
+			std::ostringstream os;
+			os << "Mayohoshi Render FPS: " << fps;
+			SetWindowText(mainWndHwnd, AnsiToWstring(os.str()).c_str());
+		}
     }
 
     return (int)msg.wParam;
+}
+
+void DXApp::ControlLoop()
+{
+	while (isAppRunning)
+	{
+		if (!isAppPaused)
+		{
+			gameTimer.Tick();
+			Update(gameTimer);
+
+			// 通知渲染线程可以渲染
+			{
+				std::unique_lock<std::mutex> lock(renderMutex);
+				isFrameReady = true;
+				isFrameRendered = false;
+				renderCV.notify_one();
+			}
+
+			// 等待渲染线程完成本帧
+			while (!isFrameRendered && isRenderThreadRunning)
+			{
+				std::this_thread::yield();
+			}
+		}
+	}
 }
 
 // 初始化窗口类
@@ -145,7 +177,7 @@ bool DXApp::InitDirectX3D()
     }
 #endif
     // 创建DXGI Factory
-    (CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)))
+    ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory)));
     // 创建硬件D3D设备
     HRESULT hardwareResulte = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice));
     // 若创建失败，回退至WARP设备

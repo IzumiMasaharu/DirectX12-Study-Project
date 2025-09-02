@@ -23,9 +23,16 @@ MyApp::MyApp(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
 }
 MyApp::~MyApp()
 {
+	isAppRunning = false;
+	isAppPaused = true;
 	isRenderThreadRunning = false;
+	isRenderPaused = true;
+
 	if (renderThread.joinable())
 		renderThread.join();
+	if (controlThread.joinable())
+		controlThread.join();
+
 	if(d3dDevice!=nullptr)
 		FlushCommandQueue();
 }
@@ -56,8 +63,8 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 	}
+	case WM_CLOSE:
 	case WM_DESTROY:
-		isRenderThreadRunning = false;
 		PostQuitMessage(0);
 		return 0;
 	case WM_LBUTTONDOWN:
@@ -98,6 +105,7 @@ bool MyApp::Init()
 		return false;
     if(!DXApp::InitDirectX3D())
 		return false;
+	Resize();
 
 	ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
 	LoadTexture(); 
@@ -117,8 +125,14 @@ bool MyApp::Init()
 	commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	FlushCommandQueue();
 
+	isAppRunning = true;
+	isAppPaused = false;
 	isRenderThreadRunning = true;
 	isRenderPaused = false;
+
+	gameTimer.Reset();
+
+	controlThread = std::thread(&MyApp::ControlLoop, this);
 	renderThread = std::thread(&MyApp::RenderLoop, this);
 
 	return true;
@@ -129,25 +143,32 @@ void MyApp::RenderLoop()
 {
 	while (isRenderThreadRunning)
 	{
-		if (resizeInfo.isResized.load(std::memory_order_relaxed))
-		{
-			clientWidth = resizeInfo.newWidth.load();
-			clientHeight = resizeInfo.newHeight.load();
-			// 防止 0 尺寸 避免除0问题
-			if (clientWidth > 0 && clientHeight > 0)
-				Resize();
+		// 等待主线程资源更新完成
+		std::unique_lock<std::mutex> lock(renderMutex);
+		renderCV.wait(lock, [&] { return isFrameReady.load(); });
 
-			resizeInfo.isResized = false;
-		}
-
-		gameTimer.Tick();
-
+		// 渲染和呈现
 		if (!isRenderPaused)
 		{
-			CalculateFPS_MSPF();
-			Update(gameTimer);
+			if (resizeInfo.isResized.load(std::memory_order_relaxed))
+			{
+				clientWidth = resizeInfo.newWidth.load();
+				clientHeight = resizeInfo.newHeight.load();
+				// 防止 0 尺寸 避免除0问题
+				if (clientWidth > 0 && clientHeight > 0)
+					Resize();
+
+				resizeInfo.isResized = false;
+			}
+
 			Draw(gameTimer);
+
+			CalculateFPS_MSPF();
 		}
+
+		// 标记本帧渲染完成
+		isFrameRendered = true;
+		isFrameReady = false;
 	}
 }
 
@@ -192,11 +213,6 @@ void MyApp::Update(const GameTimer& GTimer)
 	UpdateMaterialConstBuffers();
 	UpdateObjectsConstBuffers();
 	UpdatePassConstBuffers();
-
-	std::ostringstream os;
-	os << WstringToAnsi(mainWndTitle) << " FPS:" << fps;
-
-	SetWindowText(mainWndHwnd, AnsiToWstring(os.str()).c_str());
 }
 
 // 绘制帧画面
@@ -670,12 +686,6 @@ void MyApp::BuildPSOs()
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&PSOs["Wireframe"])));
 }
 
-// 改变窗口的高度和宽度
-void MyApp::ChangeW_H(int width, int height)
-{
-	clientWidth = width;
-	clientHeight = height;
-}
 // 更改PSO
 void MyApp::ChangePSOstate()
 {
