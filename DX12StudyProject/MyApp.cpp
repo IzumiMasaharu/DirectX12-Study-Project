@@ -213,6 +213,10 @@ void MyApp::Update(const GameTimer& GTimer)
 	UpdateMaterialConstBuffers();
 	UpdateObjectsConstBuffers();
 	UpdatePassConstBuffers();
+
+	std::ostringstream os;
+	os << "Mayohoshi Render FPS: " << fps;
+	SetWindowText(mainWndHwnd, AnsiToWstring(os.str()).c_str());
 }
 
 // 绘制帧画面
