@@ -83,6 +83,13 @@ VertexOut VS(VertexIn vin)
     return vout;
 }
 
+VertexOut VS_Wave(VertexIn vin)
+{
+    VertexOut vout = VS(vin);
+    vout.posH.y += sin(vout.posH.x * 10.0f + gTotalTime) * 0.1f;
+    return vout;
+}
+
 // 像素着色器
 float4 PS( VertexOut pin ) : SV_Target
 {   

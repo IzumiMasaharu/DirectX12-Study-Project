@@ -381,6 +381,7 @@ void MyApp::BuildDescriptorHeaps()
 void MyApp::BuildShaders()
 {
 	shaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "VS", "vs_5_1");
+	shaders["VS_Wave"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "VS_Wave", "vs_5_1");
 	shaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "PS", "ps_5_1");
 }
 // 创建输入布局
@@ -399,11 +400,15 @@ void MyApp::BuildMeshGeometry()
 	GeometryGenerator GeoGenerator;
 	GeometryGenerator::MeshData cylinder = GeoGenerator.CreateCylinder(1.0f, 0.56f, 4.0f, 100, 20);
 	GeometryGenerator::MeshData ball = GeoGenerator.CreateBall(1.0f, 50, 50);
+	GeoGenerator::MeshData gird = GeoGenerator.CreateGird(10.0f, 10.0f, 1000, 1000);
 	
 	UINT CylinderVertexOffset = 0;
 	auto BallVertexOffset = (UINT)cylinder.Vertices.size();
+	auto GridVertexOffset = (UINT)(cylinder.Vertices.size() + ball.Vertices.size());
+
 	UINT CylinderIndexOffset = 0;
 	auto BallIndexOffset = (UINT)cylinder.Indices_32.size();
+	auto GridIndexOffset = (UINT)(cylinder.Indices_32.size() + ball.Indices_32.size());
 
 	SubmeshGeometry Geo_Cylinder;
 	Geo_Cylinder.name = "Geo_Cylinder";
@@ -415,8 +420,13 @@ void MyApp::BuildMeshGeometry()
 	Geo_Ball.vertexBaseLocation = BallVertexOffset;
 	Geo_Ball.indexStartLocation = BallIndexOffset;
 	Geo_Ball.indexCount = (UINT)ball.Indices_32.size();
+	SubmeshGeometry Geo_Grid;
+	Geo_Grid.name = "Geo_Grid";
+	Geo_Grid.vertexBaseLocation = GridVertexOffset;
+	Geo_Grid.indexStartLocation = GridIndexOffset;
+	Geo_Grid.indexCount = (UINT)gird.Indices_32.size();
 
-	auto totalVertexCount = ball.Vertices.size() + cylinder.Vertices.size();
+	auto totalVertexCount = ball.Vertices.size() + cylinder.Vertices.size() + gird.Vertices.size();
 
 	std::vector<VertexConstants> vertices(totalVertexCount);
 	std::vector<std::uint16_t> indices;
@@ -433,9 +443,16 @@ void MyApp::BuildMeshGeometry()
 		vertices[k].normal = ball.Vertices[i].Normal;
 		vertices[k].texture = ball.Vertices[i].Texture;
 	}
+	for (size_t i = 0; i < gird.Vertices.size(); ++i,++k)
+	{
+		vertices[k].pos = gird.Vertices[i].position;
+		vertices[k].normal = gird.Vertices[i].Normal;
+		vertices[k].texture = gird.Vertices[i].Texture;
+	}
 
 	indices.insert(indices.end(), std::begin(cylinder.GetIndices_16()), std::end(cylinder.GetIndices_16()));
 	indices.insert(indices.end(), std::begin(ball.GetIndices_16()), std::end(ball.GetIndices_16()));
+	indices.insert(indices.end(), std::begin(gird.GetIndices_16()), std::end(gird.GetIndices_16()));
 
 	const UINT vertexBufferByteSize = (UINT)vertices.size() * sizeof(VertexConstants);
 	const UINT indexBufferByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
@@ -458,6 +475,7 @@ void MyApp::BuildMeshGeometry()
 
 	Geo->submeshList[Geo_Cylinder.name] = Geo_Cylinder;
 	Geo->submeshList[Geo_Ball.name] = Geo_Ball;
+	Geo->submeshList[Geo_Grid.name] = Geo_Grid;
 
 	geos[Geo->name] = std::move(Geo);
 }
@@ -563,6 +581,7 @@ void MyApp::BuildRenderItems()
 	auto leftBallRenderItem = std::make_unique<RenderItem>();
 	auto rightCylinderRenderItem = std::make_unique<RenderItem>();
 	auto rightBallRenderItem = std::make_unique<RenderItem>();
+	auto gridRenderItem = std::make_unique<RenderItem>();
 
 	UINT GeoObjectIndex = 0;
 
@@ -619,11 +638,24 @@ void MyApp::BuildRenderItems()
 	skullRenderItem->indexStartLocation = skullRenderItem->Geo->submeshList["skull"].indexStartLocation;
 	skullRenderItem->vertexBaseLocation = skullRenderItem->Geo->submeshList["skull"].vertexBaseLocation;
 
+	auto gridRenderItem = std::make_unique<RenderItem>();
+	XMMATRIX gridWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+
+	XMStoreFloat4x4(&gridRenderItem->worldTransform, gridWorld);
+	gridRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+	gridRenderItem->material = materials["Grass"].get();
+	gridRenderItem->Geo = geos["Geo"].get();
+	gridRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	gridRenderItem->indexCount = gridRenderItem->Geo->submeshList["Geo_Grid"].indexCount;
+	gridRenderItem->indexStartLocation = gridRenderItem->Geo->submeshList["Geo_Grid"].indexStartLocation;
+	gridRenderItem->vertexBaseLocation = gridRenderItem->Geo->submeshList["Geo_Grid"].vertexBaseLocation;
+
 	allRenderItems.push_back(std::move(leftCylinderRenderItem));
 	allRenderItems.push_back(std::move(leftBallRenderItem));
 	allRenderItems.push_back(std::move(rightCylinderRenderItem));
 	allRenderItems.push_back(std::move(rightBallRenderItem));
 	allRenderItems.push_back(std::move(skullRenderItem));
+	allRenderItems.push_back(std::move(gridRenderItem));
 
 	for (auto& i: allRenderItems)
 		opaqueRenderItems.push_back(i.get());
@@ -668,6 +700,14 @@ void MyApp::BuildPSOs()
 	OpaquePSODesc.NodeMask = 0;
 	OpaquePSODesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&OpaquePSODesc, IID_PPV_ARGS(&PSOs["Solid"])));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC WavePSODesc = OpaquePSODesc;
+	WavePSODesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaders["VS_Wave"]->GetBufferPointer()),
+		shaders["VS_Wave"]->GetBufferSize()
+	};
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WavePSODesc, IID_PPV_ARGS(&PSOs["Wave"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = OpaquePSODesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparentBlendDesc;
@@ -806,6 +846,9 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 	for (size_t itemIndex = 0; itemIndex < renderItems.size(); itemIndex++)
 	{
 		auto item = renderItems[itemIndex];
+		if(item->Geo==geos["Geo_Gird"].get())
+			commandList->SetPipelineState(PSOs["Wave"].Get());
+
 		commandList->IASetVertexBuffers(0, 1, &item->Geo->VertexBufferView());
 		commandList->IASetIndexBuffer(&item->Geo->IndexBufferView());
 		commandList->IASetPrimitiveTopology(item->primitiveType);
@@ -821,6 +864,9 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 		commandList->SetGraphicsRootConstantBufferView(2, materialConstBufferAddress);
 
 		commandList->DrawIndexedInstanced(item->indexCount, 1, item->indexStartLocation, item->vertexBaseLocation, 0);
+
+		if(item->Geo == geos["Geo_Gird"].get())
+			commandList->SetPipelineState(PSOs["Solid"].Get());
 	}
 }
 
