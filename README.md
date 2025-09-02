@@ -1,2 +1,2 @@
 # DirectX12 Study Project
- Be Used To learn DirectX 12
+According to the Dragon-Book(3D Game Programming With DirectX 12),the project has implemented the Ch.10.
