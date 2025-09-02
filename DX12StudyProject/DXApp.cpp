@@ -39,12 +39,6 @@ int DXApp::Run()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-		else
-		{
-			std::ostringstream os;
-			os << "Mayohoshi Render FPS: " << fps;
-			SetWindowText(mainWndHwnd, AnsiToWstring(os.str()).c_str());
-		}
     }
 
     return (int)msg.wParam;
