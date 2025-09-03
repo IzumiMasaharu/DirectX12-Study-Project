@@ -1,4 +1,4 @@
-﻿#include "MyApp.h"
+#include "MyApp.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -305,20 +305,31 @@ void MyApp::MouseWheel(short zDelta)
 // 载入纹理
 void MyApp::LoadTexture()
 {
+	UINT srvIndex = 0;
 	auto texStone = std::make_unique<Texture>();
 	texStone->name = "stone";
 	texStone->filename = L"../Resources/Textures/stone.dds";
+	texStone->srvHeapIndex = srvIndex++;
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
 		d3dDevice.Get(), commandList.Get(), texStone->filename.c_str(), texStone->resource, texStone->uploadHeap));
 
 	auto texBrick = std::make_unique<Texture>();
 	texBrick->name = "brick";
 	texBrick->filename = L"../Resources/Textures/bricks.dds";
+	texBrick->srvHeapIndex = srvIndex++;
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
 		d3dDevice.Get(), commandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap));
 
+	auto texWater = std::make_unique<Texture>();
+	texWater->name = "water";
+	texWater->filename = L"../Resources/Textures/water.dds";
+	texWater->srvHeapIndex = srvIndex++;
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
+		d3dDevice.Get(), commandList.Get(), texWater->filename.c_str(), texWater->resource, texWater->uploadHeap));
+
 	textures[texStone->name] = std::move(texStone);
 	textures[texBrick->name] = std::move(texBrick);
+	textures[texWater->name] = std::move(texWater);
 }
 // 创建根签名
 void MyApp::BuildRootSignature()
@@ -355,7 +366,7 @@ void MyApp::BuildDescriptorHeaps()
 	D3D12_DESCRIPTOR_HEAP_DESC SRV_HEAP_DESC;
 	SRV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	SRV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	SRV_HEAP_DESC.NumDescriptors = 2;
+	SRV_HEAP_DESC.NumDescriptors = textures.size();
 	SRV_HEAP_DESC.NodeMask = 0;
 	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC, IID_PPV_ARGS(&srvDescriptorHeap)));
 
@@ -363,19 +374,24 @@ void MyApp::BuildDescriptorHeaps()
 
 	auto stoneTex = textures["stone"]->resource;
 	auto brickTex = textures["brick"]->resource;
+	auto waterTex = textures["water"]->resource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = stoneTex->GetDesc().Format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = -1;
+
+	srvDesc.Format = stoneTex->GetDesc().Format;
 	d3dDevice->CreateShaderResourceView(stoneTex.Get(), &srvDesc, srvCPUHandle);
 
 	srvCPUHandle.Offset(1, cbs_srv_uavDescriptorSize);
-
 	srvDesc.Format = brickTex->GetDesc().Format;
 	d3dDevice->CreateShaderResourceView(brickTex.Get(), &srvDesc, srvCPUHandle);
+
+	srvCPUHandle.Offset(1, cbs_srv_uavDescriptorSize);
+	srvDesc.Format = waterTex->GetDesc().Format;
+	d3dDevice->CreateShaderResourceView(waterTex.Get(), &srvDesc, srvCPUHandle);
 }
 // 编译着色器
 void MyApp::BuildShaders()
@@ -400,7 +416,7 @@ void MyApp::BuildMeshGeometry()
 	GeometryGenerator GeoGenerator;
 	GeometryGenerator::MeshData cylinder = GeoGenerator.CreateCylinder(1.0f, 0.56f, 4.0f, 100, 20);
 	GeometryGenerator::MeshData ball = GeoGenerator.CreateBall(1.0f, 50, 50);
-	GeoGenerator::MeshData gird = GeoGenerator.CreateGird(10.0f, 10.0f, 1000, 1000);
+	GeometryGenerator::MeshData gird = GeoGenerator.CreateGird(10.0f, 10.0f, 100, 100);
 	
 	UINT CylinderVertexOffset = 0;
 	auto BallVertexOffset = (UINT)cylinder.Vertices.size();
@@ -420,11 +436,11 @@ void MyApp::BuildMeshGeometry()
 	Geo_Ball.vertexBaseLocation = BallVertexOffset;
 	Geo_Ball.indexStartLocation = BallIndexOffset;
 	Geo_Ball.indexCount = (UINT)ball.Indices_32.size();
-	SubmeshGeometry Geo_Grid;
-	Geo_Grid.name = "Geo_Grid";
-	Geo_Grid.vertexBaseLocation = GridVertexOffset;
-	Geo_Grid.indexStartLocation = GridIndexOffset;
-	Geo_Grid.indexCount = (UINT)gird.Indices_32.size();
+	SubmeshGeometry Geo_Gird;
+	Geo_Gird.name = "Geo_Gird";
+	Geo_Gird.vertexBaseLocation = GridVertexOffset;
+	Geo_Gird.indexStartLocation = GridIndexOffset;
+	Geo_Gird.indexCount = (UINT)gird.Indices_32.size();
 
 	auto totalVertexCount = ball.Vertices.size() + cylinder.Vertices.size() + gird.Vertices.size();
 
@@ -475,7 +491,7 @@ void MyApp::BuildMeshGeometry()
 
 	Geo->submeshList[Geo_Cylinder.name] = Geo_Cylinder;
 	Geo->submeshList[Geo_Ball.name] = Geo_Ball;
-	Geo->submeshList[Geo_Grid.name] = Geo_Grid;
+	Geo->submeshList[Geo_Gird.name] = Geo_Gird;
 
 	geos[Geo->name] = std::move(Geo);
 }
@@ -556,23 +572,29 @@ void MyApp::BuildMaterials()
 
 	auto matGrass = std::make_unique<Material>();
 	matGrass->name = "Grass";
-	matGrass->materialConstBufferIndex = MaterialIndex;
-	matGrass->diffuseSrvHeapIndex = MaterialIndex++;
+	matGrass->materialConstBufferIndex = MaterialIndex++;
 	matGrass->numDirtyFrames = gNumFrameResources;
 	matGrass->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	matGrass->fresneRf0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
 	matGrass->roughness = 0.5f;
 	auto matGlass = std::make_unique<Material>();
 	matGlass->name = "Glass";
-	matGlass->materialConstBufferIndex = MaterialIndex;
-	matGlass->diffuseSrvHeapIndex = MaterialIndex++;
+	matGlass->materialConstBufferIndex = MaterialIndex++;
 	matGlass->numDirtyFrames = gNumFrameResources;
 	matGlass->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	matGlass->fresneRf0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	matGlass->roughness = 0.02f;
+	auto matWater = std::make_unique<Material>();
+	matWater->name = "Water";
+	matWater->materialConstBufferIndex = MaterialIndex++;
+	matWater->numDirtyFrames = gNumFrameResources;
+	matWater->diffuseAlbedo = XMFLOAT4(0.3f, 0.5f, 0.7f, 1.0f);
+	matWater->fresneRf0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
+	matWater->roughness = 0.02f;
 
 	materials[matGrass->name] = std::move(matGrass);
 	materials[matGlass->name] = std::move(matGlass);
+	materials[matWater->name] = std::move(matWater);
 }
 // 创建渲染项
 void MyApp::BuildRenderItems()
@@ -589,10 +611,12 @@ void MyApp::BuildRenderItems()
 	XMMATRIX leftBallWorld = XMMatrixTranslation(0.0f, +2.96f, -2.0f);
 	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f ,+2.0f );
 	XMMATRIX rightBallWorld = XMMatrixTranslation(0.0f, +2.96f, +2.0f);
+	XMMATRIX gridWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 
 	XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
 	leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	leftCylinderRenderItem->material = materials["Grass"].get();
+	leftCylinderRenderItem->diffuseTexture = textures["brick"].get();
 	leftCylinderRenderItem->Geo = geos["Geo"].get();
 	leftCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	leftCylinderRenderItem->indexCount = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
@@ -602,6 +626,7 @@ void MyApp::BuildRenderItems()
 	XMStoreFloat4x4(&leftBallRenderItem->worldTransform, leftBallWorld);
 	leftBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	leftBallRenderItem->material = materials["Grass"].get();
+	leftBallRenderItem->diffuseTexture = textures["stone"].get();
 	leftBallRenderItem->Geo = geos["Geo"].get();
 	leftBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	leftBallRenderItem->indexCount = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
@@ -611,6 +636,7 @@ void MyApp::BuildRenderItems()
 	XMStoreFloat4x4(&rightCylinderRenderItem->worldTransform, rightCylinderWorld);
 	rightCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	rightCylinderRenderItem->material = materials["Grass"].get();
+	rightCylinderRenderItem->diffuseTexture = textures["brick"].get();
 	rightCylinderRenderItem->Geo = geos["Geo"].get();
 	rightCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	rightCylinderRenderItem->indexCount = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
@@ -620,11 +646,22 @@ void MyApp::BuildRenderItems()
 	XMStoreFloat4x4(&rightBallRenderItem->worldTransform, rightBallWorld);
 	rightBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	rightBallRenderItem->material = materials["Grass"].get();
+	rightBallRenderItem->diffuseTexture = textures["stone"].get();
 	rightBallRenderItem->Geo = geos["Geo"].get();
 	rightBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	rightBallRenderItem->indexCount = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
 	rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
 	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
+
+	XMStoreFloat4x4(&gridRenderItem->worldTransform, gridWorld);
+	gridRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+	gridRenderItem->material = materials["Water"].get();
+	gridRenderItem->diffuseTexture = textures["water"].get();
+	gridRenderItem->Geo = geos["Geo"].get();
+	gridRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	gridRenderItem->indexCount = gridRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
+	gridRenderItem->indexStartLocation = gridRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
+	gridRenderItem->vertexBaseLocation = gridRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
 
 	auto skullRenderItem = std::make_unique<RenderItem>();
 	XMMATRIX skullWorld = XMMatrixScaling(0.25f, 0.25f, 0.25f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, 3*MathHelper::Pi / 2);
@@ -632,30 +669,19 @@ void MyApp::BuildRenderItems()
 	XMStoreFloat4x4(&skullRenderItem->worldTransform, skullWorld);
 	skullRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	skullRenderItem->material = materials["Glass"].get();
+	skullRenderItem->diffuseTexture = textures["stone"].get();
 	skullRenderItem->Geo = geos["skullGeo"].get();
 	skullRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	skullRenderItem->indexCount = skullRenderItem->Geo->submeshList["skull"].indexCount;
 	skullRenderItem->indexStartLocation = skullRenderItem->Geo->submeshList["skull"].indexStartLocation;
 	skullRenderItem->vertexBaseLocation = skullRenderItem->Geo->submeshList["skull"].vertexBaseLocation;
 
-	auto gridRenderItem = std::make_unique<RenderItem>();
-	XMMATRIX gridWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-
-	XMStoreFloat4x4(&gridRenderItem->worldTransform, gridWorld);
-	gridRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	gridRenderItem->material = materials["Grass"].get();
-	gridRenderItem->Geo = geos["Geo"].get();
-	gridRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	gridRenderItem->indexCount = gridRenderItem->Geo->submeshList["Geo_Grid"].indexCount;
-	gridRenderItem->indexStartLocation = gridRenderItem->Geo->submeshList["Geo_Grid"].indexStartLocation;
-	gridRenderItem->vertexBaseLocation = gridRenderItem->Geo->submeshList["Geo_Grid"].vertexBaseLocation;
-
 	allRenderItems.push_back(std::move(leftCylinderRenderItem));
 	allRenderItems.push_back(std::move(leftBallRenderItem));
 	allRenderItems.push_back(std::move(rightCylinderRenderItem));
 	allRenderItems.push_back(std::move(rightBallRenderItem));
-	allRenderItems.push_back(std::move(skullRenderItem));
 	allRenderItems.push_back(std::move(gridRenderItem));
+	allRenderItems.push_back(std::move(skullRenderItem));
 
 	for (auto& i: allRenderItems)
 		opaqueRenderItems.push_back(i.get());
@@ -807,7 +833,7 @@ void MyApp::UpdatePassConstBuffers()const
 	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };
 
 	mRenderingPassConstantsBuffer.lights[0].rgbIntensity = { 1.0f,1.0f,1.0f };
-	mRenderingPassConstantsBuffer.lights[0].position = { 10.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi),0.0f,0.0f};
+	mRenderingPassConstantsBuffer.lights[0].position = { 6.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi),2.0f,6.0f*cosf(gameTimer.TotalTime()*MathHelper::Pi) };
 	mRenderingPassConstantsBuffer.lights[0].direction = { 1.0f,0.0f,0.0f };
 
 	auto currentPassConstsBuffer = currentFrameResource->passConstBuffer.get();
@@ -846,15 +872,15 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 	for (size_t itemIndex = 0; itemIndex < renderItems.size(); itemIndex++)
 	{
 		auto item = renderItems[itemIndex];
-		if(item->Geo==geos["Geo_Gird"].get())
-			commandList->SetPipelineState(PSOs["Wave"].Get());
+		if(item->Geo == geos.at("Geo").get() && item->vertexBaseLocation == item->Geo->submeshList["Geo_Gird"].vertexBaseLocation)
+			commandList->SetPipelineState(PSOs.at("Wave").Get());
 
 		commandList->IASetVertexBuffers(0, 1, &item->Geo->VertexBufferView());
 		commandList->IASetIndexBuffer(&item->Geo->IndexBufferView());
 		commandList->IASetPrimitiveTopology(item->primitiveType);
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-		tex.Offset(item->material->diffuseSrvHeapIndex, cbs_srv_uavDescriptorSize);
+		tex.Offset(item->diffuseTexture->srvHeapIndex, cbs_srv_uavDescriptorSize);
 
 		D3D12_GPU_VIRTUAL_ADDRESS objectConstBufferAddress = objectConstBuffer->GetGPUVirtualAddress() + item->objectConstBufferIndex * objectConstBufferByteSize;
 		D3D12_GPU_VIRTUAL_ADDRESS materialConstBufferAddress = materialConstBuffer->GetGPUVirtualAddress() + item->material->materialConstBufferIndex * materialConstBufferByteSize;
@@ -865,8 +891,8 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 
 		commandList->DrawIndexedInstanced(item->indexCount, 1, item->indexStartLocation, item->vertexBaseLocation, 0);
 
-		if(item->Geo == geos["Geo_Gird"].get())
-			commandList->SetPipelineState(PSOs["Solid"].Get());
+		if (item->Geo == geos.at("Geo").get() && item->vertexBaseLocation == geos.at("Geo").get()->submeshList["Geo_Gird"].vertexBaseLocation)
+			commandList->SetPipelineState(PSOs.at("Solid").Get());
 	}
 }
 
