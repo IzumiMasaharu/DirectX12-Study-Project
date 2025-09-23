@@ -161,7 +161,6 @@ std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> DXBase::GetStaticSamplers()
 	return { pointWrap, pointClamp, linearWrap, linearClamp, anisotropicWrap, anisotropicClamp };
 }
 
-
 const float MathHelper::Infinity = FLT_MAX;
 const float MathHelper::Pi = 3.1415926535f;
 

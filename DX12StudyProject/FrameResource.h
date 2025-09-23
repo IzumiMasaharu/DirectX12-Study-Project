@@ -46,7 +46,8 @@ struct VertexConstants
 {
     DirectX::XMFLOAT3 pos;
     DirectX::XMFLOAT3 normal;
-    DirectX::XMFLOAT2 texture;
+	DirectX::XMFLOAT3 tangent;
+    DirectX::XMFLOAT2 textureUV;
 };
 
 // 帧资源

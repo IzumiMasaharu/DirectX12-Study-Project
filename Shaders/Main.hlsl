@@ -11,6 +11,7 @@
 #include "Light.hlsl"
 
 Texture2D gDiffuseMap : register(t0);
+Texture2D gNormalMap : register(t1);
 
 SamplerState gsamPointWrap : register(s0);
 SamplerState gsamPointClamp : register(s1);
@@ -57,6 +58,7 @@ struct VertexIn
 {
 	float3 pos      : POSITION;
 	float3 normal   : NORMAL;
+	float3 tangentU : TANGENT;
 	float2 texCoord : TEXCOORD;
 };
 // 输出顶点数据
@@ -65,6 +67,7 @@ struct VertexOut
 	float4 posH     : SV_POSITION;
 	float3 posW     : POSITION;
 	float3 normalW  : NORMAL;
+	float3 tangentW : TANGENT;
 	float2 texCoord : TEXCOORD;
 };
 
@@ -76,6 +79,7 @@ VertexOut VS(VertexIn vin)
 	float4 pos = mul(float4(vin.pos, 1.0f), gWorldTransform);
 	vout.posW = pos.xyz;
 	vout.normalW = mul(vin.normal, (float3x3) gWorldTransform);
+	vout.tangentW = mul(vin.tangentU, (float3x3) gWorldTransform);
 	vout.posH = mul(pos, gViewProj);
 	float4 texC = mul(float4(vin.texCoord, 0.0f, 1.0f), gTextureTransform);
 	vout.texCoord = mul(texC, gMaterialTransform).xy;
@@ -132,6 +136,11 @@ VertexOut VS_Wave(VertexIn vin)
 	float3 normal = normalize(float3(-dx, 1.0f, -dz));
 	vout.normalW = mul(normal, (float3x3)gWorldTransform);
 
+	// ==== Tangent ====
+	float3 approxTangent = float3(1.0f, 0.0f, 0.0f);
+	float3 tangent = normalize(approxTangent - normal * dot(normal, approxTangent));
+	vout.tangentW = mul(tangent, (float3x3)gWorldTransform);
+
 	// 输出裁剪空间
 	vout.posH = mul(posW, gViewProj);
 
@@ -157,8 +166,17 @@ VertexOut VS_Wave(VertexIn vin)
 float4 PS(VertexOut pin) : SV_Target
 {
 	float4 diffuseAlbedo = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.texCoord) * gDiffuseAlbedo;
-	pin.normalW = normalize(pin.normalW);
-	float3 toEyeW = normalize(gEyePosW - pin.posW);
+
+	float3 binormal = normalize(cross(pin.normalW, pin.tangentW));
+	float3x3 TBN = float3x3(pin.tangentW, binormal, pin.normalW);
+
+	float3 normalTex = gNormalMap.Sample(gsamAnisotropicWrap, pin.texCoord).rgb;
+	normalTex = normalize(normalTex * 2.0f - 1.0f);
+	pin.normalW = normalize(mul(normalTex, TBN));
+
+	float3 toEyeW = gEyePosW - pin.posW;
+	float disToEye = length(toEyeW);
+	toEyeW = normalize(toEyeW);
 
 	float4 ambientLight = gAmbientIlluminating * gDiffuseAlbedo;
 
@@ -167,6 +185,10 @@ float4 PS(VertexOut pin) : SV_Target
 	float4 directLight = ComputeAllLights(gLights, material, pin.posW, pin.normalW, toEyeW, shadowFactor);
 
 	float4 allLightColor = ambientLight + directLight;
+
+	float fogAlpha = saturate((disToEye - 1.0f) / 50.0f);
+	allLightColor = lerp(allLightColor, float4(1.0f,1.0f,0.0f,1.0f), fogAlpha);
+
 	allLightColor.a = gDiffuseAlbedo.a;
 
 	return allLightColor;

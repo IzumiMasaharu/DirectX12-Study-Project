@@ -1,10 +1,10 @@
 ﻿//--------------------------------------------------------------------------------------
 // File: DDSTextureLoader.cpp
 //
-// Functions for loading a DDS texture and creating a Direct3D 11 runtime resource for it
+// Functions for loading a DDS textureUV and creating a Direct3D 11 runtime resource for it
 //
 // Note these functions are useful as a light-weight runtime loader for DDS files. For
-// a full-featured DDS file reader, writer, and texture processing pipeline see
+// a full-featured DDS file reader, writer, and textureUV processing pipeline see
 // the 'Texconv' sample and the 'DirectXTex' library.
 //
 // THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
@@ -1305,7 +1305,7 @@ static HRESULT CreateD3DResources12(
                 cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture.Get(),
                     D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
 
-                // Use Heap-allocating UpdateSubresources implementation for variable number of subresources (which is the case for textures).
+                // Use Heap-allocating UpdateSubresources implementation for variable number of subresources (which is the case for diffuseTextures).
                 UpdateSubresources(cmdList, texture.Get(), textureUploadHeap.Get(), 0, 0, num2DSubresources, initData);
 
                 cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture.Get(),
@@ -1382,7 +1382,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
         switch (d3d10ext->resourceDimension)
         {
         case D3D11_RESOURCE_DIMENSION_TEXTURE1D:
-            // D3DX writes 1D textures with a fixed Height of 1
+            // D3DX writes 1D diffuseTextures with a fixed Height of 1
             if ((header->flags & DDS_HEIGHT) && height != 1)
             {
                 return HRESULT_FROM_WIN32(ERROR_INVALID_DATA);
@@ -1447,7 +1447,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
             depth = 1;
             resDim = D3D11_RESOURCE_DIMENSION_TEXTURE2D;
 
-            // Note there's no way for a legacy Direct3D 9 DDS to express a '1D' texture
+            // Note there's no way for a legacy Direct3D 9 DDS to express a '1D' textureUV
         }
 
         assert(BitsPerPixel(format) != 0);
@@ -1510,7 +1510,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
         hr = d3dDevice->CheckFormatSupport(format, &fmtSupport);
         if (SUCCEEDED(hr) && (fmtSupport & D3D11_FORMAT_SUPPORT_MIP_AUTOGEN))
         {
-            // 10level9 feature levels do not support auto-gen mipgen for volume textures
+            // 10level9 feature levels do not support auto-gen mipgen for volume diffuseTextures
             if ((resDim != D3D11_RESOURCE_DIMENSION_TEXTURE3D)
                 || (d3dDevice->GetFeatureLevel() >= D3D_FEATURE_LEVEL_10_0))
             {
@@ -1521,7 +1521,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
 
     if (autogen)
     {
-        // Create texture with auto-generated mipmaps
+        // Create textureUV with auto-generated mipmaps
         ID3D11Resource* tex = nullptr;
         hr = CreateD3DResources(d3dDevice, resDim, width, height, depth, 0, arraySize,
             format, usage,
@@ -1602,7 +1602,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
     }
     else
     {
-        // Create the texture
+        // Create the textureUV
         std::unique_ptr<D3D11_SUBRESOURCE_DATA[]> initData(new (std::nothrow) D3D11_SUBRESOURCE_DATA[mipCount * arraySize]);
         if (!initData)
         {
@@ -1835,7 +1835,7 @@ static HRESULT CreateTextureFromDDS12(
         return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
     }
 
-    // Create the texture
+    // Create the textureUV
     std::unique_ptr<D3D12_SUBRESOURCE_DATA[]> initData(
         new (std::nothrow) D3D12_SUBRESOURCE_DATA[mipCount * arraySize]
     );
@@ -2178,7 +2178,7 @@ HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
     {
         /*
         #if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
-                if (texture != 0 || textureView != 0)
+                if (textureUV != 0 || textureView != 0)
                 {
                     CHAR strFileA[MAX_PATH];
                     int result = WideCharToMultiByte(CP_ACP,
@@ -2202,9 +2202,9 @@ HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
                             pstrName++;
                         }
 
-                        if (texture != 0 && *texture != 0)
+                        if (textureUV != 0 && *textureUV != 0)
                         {
-                            (*texture)->SetPrivateData(WKPDID_D3DDebugObjectName,
+                            (*textureUV)->SetPrivateData(WKPDID_D3DDebugObjectName,
                                 static_cast<UINT>(strnlen_s(pstrName, MAX_PATH)),
                                 pstrName
                                 );

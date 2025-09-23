@@ -1,4 +1,4 @@
-#include "MyApp.h"
+﻿#include "MyApp.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -114,7 +114,7 @@ bool MyApp::Init()
 	BuildShaders(); 
 	BuildInputLayout(); 
 	BuildMeshGeometry(); 
-	BuildImportedGeometry(); 
+	BuildImportedGeometryFromOBJ(L"../Resources/Models/Nailong.obj");
 	BuildMaterials(); 
 	BuildRenderItems(); 
 	BuildFrameResources(); 
@@ -236,7 +236,8 @@ void MyApp::Draw(const GameTimer& GTimer)
 	commandList->ResourceBarrier(1,
 		&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	commandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0, nullptr);
+	const FLOAT clearScreenColor[4] = { 0.7f, 0.7f, 0.0f, 1.0f };
+	commandList->ClearRenderTargetView(CurrentBackBufferView(), clearScreenColor, 0, nullptr);
 	commandList->ClearDepthStencilView(DepthStencilBufferView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	commandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilBufferView());
@@ -249,7 +250,7 @@ void MyApp::Draw(const GameTimer& GTimer)
 	auto passConstBuffer = currentFrameResource->passConstBuffer->Resource();
 	commandList->SetGraphicsRootConstantBufferView(3, passConstBuffer->GetGPUVirtualAddress());
 
-	DrawRenderItems(commandList.Get(), opaqueRenderItems);
+	DrawRenderItems(commandList.Get(), allRenderItems);
 
 	commandList->ResourceBarrier(1,
 		&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
@@ -306,6 +307,7 @@ void MyApp::MouseWheel(short zDelta)
 void MyApp::LoadTexture()
 {
 	UINT srvIndex = 0;
+
 	auto texStone = std::make_unique<Texture>();
 	texStone->name = "stone";
 	texStone->filename = L"../Resources/Textures/stone.dds";
@@ -327,18 +329,33 @@ void MyApp::LoadTexture()
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
 		d3dDevice.Get(), commandList.Get(), texWater->filename.c_str(), texWater->resource, texWater->uploadHeap));
 
-	textures[texStone->name] = std::move(texStone);
-	textures[texBrick->name] = std::move(texBrick);
-	textures[texWater->name] = std::move(texWater);
+	auto texDefaultNormal = std::make_unique<Texture>();
+	texDefaultNormal->name = "default";
+	texDefaultNormal->filename = L"../Resources/Textures/default_normal.dds";
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
+		d3dDevice.Get(), commandList.Get(), texDefaultNormal->filename.c_str(), texDefaultNormal->resource, texDefaultNormal->uploadHeap));
+
+	auto texBrickNormal = std::make_unique<Texture>();
+	texBrickNormal->name = "brick";
+	texBrickNormal->filename = L"../Resources/Textures/brick_normal.dds";
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
+		d3dDevice.Get(), commandList.Get(), texBrickNormal->filename.c_str(), texBrickNormal->resource, texBrickNormal->uploadHeap));
+	
+	diffuseTextures[texStone->name] = std::move(texStone);
+	diffuseTextures[texBrick->name] = std::move(texBrick);
+	diffuseTextures[texWater->name] = std::move(texWater);
+
+	normalTextures[texDefaultNormal->name] = std::move(texDefaultNormal);
+	normalTextures[texBrickNormal->name] = std::move(texBrickNormal);
 }
 // 创建根签名
 void MyApp::BuildRootSignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE textureTable;
-	textureTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	CD3DX12_DESCRIPTOR_RANGE textureSrvRange; // 描述符范围，一段连续、类型相同的描述符
+	textureSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0);
 
 	CD3DX12_ROOT_PARAMETER slotRootParameter[4];
-	slotRootParameter[0].InitAsDescriptorTable(1, &textureTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[0].InitAsDescriptorTable(1, &textureSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // 描述符表 存储一系列描述符范围
 	slotRootParameter[1].InitAsConstantBufferView(0);
 	slotRootParameter[2].InitAsConstantBufferView(1);
 	slotRootParameter[3].InitAsConstantBufferView(2);
@@ -366,15 +383,9 @@ void MyApp::BuildDescriptorHeaps()
 	D3D12_DESCRIPTOR_HEAP_DESC SRV_HEAP_DESC;
 	SRV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	SRV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	SRV_HEAP_DESC.NumDescriptors = textures.size();
+	SRV_HEAP_DESC.NumDescriptors = diffuseTextures.size() * 2;
 	SRV_HEAP_DESC.NodeMask = 0;
 	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC, IID_PPV_ARGS(&srvDescriptorHeap)));
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-	auto stoneTex = textures["stone"]->resource;
-	auto brickTex = textures["brick"]->resource;
-	auto waterTex = textures["water"]->resource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -382,16 +393,29 @@ void MyApp::BuildDescriptorHeaps()
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = -1;
 
-	srvDesc.Format = stoneTex->GetDesc().Format;
-	d3dDevice->CreateShaderResourceView(stoneTex.Get(), &srvDesc, srvCPUHandle);
+	for (auto& tex: diffuseTextures)
+	{
+		CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		srvCPUHandle.Offset(tex.second->srvHeapIndex, cbs_srv_uavDescriptorSize*2);
 
-	srvCPUHandle.Offset(1, cbs_srv_uavDescriptorSize);
-	srvDesc.Format = brickTex->GetDesc().Format;
-	d3dDevice->CreateShaderResourceView(brickTex.Get(), &srvDesc, srvCPUHandle);
+		srvDesc.Format = tex.second->resource->GetDesc().Format;
+		d3dDevice->CreateShaderResourceView(tex.second->resource.Get(), &srvDesc, srvCPUHandle);
+		srvCPUHandle.Offset(1, cbs_srv_uavDescriptorSize);
 
-	srvCPUHandle.Offset(1, cbs_srv_uavDescriptorSize);
-	srvDesc.Format = waterTex->GetDesc().Format;
-	d3dDevice->CreateShaderResourceView(waterTex.Get(), &srvDesc, srvCPUHandle);
+		auto iter = normalTextures.find(tex.first);
+		if (iter != normalTextures.end())
+		{
+			srvDesc.Format = iter->second->resource->GetDesc().Format;
+			d3dDevice->CreateShaderResourceView(iter->second->resource.Get(), &srvDesc, srvCPUHandle);
+		}
+		else
+		{
+			auto& defaultNormal = normalTextures["default"];
+			srvDesc.Format = defaultNormal->resource->GetDesc().Format;
+			d3dDevice->CreateShaderResourceView(defaultNormal->resource.Get(), &srvDesc, srvCPUHandle);
+		}
+		
+	}
 }
 // 编译着色器
 void MyApp::BuildShaders()
@@ -407,68 +431,71 @@ void MyApp::BuildInputLayout()
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+		{"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,24,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 	};
 }
 // 创建网格体
 void MyApp::BuildMeshGeometry()
 {
-	GeometryGenerator GeoGenerator;
-	GeometryGenerator::MeshData cylinder = GeoGenerator.CreateCylinder(1.0f, 0.56f, 4.0f, 100, 20);
-	GeometryGenerator::MeshData ball = GeoGenerator.CreateBall(1.0f, 50, 50);
-	GeometryGenerator::MeshData gird = GeoGenerator.CreateGird(10.0f, 10.0f, 100, 100);
-	
+	GeometryGenerator::MeshData cylinder = GeometryGenerator::CreateCylinder(1.0f, 0.56f, 4.0f, 100, 20);
+	GeometryGenerator::MeshData ball = GeometryGenerator::CreateBall(1.0f, 50, 50);
+	GeometryGenerator::MeshData gird = GeometryGenerator::CreateGird(10.0f, 10.0f, 100, 100);
+
 	UINT CylinderVertexOffset = 0;
-	auto BallVertexOffset = (UINT)cylinder.Vertices.size();
-	auto GridVertexOffset = (UINT)(cylinder.Vertices.size() + ball.Vertices.size());
+	auto BallVertexOffset = (UINT)cylinder.vertices.size();
+	auto GridVertexOffset = (UINT)(cylinder.vertices.size() + ball.vertices.size());
 
 	UINT CylinderIndexOffset = 0;
-	auto BallIndexOffset = (UINT)cylinder.Indices_32.size();
-	auto GridIndexOffset = (UINT)(cylinder.Indices_32.size() + ball.Indices_32.size());
+	auto BallIndexOffset = (UINT)cylinder.indices32.size();
+	auto GridIndexOffset = (UINT)(cylinder.indices32.size() + ball.indices32.size());
 
 	SubmeshGeometry Geo_Cylinder;
 	Geo_Cylinder.name = "Geo_Cylinder";
 	Geo_Cylinder.vertexBaseLocation = CylinderVertexOffset;
 	Geo_Cylinder.indexStartLocation = CylinderIndexOffset;
-	Geo_Cylinder.indexCount = (UINT)cylinder.Indices_32.size();
+	Geo_Cylinder.indexCount = (UINT)cylinder.indices32.size();
 	SubmeshGeometry Geo_Ball;
 	Geo_Ball.name = "Geo_Ball";
 	Geo_Ball.vertexBaseLocation = BallVertexOffset;
 	Geo_Ball.indexStartLocation = BallIndexOffset;
-	Geo_Ball.indexCount = (UINT)ball.Indices_32.size();
+	Geo_Ball.indexCount = (UINT)ball.indices32.size();
 	SubmeshGeometry Geo_Gird;
 	Geo_Gird.name = "Geo_Gird";
 	Geo_Gird.vertexBaseLocation = GridVertexOffset;
 	Geo_Gird.indexStartLocation = GridIndexOffset;
-	Geo_Gird.indexCount = (UINT)gird.Indices_32.size();
+	Geo_Gird.indexCount = (UINT)gird.indices32.size();
 
-	auto totalVertexCount = ball.Vertices.size() + cylinder.Vertices.size() + gird.Vertices.size();
+	auto totalVertexCount = ball.vertices.size() + cylinder.vertices.size() + gird.vertices.size();
 
 	std::vector<VertexConstants> vertices(totalVertexCount);
 	std::vector<std::uint16_t> indices;
 	UINT k = 0;
-	for (size_t i = 0; i < cylinder.Vertices.size(); ++i,++k)
+	for (size_t i = 0; i < cylinder.vertices.size(); ++i, ++k)
 	{
-		vertices[k].pos = cylinder.Vertices[i].position;
-		vertices[k].normal = cylinder.Vertices[i].Normal;
-		vertices[k].texture = cylinder.Vertices[i].Texture;
+		vertices[k].pos = cylinder.vertices[i].position;
+		vertices[k].normal = cylinder.vertices[i].normal;
+		vertices[k].tangent = cylinder.vertices[i].tangent;
+		vertices[k].textureUV = cylinder.vertices[i].textureUV;
 	}
-	for (size_t i = 0; i < ball.Vertices.size(); ++i,++k)
+	for (size_t i = 0; i < ball.vertices.size(); ++i, ++k)
 	{
-		vertices[k].pos = ball.Vertices[i].position;
-		vertices[k].normal = ball.Vertices[i].Normal;
-		vertices[k].texture = ball.Vertices[i].Texture;
+		vertices[k].pos = ball.vertices[i].position;
+		vertices[k].normal = ball.vertices[i].normal;
+		vertices[k].tangent = ball.vertices[i].tangent;
+		vertices[k].textureUV = ball.vertices[i].textureUV;
 	}
-	for (size_t i = 0; i < gird.Vertices.size(); ++i,++k)
+	for (size_t i = 0; i < gird.vertices.size(); ++i, ++k)
 	{
-		vertices[k].pos = gird.Vertices[i].position;
-		vertices[k].normal = gird.Vertices[i].Normal;
-		vertices[k].texture = gird.Vertices[i].Texture;
+		vertices[k].pos = gird.vertices[i].position;
+		vertices[k].normal = gird.vertices[i].normal;
+		vertices[k].tangent = gird.vertices[i].tangent;
+		vertices[k].textureUV = gird.vertices[i].textureUV;
 	}
 
-	indices.insert(indices.end(), std::begin(cylinder.GetIndices_16()), std::end(cylinder.GetIndices_16()));
-	indices.insert(indices.end(), std::begin(ball.GetIndices_16()), std::end(ball.GetIndices_16()));
-	indices.insert(indices.end(), std::begin(gird.GetIndices_16()), std::end(gird.GetIndices_16()));
+	indices.insert(indices.end(), std::begin(cylinder.getIndices16()), std::end(cylinder.getIndices16()));
+	indices.insert(indices.end(), std::begin(ball.getIndices16()), std::end(ball.getIndices16()));
+	indices.insert(indices.end(), std::begin(gird.getIndices16()), std::end(gird.getIndices16()));
 
 	const UINT vertexBufferByteSize = (UINT)vertices.size() * sizeof(VertexConstants);
 	const UINT indexBufferByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
@@ -495,128 +522,118 @@ void MyApp::BuildMeshGeometry()
 
 	geos[Geo->name] = std::move(Geo);
 }
-void MyApp::BuildImportedGeometry()
+
+void MyApp::BuildImportedGeometryFromOBJ(const std::wstring& objPath)
 {
-	std::ifstream fin("../Resources/Models/skull.txt");
+	GeometryGenerator::MeshData nailong = GeometryGenerator::CreateImportedGeometryFromOBJ(L"../Resources/Models/Nailong.obj");
 
-	if (!fin)
+	UINT nailongVertexOffset = 0;
+	UINT nailongIndexOffset = 0;
+
+	auto totalVertexCount = nailong.vertices.size();
+
+	std::vector<VertexConstants> vertices(totalVertexCount);
+	std::vector<std::uint32_t> indices;
+	UINT k = 0;
+	for (size_t i = 0; i < nailong.vertices.size(); ++i, ++k)
 	{
-		MessageBox(nullptr, L"../Resources/Models/skull.txt not found.", nullptr, 0);
-		return;
+		vertices[k].pos = nailong.vertices[i].position;
+		vertices[k].normal = nailong.vertices[i].normal;
+		vertices[k].tangent = nailong.vertices[i].tangent;
+		vertices[k].textureUV = nailong.vertices[i].textureUV;
 	}
 
-	UINT vcount = 0;
-	UINT tcount = 0;
-	std::string ignore;
-
-	fin >> ignore >> vcount;
-	fin >> ignore >> tcount;
-	fin >> ignore >> ignore >> ignore >> ignore;
-
-	std::vector<VertexConstants> vertices(vcount);
-	for (UINT i = 0; i < vcount; ++i)
-	{
-		fin >> vertices[i].pos.x >> vertices[i].pos.y >> vertices[i].pos.z;
-		fin >> vertices[i].normal.x >> vertices[i].normal.y >> vertices[i].normal.z;
-	}
-
-	fin >> ignore;
-	fin >> ignore;
-	fin >> ignore;
-
-	std::vector<std::int32_t> indices(3 * tcount);
-	for (UINT i = 0; i < tcount; ++i)
-	{
-		fin >> indices[i * 3 + 0] >> indices[i * 3 + 1] >> indices[i * 3 + 2];
-	}
-
-	fin.close();
+	indices.insert(indices.end(), std::begin(nailong.getIndices32()), std::end(nailong.getIndices32()));
 
 	const UINT vbByteSize = (UINT)vertices.size() * sizeof(VertexConstants);
-
-	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::int32_t);
+	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint32_t);
 
 	auto geo = std::make_unique<MeshGeometry>();
-	geo->name = "skullGeo";
-
+	geo->name = "objGeo";
+	
 	ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->vertexBufferCPU));
 	CopyMemory(geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
-
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->indexBufferCPU));
 	CopyMemory(geo->indexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-	geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(),
-		commandList.Get(), vertices.data(), vbByteSize, geo->vertexBufferUploader);
-
-	geo->indexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(),
-		commandList.Get(), indices.data(), ibByteSize, geo->indexBufferUploader);
+	geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), vertices.data(), vbByteSize, geo->vertexBufferUploader);
+	geo->indexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), indices.data(), ibByteSize, geo->indexBufferUploader);
 
 	geo->vertexByteStride = sizeof(VertexConstants);
 	geo->vertexBufferByteSize = vbByteSize;
 	geo->indexFormat = DXGI_FORMAT_R32_UINT;
 	geo->indexBufferByteSize = ibByteSize;
 
-	SubmeshGeometry submesh;
-	submesh.indexCount = (UINT)indices.size();
-	submesh.indexStartLocation = 0;
-	submesh.vertexBaseLocation = 0;
+	SubmeshGeometry nailongSubMesh;
+	nailongSubMesh.name = "Nailong";
+	nailongSubMesh.vertexBaseLocation = nailongVertexOffset;
+	nailongSubMesh.indexStartLocation = nailongIndexOffset;
+	nailongSubMesh.indexCount = (UINT)indices.size();
 
-	geo->submeshList["skull"] = submesh;
-
+	geo->submeshList[nailongSubMesh.name] = nailongSubMesh;
 	geos[geo->name] = std::move(geo);
 }
+
+
 // 创建材质
 void MyApp::BuildMaterials()
 {
 	UINT MaterialIndex = 0;
 
-	auto matGrass = std::make_unique<Material>();
-	matGrass->name = "Grass";
-	matGrass->materialConstBufferIndex = MaterialIndex++;
-	matGrass->numDirtyFrames = gNumFrameResources;
-	matGrass->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	matGrass->fresneRf0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	matGrass->roughness = 0.5f;
-	auto matGlass = std::make_unique<Material>();
-	matGlass->name = "Glass";
-	matGlass->materialConstBufferIndex = MaterialIndex++;
-	matGlass->numDirtyFrames = gNumFrameResources;
-	matGlass->diffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	matGlass->fresneRf0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
-	matGlass->roughness = 0.02f;
+	auto matBrick = std::make_unique<Material>();
+	matBrick->name = "Brick";
+	matBrick->materialConstBufferIndex = MaterialIndex++;
+	matBrick->numDirtyFrames = gNumFrameResources;
+	matBrick->diffuseAlbedo = XMFLOAT4(0.5f, 0.45f, 0.4f, 1.0f);
+	matBrick->fresneRf0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
+	matBrick->roughness = 0.7f;
+	auto matStone = std::make_unique<Material>();
+	matStone->name = "Stone";
+	matStone->materialConstBufferIndex = MaterialIndex++;
+	matStone->numDirtyFrames = gNumFrameResources;
+	matStone->diffuseAlbedo = XMFLOAT4(0.9f, 0.9f, 0.85f, 1.0f);
+	matStone->fresneRf0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
+	matStone->roughness = 0.15f;
+	auto matBone = std::make_unique<Material>();
+	matBone->name = "Bone";
+	matBone->materialConstBufferIndex = MaterialIndex++;
+	matBone->numDirtyFrames = gNumFrameResources;
+	matBone->diffuseAlbedo = XMFLOAT4(0.95f, 0.93f, 0.85f, 1.0f);
+	matBone->fresneRf0 = XMFLOAT3(0.03f, 0.03f, 0.03f);
+	matBone->roughness = 0.25f;
 	auto matWater = std::make_unique<Material>();
 	matWater->name = "Water";
 	matWater->materialConstBufferIndex = MaterialIndex++;
 	matWater->numDirtyFrames = gNumFrameResources;
-	matWater->diffuseAlbedo = XMFLOAT4(0.3f, 0.5f, 0.7f, 1.0f);
+	matWater->diffuseAlbedo = XMFLOAT4(0.3f, 0.5f, 0.7f, 0.7f);
 	matWater->fresneRf0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
 	matWater->roughness = 0.02f;
 
-	materials[matGrass->name] = std::move(matGrass);
-	materials[matGlass->name] = std::move(matGlass);
+	materials[matBrick->name] = std::move(matBrick);
+	materials[matStone->name] = std::move(matStone);
+	materials[matBone->name] = std::move(matBone);
 	materials[matWater->name] = std::move(matWater);
 }
 // 创建渲染项
 void MyApp::BuildRenderItems()
 {
+	UINT GeoObjectIndex = 0;
+
 	auto leftCylinderRenderItem = std::make_unique<RenderItem>();
 	auto leftBallRenderItem = std::make_unique<RenderItem>();
 	auto rightCylinderRenderItem = std::make_unique<RenderItem>();
 	auto rightBallRenderItem = std::make_unique<RenderItem>();
-	auto gridRenderItem = std::make_unique<RenderItem>();
 
-	UINT GeoObjectIndex = 0;
-
-	XMMATRIX leftCylinderWorld = XMMatrixTranslation(0.0f, +0.0f, -2.0f);
-	XMMATRIX leftBallWorld = XMMatrixTranslation(0.0f, +2.96f, -2.0f);
-	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f ,+2.0f );
-	XMMATRIX rightBallWorld = XMMatrixTranslation(0.0f, +2.96f, +2.0f);
-	XMMATRIX gridWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX leftCylinderWorld = XMMatrixTranslation(0.0f, +0.0f, -2.5f);
+	XMMATRIX leftBallWorld = XMMatrixTranslation(0.0f, +2.96f, -2.5f);
+	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f ,+2.5f );
+	XMMATRIX rightBallWorld = XMMatrixTranslation(0.0f, +2.96f, +2.5f);
 
 	XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
 	leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	leftCylinderRenderItem->material = materials["Grass"].get();
-	leftCylinderRenderItem->diffuseTexture = textures["brick"].get();
+	leftCylinderRenderItem->material = materials["Brick"].get();
+	leftCylinderRenderItem->diffuseTexture = diffuseTextures["brick"].get();
+	leftCylinderRenderItem->normalTexture = normalTextures["brick"].get();
 	leftCylinderRenderItem->Geo = geos["Geo"].get();
 	leftCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	leftCylinderRenderItem->indexCount = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
@@ -625,8 +642,9 @@ void MyApp::BuildRenderItems()
 
 	XMStoreFloat4x4(&leftBallRenderItem->worldTransform, leftBallWorld);
 	leftBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	leftBallRenderItem->material = materials["Grass"].get();
-	leftBallRenderItem->diffuseTexture = textures["stone"].get();
+	leftBallRenderItem->material = materials["Stone"].get();
+	leftBallRenderItem->diffuseTexture = diffuseTextures["stone"].get();
+	leftBallRenderItem->normalTexture = normalTextures["default"].get();
 	leftBallRenderItem->Geo = geos["Geo"].get();
 	leftBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	leftBallRenderItem->indexCount = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
@@ -635,8 +653,9 @@ void MyApp::BuildRenderItems()
 
 	XMStoreFloat4x4(&rightCylinderRenderItem->worldTransform, rightCylinderWorld);
 	rightCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	rightCylinderRenderItem->material = materials["Grass"].get();
-	rightCylinderRenderItem->diffuseTexture = textures["brick"].get();
+	rightCylinderRenderItem->material = materials["Brick"].get();
+	rightCylinderRenderItem->diffuseTexture = diffuseTextures["brick"].get();
+	rightCylinderRenderItem->normalTexture = normalTextures["brick"].get();
 	rightCylinderRenderItem->Geo = geos["Geo"].get();
 	rightCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	rightCylinderRenderItem->indexCount = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
@@ -645,46 +664,55 @@ void MyApp::BuildRenderItems()
 
 	XMStoreFloat4x4(&rightBallRenderItem->worldTransform, rightBallWorld);
 	rightBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	rightBallRenderItem->material = materials["Grass"].get();
-	rightBallRenderItem->diffuseTexture = textures["stone"].get();
+	rightBallRenderItem->material = materials["Stone"].get();
+	rightBallRenderItem->diffuseTexture = diffuseTextures["stone"].get();
+	rightBallRenderItem->normalTexture = normalTextures["default"].get();
 	rightBallRenderItem->Geo = geos["Geo"].get();
 	rightBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	rightBallRenderItem->indexCount = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
 	rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
 	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
+	auto nailongRenderItem = std::make_unique<RenderItem>();
+	XMMATRIX nailongWorld = XMMatrixScaling(0.2f, 0.2f, 0.2f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, MathHelper::Pi / 2) * XMMatrixTranslation(0.0f, -1.0f, -0.0f);
+
+	XMStoreFloat4x4(&nailongRenderItem->worldTransform, nailongWorld);
+	nailongRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+	nailongRenderItem->material = materials["Bone"].get();
+	nailongRenderItem->diffuseTexture = diffuseTextures["stone"].get();
+	nailongRenderItem->normalTexture = normalTextures["default"].get();
+	nailongRenderItem->Geo = geos["objGeo"].get();
+	nailongRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	nailongRenderItem->indexCount = nailongRenderItem->Geo->submeshList["Nailong"].indexCount;
+	nailongRenderItem->indexStartLocation = nailongRenderItem->Geo->submeshList["Nailong"].indexStartLocation;
+	nailongRenderItem->vertexBaseLocation = nailongRenderItem->Geo->submeshList["Nailong"].vertexBaseLocation;
+
+	auto gridRenderItem = std::make_unique<RenderItem>();
+	XMMATRIX gridWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+
 	XMStoreFloat4x4(&gridRenderItem->worldTransform, gridWorld);
 	gridRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	gridRenderItem->material = materials["Water"].get();
-	gridRenderItem->diffuseTexture = textures["water"].get();
+	gridRenderItem->diffuseTexture = diffuseTextures["water"].get();
+	gridRenderItem->normalTexture = normalTextures["default"].get();
 	gridRenderItem->Geo = geos["Geo"].get();
 	gridRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	gridRenderItem->indexCount = gridRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
 	gridRenderItem->indexStartLocation = gridRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
 	gridRenderItem->vertexBaseLocation = gridRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
 
-	auto skullRenderItem = std::make_unique<RenderItem>();
-	XMMATRIX skullWorld = XMMatrixScaling(0.25f, 0.25f, 0.25f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, 3*MathHelper::Pi / 2);
+	opaqueRenderItems.push_back(std::move(leftCylinderRenderItem));
+	opaqueRenderItems.push_back(std::move(leftBallRenderItem));
+	opaqueRenderItems.push_back(std::move(rightCylinderRenderItem));
+	opaqueRenderItems.push_back(std::move(rightBallRenderItem));
+	opaqueRenderItems.push_back(std::move(nailongRenderItem));
+	transparentRenderItems.push_back(std::move(gridRenderItem));
 
-	XMStoreFloat4x4(&skullRenderItem->worldTransform, skullWorld);
-	skullRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	skullRenderItem->material = materials["Glass"].get();
-	skullRenderItem->diffuseTexture = textures["stone"].get();
-	skullRenderItem->Geo = geos["skullGeo"].get();
-	skullRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	skullRenderItem->indexCount = skullRenderItem->Geo->submeshList["skull"].indexCount;
-	skullRenderItem->indexStartLocation = skullRenderItem->Geo->submeshList["skull"].indexStartLocation;
-	skullRenderItem->vertexBaseLocation = skullRenderItem->Geo->submeshList["skull"].vertexBaseLocation;
+	for (auto& item : opaqueRenderItems)
+		allRenderItems.push_back(item.get());
 
-	allRenderItems.push_back(std::move(leftCylinderRenderItem));
-	allRenderItems.push_back(std::move(leftBallRenderItem));
-	allRenderItems.push_back(std::move(rightCylinderRenderItem));
-	allRenderItems.push_back(std::move(rightBallRenderItem));
-	allRenderItems.push_back(std::move(gridRenderItem));
-	allRenderItems.push_back(std::move(skullRenderItem));
-
-	for (auto& i: allRenderItems)
-		opaqueRenderItems.push_back(i.get());
+	for (auto& item : transparentRenderItems)
+		allRenderItems.push_back(item.get());
 }
 // 创建帧资源
 void MyApp::BuildFrameResources()
@@ -713,6 +741,7 @@ void MyApp::BuildPSOs()
 		shaders["PS"]->GetBufferSize()
 	};
 	OpaquePSODesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	OpaquePSODesc.BlendState.AlphaToCoverageEnable = true;
 	OpaquePSODesc.SampleMask = UINT_MAX;
 	OpaquePSODesc.RasterizerState = drd;
 	OpaquePSODesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
@@ -721,11 +750,15 @@ void MyApp::BuildPSOs()
 	OpaquePSODesc.NumRenderTargets = 1;
 	OpaquePSODesc.RTVFormats[0] = backBufferFormat;
 	OpaquePSODesc.DSVFormat = depthStencilFormat;
-	OpaquePSODesc.SampleDesc.Count = isMSAA4xOn ? 4 : 1;
-	OpaquePSODesc.SampleDesc.Quality = isMSAA4xOn ? (MSAA4xQualityLevel - 1) : 0;
+	OpaquePSODesc.SampleDesc.Count = 1;
+	OpaquePSODesc.SampleDesc.Quality = 0;
 	OpaquePSODesc.NodeMask = 0;
 	OpaquePSODesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&OpaquePSODesc, IID_PPV_ARGS(&PSOs["Solid"])));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaque4xPsoDesc = OpaquePSODesc;	//复制一份opaquePsoDesc，开启MSAA时用
+	opaque4xPsoDesc.SampleDesc.Count = 4;	//采样数量设为4
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&opaque4xPsoDesc, IID_PPV_ARGS(&PSOs["opaque4x"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC WavePSODesc = OpaquePSODesc;
 	WavePSODesc.VS =
@@ -735,7 +768,7 @@ void MyApp::BuildPSOs()
 	};
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WavePSODesc, IID_PPV_ARGS(&PSOs["Wave"])));
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = OpaquePSODesc;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = WavePSODesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparentBlendDesc;
 	transparentBlendDesc.BlendEnable = true;
 	transparentBlendDesc.LogicOpEnable = false;
@@ -748,6 +781,7 @@ void MyApp::BuildPSOs()
 	transparentBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
 	transparentBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	transparentPSODesc.BlendState.RenderTarget[0] = transparentBlendDesc;
+	transparentPSODesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&transparentPSODesc, IID_PPV_ARGS(&PSOs["Transparent"])));
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC WireframePSODesc = OpaquePSODesc;
@@ -832,8 +866,9 @@ void MyApp::UpdatePassConstBuffers()const
 	mRenderingPassConstantsBuffer.deltaTime = gameTimer.DeltaTime();
 	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };
 
-	mRenderingPassConstantsBuffer.lights[0].rgbIntensity = { 1.0f,1.0f,1.0f };
-	mRenderingPassConstantsBuffer.lights[0].position = { 6.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi),2.0f,6.0f*cosf(gameTimer.TotalTime()*MathHelper::Pi) };
+	mRenderingPassConstantsBuffer.lights[0].end = 20.0f;
+	mRenderingPassConstantsBuffer.lights[0].rgbIntensity = { 2.0f,2.0f,2.0f };
+	mRenderingPassConstantsBuffer.lights[0].position = { 6.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi/16.0f),2.0f,6.0f*cosf(gameTimer.TotalTime()*MathHelper::Pi/16.0f) };
 	mRenderingPassConstantsBuffer.lights[0].direction = { 1.0f,0.0f,0.0f };
 
 	auto currentPassConstsBuffer = currentFrameResource->passConstBuffer.get();
@@ -873,19 +908,19 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 	{
 		auto item = renderItems[itemIndex];
 		if(item->Geo == geos.at("Geo").get() && item->vertexBaseLocation == item->Geo->submeshList["Geo_Gird"].vertexBaseLocation)
-			commandList->SetPipelineState(PSOs.at("Wave").Get());
+			commandList->SetPipelineState(PSOs.at("Transparent").Get());
 
 		commandList->IASetVertexBuffers(0, 1, &item->Geo->VertexBufferView());
 		commandList->IASetIndexBuffer(&item->Geo->IndexBufferView());
 		commandList->IASetPrimitiveTopology(item->primitiveType);
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-		tex.Offset(item->diffuseTexture->srvHeapIndex, cbs_srv_uavDescriptorSize);
+		tex.Offset(item->diffuseTexture->srvHeapIndex, cbs_srv_uavDescriptorSize*2);
+		commandList->SetGraphicsRootDescriptorTable(0, tex);
 
 		D3D12_GPU_VIRTUAL_ADDRESS objectConstBufferAddress = objectConstBuffer->GetGPUVirtualAddress() + item->objectConstBufferIndex * objectConstBufferByteSize;
 		D3D12_GPU_VIRTUAL_ADDRESS materialConstBufferAddress = materialConstBuffer->GetGPUVirtualAddress() + item->material->materialConstBufferIndex * materialConstBufferByteSize;
-
-		commandList->SetGraphicsRootDescriptorTable(0, tex);
+		
 		commandList->SetGraphicsRootConstantBufferView(1, objectConstBufferAddress);
 		commandList->SetGraphicsRootConstantBufferView(2, materialConstBufferAddress);
 

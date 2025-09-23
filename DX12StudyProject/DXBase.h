@@ -126,6 +126,7 @@ public:
 
     // 获取静态采样器
     static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+
 };
 
 // 数学帮手，给我这种脑残用的

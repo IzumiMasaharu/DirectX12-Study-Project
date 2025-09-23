@@ -31,7 +31,7 @@ private:
 	void BuildShaders(); // 编译着色器
 	void BuildInputLayout(); // 创建输入布局
 	void BuildMeshGeometry(); // 创建网格体
-	void BuildImportedGeometry(); // 创建通过文件导入的模型
+	void BuildImportedGeometryFromOBJ(const std::wstring& filePath); // 创建通过文件导入的模型
 	void BuildMaterials(); // 创建材质
 	void BuildRenderItems(); // 创建渲染项
 	void BuildFrameResources(); // 创建帧资源
@@ -66,11 +66,12 @@ private:
 	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> geos; // 储存几何网格体的无序图
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOs; // 储存不同PSO的无序图
 	std::unordered_map<std::string, std::unique_ptr<Material>> materials; // 存储材质的无序图
-	std::unordered_map<std::string, std::unique_ptr<Texture>> textures; // 存储纹理的无序图
+	std::unordered_map<std::string, std::unique_ptr<Texture>> diffuseTextures; // 存储纹理的无序图
+	std::unordered_map<std::string, std::unique_ptr<Texture>> normalTextures; // 存储纹理的无序图
 	
-	std::vector<std::unique_ptr<RenderItem>> allRenderItems; // 储存有所有渲染项
-	std::vector<RenderItem*> opaqueRenderItems; // 储存不透明渲染项
-	std::vector<RenderItem*> transparentRenderItems; // 储存透明渲染项
+	std::vector<RenderItem*> allRenderItems; // 储存有所有渲染项
+	std::vector<std::unique_ptr<RenderItem>> opaqueRenderItems; // 储存不透明渲染项
+	std::vector<std::unique_ptr<RenderItem>> transparentRenderItems; // 储存透明渲染项
 
 	UINT currentFrameResourceIndex = 0; // 当前帧资源索引
 	std::vector<std::unique_ptr<FrameResource>> frameResources; // 全部帧资源

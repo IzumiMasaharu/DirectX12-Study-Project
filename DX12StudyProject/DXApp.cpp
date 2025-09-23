@@ -192,7 +192,6 @@ bool DXApp::InitDirectX3D()
     mQualityLevel.SampleCount = 4;
     ThrowIfFailed(d3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &mQualityLevel, sizeof(mQualityLevel)));
     MSAA4xQualityLevel = mQualityLevel.NumQualityLevels;
-    assert(MSAA4xQualityLevel > 0 && "当前MSAA级别不可用");
 
     // 获取描述符大小
     rtvDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -240,8 +239,8 @@ void DXApp::CreateSwapChain()
     scd.BufferDesc.RefreshRate.Denominator = 1; // 最低刷新率
     scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED; // 是否缩放
     scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; // 逐行扫描还是隔行扫描
-    scd.SampleDesc.Count = isMSAA4xOn ? 4 : 1; // 多重采样采样数量
-    scd.SampleDesc.Quality = isMSAA4xOn ? (MSAA4xQualityLevel - 1) : 0; // 多重采样质量级别
+    scd.SampleDesc.Count = 1; // 多重采样采样数量
+    scd.SampleDesc.Quality = 0; // 多重采样质量级别
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     scd.BufferCount = SwapChainBufferCount;
     scd.Windowed = true; // 窗口显示还是全屏显示
@@ -427,8 +426,8 @@ void DXApp::Resize()
     DSD.Width = clientWidth;
     DSD.Height = clientHeight;
     DSD.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    DSD.SampleDesc.Count = isMSAA4xOn ? 4 : 1;//多重采样采样数量
-    DSD.SampleDesc.Quality = isMSAA4xOn ? (MSAA4xQualityLevel - 1) : 0;//多重采样质量级别
+    DSD.SampleDesc.Count = 1;//多重采样采样数量
+    DSD.SampleDesc.Quality = 0;//多重采样质量级别
 
     // 指定深度缓冲区的初始化清除值
     D3D12_CLEAR_VALUE OptiClear;
@@ -483,15 +482,11 @@ bool DXApp::Get4xMSAAState()const
     return isMSAA4xOn;
 }
 // 更改4xMSAA功能开关状态
-void DXApp::Set4xMSAAState(bool On_Off)
+void DXApp::Set4xMSAAState(bool state)
 {
-    if (isMSAA4xOn != On_Off)
+    if (isMSAA4xOn != state)
     {
-        isMSAA4xOn = On_Off;
-
-        // Recreate the swapchain and buffers with new multisample settings.
-        CreateSwapChain();
-        Resize();
+        isMSAA4xOn = state;
     }
 }
 
