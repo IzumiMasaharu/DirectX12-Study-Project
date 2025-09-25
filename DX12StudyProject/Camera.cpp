@@ -8,15 +8,14 @@ Camera::Camera()
     look = { 0.0f, 0.0f, 1.0f };
     up = { 0.0f, 1.0f, 0.0f };
     right = { 1.0f, 0.0f, 0.0f };
-    updateViewMatrix();  // 初始化时计算一次
+    updateViewMatrix();
 }
 
 void Camera::setPosition(float x, float y, float z)
 {
     position = { x, y, z };
-    viewDirty = true;  // 标记需要更新
+    viewDirty = true; 
 }
-
 void Camera::setPosition(const DirectX::XMFLOAT3& pos)
 {
     position = pos;
@@ -31,21 +30,18 @@ void Camera::lookAt(const DirectX::XMFLOAT3& target)
     XMVECTOR worldUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     lookAt(lookAtDir, worldUp);
 }
-
 void Camera::lookAt(const DirectX::XMFLOAT3& target, float angle)
 {
     XMVECTOR worldUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     XMVECTOR positionVec = XMLoadFloat3(&position);
     XMVECTOR targetVec = XMLoadFloat3(&target);
     XMVECTOR lookAtDir = XMVectorSubtract(targetVec, positionVec);
-    
-    // 避免重复计算normalize
+
     lookAtDir = XMVector3Normalize(lookAtDir);
     XMVECTOR quaternion = XMQuaternionRotationAxis(lookAtDir, angle);
     worldUp = XMVector3Rotate(worldUp, quaternion);
     lookAt(lookAtDir, worldUp);
 }
-
 void Camera::lookAt(DirectX::XMVECTOR lookAtDir, DirectX::XMVECTOR worldUp)
 {
     XMVECTOR lookVec = XMVector3Normalize(lookAtDir);
@@ -59,6 +55,17 @@ void Camera::lookAt(DirectX::XMVECTOR lookAtDir, DirectX::XMVECTOR worldUp)
     viewDirty = true;
 }
 
+void Camera::setLens(float fov, float aspectRatio, float nearZ, float farZ)
+{
+	this->fov = fov;
+	this->aspectRatio = aspectRatio;
+	this->nearZ = nearZ;
+	this->farZ = farZ;
+
+	XMMATRIX P = XMMatrixPerspectiveFovLH(this->fov, this->aspectRatio, this->nearZ, this->farZ);
+	XMStoreFloat4x4(&projectionTransform, P);
+}
+
 void Camera::move(DirectX::XMVECTOR delta)
 {
     XMVECTOR positionVec = XMLoadFloat3(&position);
@@ -69,13 +76,12 @@ void Camera::move(DirectX::XMVECTOR delta)
 
 void Camera::roll(float angle)
 {
-    if (abs(angle) < 1e-6f) return;  // 避免微小旋转
+    if (abs(angle) < 1e-6f) return; 
     
     XMVECTOR lookVec = XMLoadFloat3(&look);
     XMVECTOR quaternion = XMQuaternionRotationAxis(lookVec, angle);
     rotate(quaternion);
 }
-
 void Camera::pitch(float angle)
 {
     if (abs(angle) < 1e-6f) return;
@@ -84,7 +90,6 @@ void Camera::pitch(float angle)
     XMVECTOR quaternion = XMQuaternionRotationAxis(rightVec, angle);
     rotate(quaternion);
 }
-
 void Camera::yaw(float angle)
 {
     if (abs(angle) < 1e-6f) return;
@@ -120,7 +125,6 @@ void Camera::updateViewMatrix()
 
     XMVECTOR P = XMLoadFloat3(&position);
     
-    // 一次性计算所有点积
     XMVECTOR dotR = XMVector3Dot(R, P);
     XMVECTOR dotU = XMVector3Dot(U, P);
     XMVECTOR dotL = XMVector3Dot(L, P);
@@ -129,12 +133,10 @@ void Camera::updateViewMatrix()
     float y = -XMVectorGetX(dotU);
     float z = -XMVectorGetX(dotL);
 
-    // 更新存储的向量
     XMStoreFloat3(&look, L);
     XMStoreFloat3(&up, U);
     XMStoreFloat3(&right, R);
 
-    // 直接构建视图矩阵
     viewTransform._11 = XMVectorGetX(R);  viewTransform._12 = XMVectorGetX(U);  viewTransform._13 = XMVectorGetX(L);  viewTransform._14 = 0.0f;
     viewTransform._21 = XMVectorGetY(R);  viewTransform._22 = XMVectorGetY(U);  viewTransform._23 = XMVectorGetY(L);  viewTransform._24 = 0.0f;
     viewTransform._31 = XMVectorGetZ(R);  viewTransform._32 = XMVectorGetZ(U);  viewTransform._33 = XMVectorGetZ(L);  viewTransform._34 = 0.0f;

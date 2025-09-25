@@ -186,15 +186,13 @@ void MyApp::Resize()
 	screenViewport.MinDepth = 0.0f;
 	scissorRect = { 0,0,clientWidth,clientHeight };
 
-	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, W_H_Ratio(), 1.0f, 100.0f);
-	XMStoreFloat4x4(&projectionTransform, P);
+	camera.setLens(0.25f * XM_PI, W_H_Ratio(), 1.0f, 1000.0f);
 }
 
 // 更新帧画面
 void MyApp::Update(const GameTimer& GTimer)
 {
 	ChangePSOstate();
-	UpdateCamera();
 
 	currentFrameResourceIndex = (currentFrameResourceIndex + 1) % gNumFrameResources;
 	currentFrameResource = frameResources[currentFrameResourceIndex].get();
@@ -568,7 +566,6 @@ void MyApp::BuildMeshGeometry()
 
 	geos[Geo->name] = std::move(Geo);
 }
-
 void MyApp::BuildImportedGeometryFromOBJ(const std::wstring& objPath)
 {
 	GeometryGenerator::MeshData nailong = GeometryGenerator::CreateImportedGeometryFromOBJ(L"../Resources/Models/Nailong.obj");
@@ -619,8 +616,6 @@ void MyApp::BuildImportedGeometryFromOBJ(const std::wstring& objPath)
 	geo->submeshList[nailongSubMesh.name] = nailongSubMesh;
 	geos[geo->name] = std::move(geo);
 }
-
-
 // 创建材质
 void MyApp::BuildMaterials()
 {
@@ -844,24 +839,6 @@ void MyApp::ChangePSOstate()
 	else
 		isWireframeEnabled = false;
 }
-// 更新摄像头矩阵
-void MyApp::UpdateCamera()
-{
-	eyePosition.x = radius * sinf(phi) * cosf(theta);
-	eyePosition.z = radius * sinf(phi) * sinf(theta);
-	eyePosition.y = radius * cosf(phi);
-
-	XMVECTOR pos = XMVectorSet(eyePosition.x, eyePosition.y, eyePosition.z, 1.0f);
-	XMVECTOR target = XMVectorZero();
-	XMVECTOR up;
-	if (sinf(phi) >= 0)
-		up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	else
-		up = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
-
-	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-	XMStoreFloat4x4(&viewTransform, view);
-}
 // 更新物体常量缓冲区（世界矩阵）
 void MyApp::UpdateObjectsConstBuffers()const
 {
@@ -889,8 +866,8 @@ void MyApp::UpdatePassConstBuffers()const
 {
 	RenderingPassConstants mRenderingPassConstantsBuffer;
 
-	XMMATRIX view = XMLoadFloat4x4(&viewTransform);
-	XMMATRIX proj = XMLoadFloat4x4(&projectionTransform);
+	XMMATRIX view = camera.getViewMatrixXM();
+	XMMATRIX proj = camera.getProjMatrixXM();
 	XMMATRIX viewProj=XMMatrixMultiply(view,proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
 	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
@@ -903,11 +880,11 @@ void MyApp::UpdatePassConstBuffers()const
 	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.invProj, XMMatrixTranspose(invProj));
 	XMStoreFloat4x4(&mRenderingPassConstantsBuffer.invViewProj, XMMatrixTranspose(invViewProj));
 
-	mRenderingPassConstantsBuffer.eyePosW = eyePosition;
+	mRenderingPassConstantsBuffer.eyePosW = camera.getPositionFloat3();
 	mRenderingPassConstantsBuffer.renderTargetSize = XMFLOAT2((float)clientWidth, (float)clientHeight);
 	mRenderingPassConstantsBuffer.invRenderTargetSize = XMFLOAT2(1.0f / clientWidth, 1.0f / clientHeight);
-	mRenderingPassConstantsBuffer.nearZ = 1.0f;
-	mRenderingPassConstantsBuffer.farZ = 100.0f;
+	mRenderingPassConstantsBuffer.nearZ = camera.getNearZ();
+	mRenderingPassConstantsBuffer.farZ = camera.getFarZ();
 	mRenderingPassConstantsBuffer.totalTime = gameTimer.TotalTime();
 	mRenderingPassConstantsBuffer.deltaTime = gameTimer.DeltaTime();
 	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };

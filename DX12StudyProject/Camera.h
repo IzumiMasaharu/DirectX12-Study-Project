@@ -27,32 +27,25 @@ public:
     void pitch(float angle);
     void yaw(float angle);
 
-    // Getter 方法（内联优化）
+    // Getter
     const DirectX::XMFLOAT3& getPositionFloat3() const { return position; }
     const DirectX::XMFLOAT3& getLookFloat3() const { return look; }
     const DirectX::XMFLOAT3& getUpFloat3() const { return up; }
     const DirectX::XMFLOAT3& getRightFloat3() const { return right; }
-    
-    DirectX::XMVECTOR getPosition() const { return DirectX::XMLoadFloat3(&position); }
-    DirectX::XMVECTOR getLook() const { return DirectX::XMLoadFloat3(&look); }
-    DirectX::XMVECTOR getUp() const { return DirectX::XMLoadFloat3(&up); }
-    DirectX::XMVECTOR getRight() const { return DirectX::XMLoadFloat3(&right); }
 
     float getNearZ() const { return nearZ; }
     float getFarZ() const { return farZ; }
     float getFov() const { return fov; }
-    float getAspect() const { return aspect; }
+    float getAspect() const { return aspectRatio; }
 
     // 矩阵获取（延迟更新）
     DirectX::XMFLOAT4X4 getViewMatrix();
     DirectX::XMMATRIX getViewMatrixXM();
     const DirectX::XMFLOAT4X4& getProjMatrix() const { return projectionTransform; }
     DirectX::XMMATRIX getProjMatrixXM() const { return DirectX::XMLoadFloat4x4(&projectionTransform); }
-
 private:
     void rotate(DirectX::XMVECTOR quaternion);
     void updateViewMatrix();
-
 private:
     // 相机状态
     DirectX::XMFLOAT3 position;
@@ -64,7 +57,7 @@ private:
     float nearZ = 0.0f;
     float farZ = 0.0f;
     float fov = 0.0f;
-    float aspect = 0.0f;
+    float aspectRatio = 0.0f;
 
     // 变换矩阵
     DirectX::XMFLOAT4X4 viewTransform = MathHelper::Identity4x4();

@@ -39,7 +39,6 @@ private:
 	void BuildPSOs(); // 创建渲染管线状态对象
 
 	void ChangePSOstate();
-	void UpdateCamera(); // 更新摄像头矩阵
 	void UpdateObjectsConstBuffers()const; // 更新常量缓冲区（世界矩阵）
 	void UpdatePassConstBuffers()const; // 更新渲染过程常量缓冲区
 	void UpdateMaterialConstBuffers()const; // 更新材质常量缓冲区
@@ -88,12 +87,5 @@ private:
 	bool isWireframeEnabled = false;
 
 	Camera camera;	//摄像机对象
-	DirectX::XMFLOAT3 eyePosition = { 0.0f,0.0f,0.0f };
-	float theta = 0; // 极点-原点在x-z面上投影与x轴正半轴夹角
-	float phi = DirectX::XM_PIDIV4; // 极点-原点连线与Y轴正半轴夹角
-	float radius = 15.0f; // 极径长
-
-	DirectX::XMFLOAT4X4 viewTransform = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 projectionTransform = MathHelper::Identity4x4();
 };
 
