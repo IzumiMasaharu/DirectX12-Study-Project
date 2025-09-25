@@ -39,9 +39,9 @@ private:
 	void BuildPSOs(); // 创建渲染管线状态对象
 
 	void ChangePSOstate();
-	void UpdateObjectsConstBuffers()const; // 更新常量缓冲区（世界矩阵）
-	void UpdatePassConstBuffers()const; // 更新渲染过程常量缓冲区
-	void UpdateMaterialConstBuffers()const; // 更新材质常量缓冲区
+	void UpdateObjectsConstBuffers(); // 更新常量缓冲区（世界矩阵）
+	void UpdatePassConstBuffers(); // 更新渲染过程常量缓冲区
+	void UpdateMaterialConstBuffers(); // 更新材质常量缓冲区
 
 	void DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<RenderItem*>& renderItems)const; // 绘制渲染项
 public:

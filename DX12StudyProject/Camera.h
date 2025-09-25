@@ -31,6 +31,11 @@ public:
     void roll(float angle);
     void pitch(float angle);
     void yaw(float angle);
+    
+    void rotateByQuaternion(float yawRadians, float pitchRadians, float rollRadians = 0.0f);
+    void setOrientationFromQuaternion(const DirectX::XMFLOAT4& quat);
+    DirectX::XMFLOAT4 getOrientation() const { return orientation; }
+    void updateVectorsFromQuaternion();
 
     // Getter
     const DirectX::XMFLOAT3& getPositionFloat3() const { return position; }
@@ -58,6 +63,8 @@ private:
     DirectX::XMFLOAT3 look;
     DirectX::XMFLOAT3 up;
     DirectX::XMFLOAT3 right;
+
+    DirectX::XMFLOAT4 orientation = {0.0f, 0.0f, 0.0f, 1.0f};
 
     // 投影参数
     float nearZ = 0.0f;

@@ -145,6 +145,62 @@ void Camera::yaw(float angle)
     rotate(quaternion);
 }
 
+void Camera::rotateByQuaternion(float yawRadians, float pitchRadians, float rollRadians)
+{
+    using namespace DirectX;
+    
+    // 创建各轴旋转四元数
+    XMVECTOR yawQuat = XMQuaternionRotationAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), yawRadians);     // 绕Y轴(世界上方)
+    XMVECTOR pitchQuat = XMQuaternionRotationAxis(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), pitchRadians); // 绕X轴(右方)
+    XMVECTOR rollQuat = XMQuaternionRotationAxis(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rollRadians);   // 绕Z轴(前方)
+    
+    // 当前方向四元数
+    XMVECTOR currentOrientationQuat = XMLoadFloat4(&orientation);
+    
+    // 合成旋转：先yaw，再pitch，最后roll
+    XMVECTOR deltaRotation = XMQuaternionMultiply(XMQuaternionMultiply(yawQuat, pitchQuat), rollQuat);
+    
+    // 应用旋转到当前方向
+    XMVECTOR newOrientationQuat = XMQuaternionMultiply(currentOrientationQuat, deltaRotation);
+    
+    // 归一化四元数
+    newOrientationQuat = XMQuaternionNormalize(newOrientationQuat);
+    
+    // 保存新的方向四元数
+    XMStoreFloat4(&orientation, newOrientationQuat);
+    
+    // 更新相机向量
+    updateVectorsFromQuaternion();
+}
+void Camera::setOrientationFromQuaternion(const DirectX::XMFLOAT4& quat)
+{
+    orientation = quat;
+    updateVectorsFromQuaternion();
+}
+void Camera::updateVectorsFromQuaternion()
+{
+    using namespace DirectX;
+    
+    XMVECTOR orientationQuat = XMLoadFloat4(&orientation);
+    
+    // 初始方向向量（相机默认看向-Z，上方为+Y，右方为+X）
+    XMVECTOR defaultForward = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
+    XMVECTOR defaultUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    XMVECTOR defaultRight = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    
+    // 通过四元数旋转得到当前方向向量
+    XMVECTOR currentLook = XMVector3Rotate(defaultForward, orientationQuat);
+    XMVECTOR currentUp = XMVector3Rotate(defaultUp, orientationQuat);
+    XMVECTOR currentRight = XMVector3Rotate(defaultRight, orientationQuat);
+    
+    // 存储到成员变量
+    XMStoreFloat3(&look, currentLook);
+    XMStoreFloat3(&up, currentUp);
+    XMStoreFloat3(&right, currentRight);
+    
+    viewDirty = true;
+}
+
 void Camera::rotate(DirectX::XMVECTOR quaternion)
 {
     XMVECTOR lookVec = XMLoadFloat3(&look);

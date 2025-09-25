@@ -283,11 +283,12 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
 	{
-		float dPhi = XMConvertToRadians(0.25f * static_cast<float>(x - lastMousePosition.x));
-		float dTheta = XMConvertToRadians(0.25f * static_cast<float>(y - lastMousePosition.y));
-
-		camera.pitch(dPhi);
-		camera.yaw(dTheta);
+		// 计算鼠标移动量，转换为弧度
+        float dYaw = XMConvertToRadians(0.25f * static_cast<float>(x - lastMousePosition.x));
+        float dPitch = XMConvertToRadians(0.25f * static_cast<float>(y - lastMousePosition.y));
+        
+        // 使用四元数进行旋转，取负值符合常见操作习惯
+        camera.rotateByQuaternion(-dYaw, -dPitch, 0.0f);
 	}
 
 	lastMousePosition.x = x;
@@ -838,7 +839,7 @@ void MyApp::ChangePSOstate()
 		isWireframeEnabled = false;
 }
 // 更新物体常量缓冲区（世界矩阵）
-void MyApp::UpdateObjectsConstBuffers()const
+void MyApp::UpdateObjectsConstBuffers()
 {
 	auto currentObjectConstBuffer = currentFrameResource->objectConstBuffer.get();
 
@@ -860,7 +861,7 @@ void MyApp::UpdateObjectsConstBuffers()const
 	}
 }
 // 更新渲染过程常量
-void MyApp::UpdatePassConstBuffers()const
+void MyApp::UpdatePassConstBuffers()
 {
 	RenderingPassConstants mRenderingPassConstantsBuffer;
 
@@ -896,7 +897,7 @@ void MyApp::UpdatePassConstBuffers()const
 	currentPassConstsBuffer->CopyData(0, mRenderingPassConstantsBuffer);
 }
 // 更新材质常量缓冲区
-void MyApp::UpdateMaterialConstBuffers()const
+void MyApp::UpdateMaterialConstBuffers()
 {
 	auto currentMaterialConstBuffer = currentFrameResource->materialConstBuffer.get();
 
