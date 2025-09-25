@@ -4,21 +4,35 @@
 class Camera
 {
 public:
-	Camera();
+	Camera() = delete;
 	~Camera() = default;
 
 	void setPosition(float x,float y,float z);
+	void lookAt(DirectX::XMFLOAT3 target);
+	void lookAt(DirectX::XMFLOAT3 target, float angle);
+	void lookAt(DirectX::XMVECTOR lookAtDir, DirectX::XMVECTOR worldUp);
 	void setLens(float fovY, float aspectRatio, float zn, float zf);
-	void updateView();
+
 	void move(DirectX::XMVECTOR delta);
-	void rotate(DirectX::XMVECTOR quaternion);
+	void roll(float angle);
+	void pitch(float angle);
+	void yaw(float angle);
+
+	DirectX::XMVECTOR getPosition() const { return position; }
+	DirectX::XMVECTOR getLook() const { return look; }
+	DirectX::XMVECTOR getUp() const { return up; }
+	DirectX::XMVECTOR getRight() const { return right; }
+
+	float getNearZ() const { return nearZ; }
+	float getFarZ() const { return farZ; }
+	float getFov() const { return fov; }
+	float getAspect() const { return aspect; }
 
 	DirectX::XMFLOAT4X4 getViewMatrix() const { return viewTransform; }
 	DirectX::XMFLOAT4X4 getProjMatrix() const { return projectionTransform; }
-
 private:
+	void rotate(DirectX::XMVECTOR quaternion);
 	void updateViewMatrix();
-
 private:
 	DirectX::XMVECTOR position;
 	DirectX::XMVECTOR look;

@@ -4,6 +4,7 @@
 #include "GeometryGenerator.h"
 #include "RenderItem.h"
 #include "UploadBuffer.h"
+#include "Camera.h"
 
 class MyApp : public DXApp
 {
@@ -86,6 +87,7 @@ private:
 
 	bool isWireframeEnabled = false;
 
+	Camera camera;	//摄像机对象
 	DirectX::XMFLOAT3 eyePosition = { 0.0f,0.0f,0.0f };
 	float theta = 0; // 极点-原点在x-z面上投影与x轴正半轴夹角
 	float phi = DirectX::XM_PIDIV4; // 极点-原点连线与Y轴正半轴夹角
