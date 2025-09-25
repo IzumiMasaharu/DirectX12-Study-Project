@@ -34,10 +34,10 @@ private:
 	void rotate(DirectX::XMVECTOR quaternion);
 	void updateViewMatrix();
 private:
-	DirectX::XMVECTOR position;
-	DirectX::XMVECTOR look;
-	DirectX::XMVECTOR up;
-	DirectX::XMVECTOR right;
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT3 look;
+	DirectX::XMFLOAT3 up;
+	DirectX::XMFLOAT3 right;
 
 	float nearZ = 0.0f;
 	float farZ = 0.0f;
