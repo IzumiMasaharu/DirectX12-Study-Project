@@ -213,14 +213,14 @@ XMMATRIX Camera::getViewMatrixXM()
     }
     return XMLoadFloat4x4(&viewTransform);
 }
-DirectX::XMFLOAT4X4 Camera::getProjectionMatrix() const
+DirectX::XMFLOAT4X4 Camera::getProjMatrix()
 {
     if (projDirty) {
         updateProjectionMatrix();
     }
     return projectionTransform;
 }
-XMMATRIX Camera::getProjectionMatrixXM() const
+XMMATRIX Camera::getProjMatrixXM()
 {
     if (projDirty) {
         updateProjectionMatrix();
