@@ -8,7 +8,12 @@ Camera::Camera()
     look = { 0.0f, 0.0f, 1.0f };
     up = { 0.0f, 1.0f, 0.0f };
     right = { 1.0f, 0.0f, 0.0f };
+    fov = XM_PIDIV2;
+    aspectRatio = 1.0f;
+    nearZ = 0.1f;
+    farZ = 1000.0f;
     updateViewMatrix();
+    updateProjectionMatrix();
 }
 
 void Camera::setPosition(float x, float y, float z)
@@ -62,8 +67,47 @@ void Camera::setLens(float fov, float aspectRatio, float nearZ, float farZ)
 	this->nearZ = nearZ;
 	this->farZ = farZ;
 
-	XMMATRIX P = XMMatrixPerspectiveFovLH(this->fov, this->aspectRatio, this->nearZ, this->farZ);
-	XMStoreFloat4x4(&projectionTransform, P);
+    projDirty = true;
+}
+void Camera::zoom(float factor)
+{
+    float newFov = fov * factor;
+    newFov = std::max(0.1f, std::min(newFov, XM_PIDIV));
+    
+    if (abs(newFov - fov) > 1e-6f) {
+        fov = newFov;
+        projDirty = true;
+    }
+}
+void Camera::setFov(float fov)
+{
+    this->fov = std::max(0.1f, std::min(fov, XM_PIDIV));
+
+    if (abs(fov - this->fov) > 1e-6f) {
+        this->fov = fov;
+        projDirty = true;
+    }
+}
+void Camera::setAspectRatio(float aspectRatio)
+{
+    if (abs(aspectRatio - this->aspectRatio) > 1e-6f) {
+        this->aspectRatio = aspectRatio;
+        projDirty = true;
+    }
+}
+void Camera::setNearZ(float nearZ)
+{
+    if (abs(nearZ - this->nearZ) > 1e-6f) {
+        this->nearZ = nearZ;
+        projDirty = true;
+    }
+}
+void Camera::setFarZ(float farZ)
+{
+    if (abs(farZ - this->farZ) > 1e-6f) {
+        this->farZ = farZ;
+        projDirty = true;
+    }
 }
 
 void Camera::move(DirectX::XMVECTOR delta)
@@ -144,6 +188,13 @@ void Camera::updateViewMatrix()
 
     viewDirty = false;
 }
+void Camera::updateProjectionMatrix()
+{
+    XMMATRIX P = XMMatrixPerspectiveFovLH(fov, aspectRatio, nearZ, farZ);
+    XMStoreFloat4x4(&projectionTransform, P);
+
+    projDirty = false;
+}
 
 // 延迟更新的getter方法
 DirectX::XMFLOAT4X4 Camera::getViewMatrix()
@@ -153,11 +204,24 @@ DirectX::XMFLOAT4X4 Camera::getViewMatrix()
     }
     return viewTransform;
 }
-
 XMMATRIX Camera::getViewMatrixXM()
 {
     if (viewDirty) {
         updateViewMatrix();
     }
     return XMLoadFloat4x4(&viewTransform);
+}
+DirectX::XMFLOAT4X4 Camera::getProjectionMatrix() const
+{
+    if (projDirty) {
+        updateProjectionMatrix();
+    }
+    return projectionTransform;
+}
+XMMATRIX Camera::getProjectionMatrixXM() const
+{
+    if (projDirty) {
+        updateProjectionMatrix();
+    }
+    return XMLoadFloat4x4(&projectionTransform);
 }

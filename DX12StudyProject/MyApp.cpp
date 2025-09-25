@@ -283,11 +283,8 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
 	{
-		float dTheta = XMConvertToRadians(0.25f * static_cast<float>(x - lastMousePosition.x));
-		float dPhi = XMConvertToRadians(0.25f * static_cast<float>(y - lastMousePosition.y));
-
-		theta += dTheta;
-		phi += dPhi;
+		camera.pitch(dPhi);
+		camera.yaw(dTheta);
 	}
 
 	lastMousePosition.x = x;
@@ -296,9 +293,7 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 // 当鼠标滚轮滚动时
 void MyApp::MouseWheel(short zDelta)
 {
-	radius += -0.05f * (zDelta / 10);
-
-	radius = MathHelper::Clamp(radius, 3.0f, 15.0f);
+	camera.zoom(1.0f + zDelta / 1200.0f);
 }
 
 // 载入纹理

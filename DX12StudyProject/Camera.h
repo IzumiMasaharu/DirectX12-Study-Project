@@ -18,6 +18,11 @@ public:
     
     // 透镜设置
     void setLens(float fovY, float aspectRatio, float nearZ, float farZ);
+    void zoom(float factor);
+    void setFov(float fov);
+    void setAspectRatio(float aspectRatio);
+    void setNearZ(float nearZ);
+    void setFarZ(float farZ);
 
     // 移动方法
     void move(DirectX::XMVECTOR delta);
@@ -41,11 +46,12 @@ public:
     // 矩阵获取（延迟更新）
     DirectX::XMFLOAT4X4 getViewMatrix();
     DirectX::XMMATRIX getViewMatrixXM();
-    const DirectX::XMFLOAT4X4& getProjMatrix() const { return projectionTransform; }
-    DirectX::XMMATRIX getProjMatrixXM() const { return DirectX::XMLoadFloat4x4(&projectionTransform); }
+    DirectX::XMFLOAT4X4 getProjMatrix();
+    DirectX::XMMATRIX getProjMatrixXM();
 private:
     void rotate(DirectX::XMVECTOR quaternion);
     void updateViewMatrix();
+    void updateProjectionMatrix();
 private:
     // 相机状态
     DirectX::XMFLOAT3 position;
@@ -65,4 +71,5 @@ private:
     
     // 优化标志
     mutable bool viewDirty = true;  // 标记视图矩阵是否需要更新
+    mutable bool projDirty = true;  // 标记投影矩阵是否需要更新
 };
