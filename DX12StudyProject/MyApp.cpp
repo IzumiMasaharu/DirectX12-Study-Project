@@ -242,13 +242,13 @@ void MyApp::Draw(const GameTimer& GTimer)
 
 	commandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilBufferView());
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap.Get() };
+	ID3D12DescriptorHeap* descriptorHeaps[] = { diffuseSrvDescriptorHeap.Get() };
 	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 
 	auto passConstBuffer = currentFrameResource->passConstBuffer->Resource();
-	commandList->SetGraphicsRootConstantBufferView(3, passConstBuffer->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(4, passConstBuffer->GetGPUVirtualAddress());
 
 	DrawRenderItems(commandList.Get(), allRenderItems);
 
@@ -308,61 +308,90 @@ void MyApp::LoadTexture()
 {
 	UINT srvIndex = 0;
 
-	auto texStone = std::make_unique<Texture>();
-	texStone->name = "stone";
-	texStone->filename = L"../Resources/Textures/stone.dds";
-	texStone->srvHeapIndex = srvIndex++;
+	auto texSkycube = std::make_unique<Texture>();
+	texSkycube->name = "skycube";
+	texSkycube->filename = L"../Resources/Textures/snow_skycube.dds";
+	texSkycube->srvHeapIndex = srvIndex;
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
-		d3dDevice.Get(), commandList.Get(), texStone->filename.c_str(), texStone->resource, texStone->uploadHeap));
+		d3dDevice.Get(), commandList.Get(), texSkycube->filename.c_str(), texSkycube->resource, texSkycube->uploadHeap));
 
-	auto texBrick = std::make_unique<Texture>();
-	texBrick->name = "brick";
-	texBrick->filename = L"../Resources/Textures/bricks.dds";
-	texBrick->srvHeapIndex = srvIndex++;
-	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
-		d3dDevice.Get(), commandList.Get(), texBrick->filename.c_str(), texBrick->resource, texBrick->uploadHeap));
+	skycubeTexture = std::move(texSkycube);
 
-	auto texWater = std::make_unique<Texture>();
-	texWater->name = "water";
-	texWater->filename = L"../Resources/Textures/water.dds";
-	texWater->srvHeapIndex = srvIndex++;
-	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
-		d3dDevice.Get(), commandList.Get(), texWater->filename.c_str(), texWater->resource, texWater->uploadHeap));
+	std::vector<std::string> diffuseTexNames =
+	{
+		"stone",
+		"brick",
+		"wave",
+		"floor",
+	};
+	std::vector<std::wstring> diffuseTexFilepathes =
+	{
+		L"../Resources/Textures/stone.dds",
+		L"../Resources/Textures/bricks.dds",
+		L"../Resources/Textures/water.dds",
+		L"../Resources/Textures/floor.dds",
+	};
 
-	auto texDefaultNormal = std::make_unique<Texture>();
-	texDefaultNormal->name = "default";
-	texDefaultNormal->filename = L"../Resources/Textures/default_normal.dds";
-	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
-		d3dDevice.Get(), commandList.Get(), texDefaultNormal->filename.c_str(), texDefaultNormal->resource, texDefaultNormal->uploadHeap));
+	std::vector<std::string> normalTexNames =
+	{
+		"default",
+		"brick",
+		"wave",
+		"floor",
+	};
+	std::vector<std::wstring> normalTexFilepathes =
+	{
+		L"../Resources/Textures/default_normal.dds",
+		L"../Resources/Textures/brick_normal.dds",
+		L"../Resources/Textures/wave.dds",
+		L"../Resources/Textures/floor_normal.dds",
+	};
 
-	auto texBrickNormal = std::make_unique<Texture>();
-	texBrickNormal->name = "brick";
-	texBrickNormal->filename = L"../Resources/Textures/brick_normal.dds";
-	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
-		d3dDevice.Get(), commandList.Get(), texBrickNormal->filename.c_str(), texBrickNormal->resource, texBrickNormal->uploadHeap));
-	
-	diffuseTextures[texStone->name] = std::move(texStone);
-	diffuseTextures[texBrick->name] = std::move(texBrick);
-	diffuseTextures[texWater->name] = std::move(texWater);
+	for (int i = 0; i < (int)diffuseTexNames.size(); ++i)
+	{
+		auto diffuseTex = std::make_unique<Texture>();
+		diffuseTex->name = diffuseTexNames[i];
+		diffuseTex->filename = diffuseTexFilepathes[i];
+		diffuseTex->srvHeapIndex = srvIndex++;
+		ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
+			d3dDevice.Get(), commandList.Get(), diffuseTex->filename.c_str(), diffuseTex->resource, diffuseTex->uploadHeap));
 
-	normalTextures[texDefaultNormal->name] = std::move(texDefaultNormal);
-	normalTextures[texBrickNormal->name] = std::move(texBrickNormal);
+		diffuseTextures[diffuseTex->name] = std::move(diffuseTex);
+	}
+
+	for (int i = 0; i < (int)normalTexNames.size(); ++i)
+	{
+		auto normalTex = std::make_unique<Texture>();
+		normalTex->name = normalTexNames[i];
+		normalTex->filename = normalTexFilepathes[i];
+		ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
+			d3dDevice.Get(), commandList.Get(), normalTex->filename.c_str(), normalTex->resource, normalTex->uploadHeap));
+
+		normalTextures[normalTex->name] = std::move(normalTex);
+	}
 }
 // 创建根签名
 void MyApp::BuildRootSignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE textureSrvRange; // 描述符范围，一段连续、类型相同的描述符
-	textureSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0);
+	// 描述符范围，一段连续、类型相同的描述符
+	CD3DX12_DESCRIPTOR_RANGE skycubeSrvRange;	
+	skycubeSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	CD3DX12_DESCRIPTOR_RANGE textureSrvRange[3]; 
+	textureSrvRange[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+	textureSrvRange[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2);
+	textureSrvRange[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3);
 
-	CD3DX12_ROOT_PARAMETER slotRootParameter[4];
-	slotRootParameter[0].InitAsDescriptorTable(1, &textureSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // 描述符表 存储一系列描述符范围
-	slotRootParameter[1].InitAsConstantBufferView(0);
-	slotRootParameter[2].InitAsConstantBufferView(1);
-	slotRootParameter[3].InitAsConstantBufferView(2);
+	const UINT numSlotRootParams = 5;
+	CD3DX12_ROOT_PARAMETER slotRootParameter[numSlotRootParams];
+	slotRootParameter[0].InitAsDescriptorTable(1, &skycubeSrvRange, D3D12_SHADER_VISIBILITY_PIXEL); // 描述符表 存储一系列描述符范围
+	slotRootParameter[1].InitAsDescriptorTable(3, textureSrvRange, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[2].InitAsConstantBufferView(0);
+	slotRootParameter[3].InitAsConstantBufferView(1);
+	slotRootParameter[4].InitAsConstantBufferView(2);
 
 	auto staticSamplers = DXBase::GetStaticSamplers();
 
-	CD3DX12_ROOT_SIGNATURE_DESC RootSignatureDesc(4, slotRootParameter, (UINT)staticSamplers.size(), staticSamplers.data(),
+	CD3DX12_ROOT_SIGNATURE_DESC RootSignatureDesc(numSlotRootParams, slotRootParameter, (UINT)staticSamplers.size(), staticSamplers.data(),
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	ComPtr<ID3DBlob> serializedRootSignature = nullptr;
@@ -380,39 +409,56 @@ void MyApp::BuildRootSignature()
 // 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
 void MyApp::BuildDescriptorHeaps()
 {
-	D3D12_DESCRIPTOR_HEAP_DESC SRV_HEAP_DESC;
-	SRV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	SRV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	SRV_HEAP_DESC.NumDescriptors = diffuseTextures.size() * 2;
-	SRV_HEAP_DESC.NodeMask = 0;
-	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC, IID_PPV_ARGS(&srvDescriptorHeap)));
+	D3D12_DESCRIPTOR_HEAP_DESC STATIC_SRV_HEAP_DESC;
+	STATIC_SRV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	STATIC_SRV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	STATIC_SRV_HEAP_DESC.NumDescriptors = diffuseTextures.size() * 2;
+	STATIC_SRV_HEAP_DESC.NodeMask = 0;
+	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&STATIC_SRV_HEAP_DESC, IID_PPV_ARGS(&diffuseSrvDescriptorHeap)));
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = -1;
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC SKYCUBE_SRV_HEAP_DESC(STATIC_SRV_HEAP_DESC);
+		SKYCUBE_SRV_HEAP_DESC.NumDescriptors = 1;
+		ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SKYCUBE_SRV_HEAP_DESC, IID_PPV_ARGS(&skycubeDescriptorHeap)));
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC skycubeSrvDesc = {};
+		skycubeSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		skycubeSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+		skycubeSrvDesc.TextureCube.MostDetailedMip = 0;
+		skycubeSrvDesc.TextureCube.MipLevels = skycubeTexture->resource->GetDesc().MipLevels;
+		skycubeSrvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+		skycubeSrvDesc.Format = skycubeTexture->resource->GetDesc().Format;
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE skycubeSrvCPUHandle(skycubeDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		d3dDevice->CreateShaderResourceView(skycubeTexture->resource.Get(), &skycubeSrvDesc, skycubeSrvCPUHandle);
+	}
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC staticSrvDesc = {};
+	staticSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	staticSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	staticSrvDesc.Texture2D.MostDetailedMip = 0;
+	staticSrvDesc.Texture2D.MipLevels = -1;
 
 	for (auto& tex: diffuseTextures)
 	{
-		CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-		srvCPUHandle.Offset(tex.second->srvHeapIndex, cbs_srv_uavDescriptorSize*2);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(diffuseSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		srvCPUHandle.Offset(tex.second->srvHeapIndex, cbs_srv_uavDescriptorSize *2);
 
-		srvDesc.Format = tex.second->resource->GetDesc().Format;
-		d3dDevice->CreateShaderResourceView(tex.second->resource.Get(), &srvDesc, srvCPUHandle);
+		staticSrvDesc.Format = tex.second->resource->GetDesc().Format;
+		d3dDevice->CreateShaderResourceView(tex.second->resource.Get(), &staticSrvDesc, srvCPUHandle);
 		srvCPUHandle.Offset(1, cbs_srv_uavDescriptorSize);
 
 		auto iter = normalTextures.find(tex.first);
 		if (iter != normalTextures.end())
 		{
-			srvDesc.Format = iter->second->resource->GetDesc().Format;
-			d3dDevice->CreateShaderResourceView(iter->second->resource.Get(), &srvDesc, srvCPUHandle);
+			staticSrvDesc.Format = iter->second->resource->GetDesc().Format;
+			d3dDevice->CreateShaderResourceView(iter->second->resource.Get(), &staticSrvDesc, srvCPUHandle);
 		}
 		else
 		{
 			auto& defaultNormal = normalTextures["default"];
-			srvDesc.Format = defaultNormal->resource->GetDesc().Format;
-			d3dDevice->CreateShaderResourceView(defaultNormal->resource.Get(), &srvDesc, srvCPUHandle);
+			staticSrvDesc.Format = defaultNormal->resource->GetDesc().Format;
+			d3dDevice->CreateShaderResourceView(defaultNormal->resource.Get(), &staticSrvDesc, srvCPUHandle);
 		}
 		
 	}
@@ -420,9 +466,9 @@ void MyApp::BuildDescriptorHeaps()
 // 编译着色器
 void MyApp::BuildShaders()
 {
-	shaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "VS", "vs_5_1");
-	shaders["VS_Wave"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "VS_Wave", "vs_5_1");
-	shaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Main.hlsl", nullptr, "PS", "ps_5_1");
+	shaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_Common.hlsl", nullptr, "VS", "vs_5_1");
+	shaders["VS_Wave"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_AniWave.hlsl", nullptr, "VS_Wave", "vs_5_1");
+	shaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Fragment.hlsl", nullptr, "PS", "ps_5_1");
 }
 // 创建输入布局
 void MyApp::BuildInputLayout()
@@ -693,8 +739,8 @@ void MyApp::BuildRenderItems()
 	XMStoreFloat4x4(&gridRenderItem->worldTransform, gridWorld);
 	gridRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	gridRenderItem->material = materials["Water"].get();
-	gridRenderItem->diffuseTexture = diffuseTextures["water"].get();
-	gridRenderItem->normalTexture = normalTextures["default"].get();
+	gridRenderItem->diffuseTexture = diffuseTextures["wave"].get();
+	gridRenderItem->normalTexture = normalTextures["wave"].get();
 	gridRenderItem->Geo = geos["Geo"].get();
 	gridRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	gridRenderItem->indexCount = gridRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
@@ -914,15 +960,15 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 		commandList->IASetIndexBuffer(&item->Geo->IndexBufferView());
 		commandList->IASetPrimitiveTopology(item->primitiveType);
 
-		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(diffuseSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 		tex.Offset(item->diffuseTexture->srvHeapIndex, cbs_srv_uavDescriptorSize*2);
-		commandList->SetGraphicsRootDescriptorTable(0, tex);
+		commandList->SetGraphicsRootDescriptorTable(1, tex);
 
 		D3D12_GPU_VIRTUAL_ADDRESS objectConstBufferAddress = objectConstBuffer->GetGPUVirtualAddress() + item->objectConstBufferIndex * objectConstBufferByteSize;
 		D3D12_GPU_VIRTUAL_ADDRESS materialConstBufferAddress = materialConstBuffer->GetGPUVirtualAddress() + item->material->materialConstBufferIndex * materialConstBufferByteSize;
 		
-		commandList->SetGraphicsRootConstantBufferView(1, objectConstBufferAddress);
-		commandList->SetGraphicsRootConstantBufferView(2, materialConstBufferAddress);
+		commandList->SetGraphicsRootConstantBufferView(2, objectConstBufferAddress);
+		commandList->SetGraphicsRootConstantBufferView(3, materialConstBufferAddress);
 
 		commandList->DrawIndexedInstanced(item->indexCount, 1, item->indexStartLocation, item->vertexBaseLocation, 0);
 

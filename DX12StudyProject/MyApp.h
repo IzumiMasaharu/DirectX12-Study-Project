@@ -55,27 +55,32 @@ private:
 		std::atomic<int>  newHeight{ 0 };
 	} resizeInfo;
 
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr; // 根签名
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;	// 根签名
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap = nullptr; // SRV描述符堆
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> skycubeDescriptorHeap = nullptr;		// 天空盒SRV描述符堆
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> diffuseSrvDescriptorHeap = nullptr;	// 静态SRV描述符堆
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> normalSrvDescriptorHeap = nullptr;		// 法线SRV描述符堆
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dynamicSrvDescriptorHeap = nullptr;	// 动态（Off-Screen）SRV描述符堆
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout; // 输入布局
-	UINT passCbvOffset = 0; // 渲染过程常量缓冲区偏移量
+	UINT passCbvOffset = 0;		// 渲染过程常量缓冲区偏移量
 
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> shaders; // 储存着色器的无序图
-	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> geos; // 储存几何网格体的无序图
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOs; // 储存不同PSO的无序图
-	std::unordered_map<std::string, std::unique_ptr<Material>> materials; // 存储材质的无序图
-	std::unordered_map<std::string, std::unique_ptr<Texture>> diffuseTextures; // 存储纹理的无序图
-	std::unordered_map<std::string, std::unique_ptr<Texture>> normalTextures; // 存储纹理的无序图
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> shaders;			// 储存着色器的无序图
+	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> geos;				// 储存几何网格体的无序图
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOs;	// 储存不同PSO的无序图
+	std::unordered_map<std::string, std::unique_ptr<Material>> materials;				// 存储材质的无序图
+	std::unique_ptr<Texture> skycubeTexture;											// 存储天空盒纹理的无序图
+	std::unordered_map<std::string, std::unique_ptr<Texture>> diffuseTextures;			// 存储漫反射纹理的无序图
+	std::unordered_map<std::string, std::unique_ptr<Texture>> normalTextures;			// 存储法线纹理的无序图
+	std::unordered_map<std::string, std::unique_ptr<Texture>> heightTextures;			// 存储深度图的无序图
 	
-	std::vector<RenderItem*> allRenderItems; // 储存有所有渲染项
-	std::vector<std::unique_ptr<RenderItem>> opaqueRenderItems; // 储存不透明渲染项
-	std::vector<std::unique_ptr<RenderItem>> transparentRenderItems; // 储存透明渲染项
+	std::vector<RenderItem*> allRenderItems;							// 储存有所有渲染项
+	std::vector<std::unique_ptr<RenderItem>> opaqueRenderItems;			// 储存不透明渲染项
+	std::vector<std::unique_ptr<RenderItem>> transparentRenderItems;	// 储存透明渲染项
 
-	UINT currentFrameResourceIndex = 0; // 当前帧资源索引
 	std::vector<std::unique_ptr<FrameResource>> frameResources; // 全部帧资源
-	FrameResource* currentFrameResource = nullptr; // 当前帧资源
+	UINT currentFrameResourceIndex = 0;							// 当前帧资源索引
+	FrameResource* currentFrameResource = nullptr;				// 当前帧资源
 
 	POINT lastMousePosition;
 

@@ -29,7 +29,7 @@ struct RenderingPassConstants
     DirectX::XMFLOAT4X4 viewProj = MathHelper::Identity4x4(); // 视图投影矩阵
     DirectX::XMFLOAT4X4 invViewProj = MathHelper::Identity4x4(); // 视图投影矩阵的逆矩阵
     DirectX::XMFLOAT3 eyePosW = { 0.0f,0.0f,0.0f }; // 摄像机位置坐标
-    float cbPerObjectPad1 = 0.0f;//
+    float cbPerObjectPad1 = 0.0f;	// Padding
     DirectX::XMFLOAT2 renderTargetSize = { 1.0f,1.0f }; // 渲染目标的大小
     DirectX::XMFLOAT2 invRenderTargetSize = { 1.0f,1.0f }; // 渲染目标大小的倒数
     float nearZ = 0.0f; // 近视平面
