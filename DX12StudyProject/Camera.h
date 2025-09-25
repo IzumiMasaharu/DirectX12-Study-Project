@@ -17,9 +17,9 @@ public:
     void lookAt(DirectX::XMVECTOR lookAtDir, DirectX::XMVECTOR worldUp);
     
     // 透镜设置
-    void setLens(float fovY, float aspectRatio, float nearZ, float farZ);
+    void setLens(float fov, float aspectRatio, float nearZ, float farZ);
     void zoom(float factor);
-    void setFov(float fov);
+    void setFov(float newFov);
     void setAspectRatio(float aspectRatio);
     void setNearZ(float nearZ);
     void setFarZ(float farZ);

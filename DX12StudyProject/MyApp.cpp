@@ -283,6 +283,9 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
 	{
+		float dPhi = XMConvertToRadians(0.25f * static_cast<float>(x - lastMousePosition.x));
+		float dTheta = XMConvertToRadians(0.25f * static_cast<float>(y - lastMousePosition.y));
+
 		camera.pitch(dPhi);
 		camera.yaw(dTheta);
 	}

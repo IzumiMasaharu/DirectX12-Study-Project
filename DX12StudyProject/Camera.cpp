@@ -71,20 +71,20 @@ void Camera::setLens(float fov, float aspectRatio, float nearZ, float farZ)
 }
 void Camera::zoom(float factor)
 {
-    float newFov = fov * factor;
-    newFov = std::max(0.1f, std::min(newFov, XM_PIDIV));
-    
-    if (abs(newFov - fov) > 1e-6f) {
-        fov = newFov;
+    float newFov = this->fov * factor;
+    newFov = std::max(0.05f, std::min(newFov, XM_PI));
+
+    if (abs(newFov - this->fov) > 1e-6f) {
+        this->fov = newFov;
         projDirty = true;
     }
 }
-void Camera::setFov(float fov)
+void Camera::setFov(float newFov)
 {
-    this->fov = std::max(0.1f, std::min(fov, XM_PIDIV));
+    newFov = std::max(0.05f, std::min(newFov, XM_PI));
 
-    if (abs(fov - this->fov) > 1e-6f) {
-        this->fov = fov;
+    if (abs(newFov - this->fov) > 1e-6f) {
+        this->fov = newFov;
         projDirty = true;
     }
 }
@@ -97,6 +97,8 @@ void Camera::setAspectRatio(float aspectRatio)
 }
 void Camera::setNearZ(float nearZ)
 {
+    nearZ = std::max(0.01f, std::min(nearZ, farZ - 0.01f));
+
     if (abs(nearZ - this->nearZ) > 1e-6f) {
         this->nearZ = nearZ;
         projDirty = true;
