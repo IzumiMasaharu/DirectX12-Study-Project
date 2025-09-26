@@ -3,15 +3,6 @@
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
-float CircleRun(float x, float c)
-{
-	float res = abs(fmod(x, 2*c));
-	if (res < c)
-		return res;
-	else
-		return 2 * c - res;
-}
-
 MyApp::MyApp(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
 {
 	mainWndTitle = L"Mayohoshi Render";
@@ -33,7 +24,7 @@ MyApp::~MyApp()
 	if (controlThread.joinable())
 		controlThread.join();
 
-	if(d3dDevice!=nullptr)
+	if (d3dDevice != nullptr)
 		FlushCommandQueue();
 }
 
@@ -99,26 +90,26 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 // 应用程序初始化
 bool MyApp::Init()
 {
-	if(!DXApp::InitWindowClass(windowClass,L"Render Main Window Class"))
+	if (!DXApp::InitWindowClass(windowClass, L"Render Main Window Class"))
 		return false;
-	if (!DXApp::InitWindow(appMainWnd, windowClass, mainWndTitle,100,100,800,600))
+	if (!DXApp::InitWindow(appMainWnd, windowClass, mainWndTitle, 100, 100, 800, 600))
 		return false;
-    if(!DXApp::InitDirectX3D())
+	if (!DXApp::InitDirectX3D())
 		return false;
 	Resize();
 
 	ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
-	LoadTexture(); 
-	BuildRootSignature(); 
-	BuildDescriptorHeaps(); 
-	BuildShaders(); 
-	BuildInputLayout(); 
-	BuildMeshGeometry(); 
+	LoadTexture();
+	BuildRootSignature();
+	BuildDescriptorHeaps();
+	BuildShaders();
+	BuildInputLayout();
+	BuildMeshGeometry();
 	BuildImportedGeometryFromOBJ(L"../Resources/Models/Nailong.obj");
-	BuildMaterials(); 
-	BuildRenderItems(); 
-	BuildFrameResources(); 
-	BuildPSOs(); 
+	BuildMaterials();
+	BuildRenderItems();
+	BuildFrameResources();
+	BuildPSOs();
 
 	ThrowIfFailed(commandList->Close());
 	ID3D12CommandList* cmdsLists[] = { commandList.Get() };
@@ -186,7 +177,7 @@ void MyApp::Resize()
 	screenViewport.MinDepth = 0.0f;
 	scissorRect = { 0,0,clientWidth,clientHeight };
 
-	camera.setLens(0.25f * XM_PI, W_H_Ratio(), 1.0f, 1000.0f);
+	camera.setAspectRatio(W_H_Ratio());
 }
 
 // 更新帧画面
@@ -256,7 +247,7 @@ void MyApp::Draw(const GameTimer& GTimer)
 	ThrowIfFailed(commandList->Close());
 
 	ID3D12CommandList* CommandList[] = { commandList.Get() };
-	commandQueue->ExecuteCommandLists(_countof(CommandList), CommandList); 
+	commandQueue->ExecuteCommandLists(_countof(CommandList), CommandList);
 
 	ThrowIfFailed(swapChain->Present(0, 0));
 
@@ -283,12 +274,10 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
 	{
-		// 计算鼠标移动量，转换为弧度
-        float dYaw = XMConvertToRadians(0.25f * static_cast<float>(x - lastMousePosition.x));
-        float dPitch = XMConvertToRadians(0.25f * static_cast<float>(y - lastMousePosition.y));
-        
-        // 使用四元数进行旋转，取负值符合常见操作习惯
-        camera.rotateByQuaternion(-dYaw, -dPitch, 0.0f);
+		float pitch = (y - lastMousePosition.y) * 0.002f;
+		float yaw = (x - lastMousePosition.x) * 0.002f;
+
+		camera.rotate(0.0f,pitch,yaw);
 	}
 
 	lastMousePosition.x = x;
@@ -297,7 +286,7 @@ void MyApp::MouseMove(WPARAM ButtonState, int x, int y)
 // 当鼠标滚轮滚动时
 void MyApp::MouseWheel(short zDelta)
 {
-	camera.zoom(1.0f + zDelta / 1200.0f);
+	camera.zoom(1.0f + (-zDelta) / 1200.0f);
 }
 
 // 载入纹理
@@ -371,9 +360,9 @@ void MyApp::LoadTexture()
 void MyApp::BuildRootSignature()
 {
 	// 描述符范围，一段连续、类型相同的描述符
-	CD3DX12_DESCRIPTOR_RANGE skycubeSrvRange;	
+	CD3DX12_DESCRIPTOR_RANGE skycubeSrvRange;
 	skycubeSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-	CD3DX12_DESCRIPTOR_RANGE textureSrvRange[3]; 
+	CD3DX12_DESCRIPTOR_RANGE textureSrvRange[3];
 	textureSrvRange[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
 	textureSrvRange[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2);
 	textureSrvRange[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3);
@@ -401,7 +390,7 @@ void MyApp::BuildRootSignature()
 	ThrowIfFailed(hr);
 
 	ThrowIfFailed(d3dDevice->CreateRootSignature(0, serializedRootSignature->GetBufferPointer(),
-			serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+		serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 }
 // 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
 void MyApp::BuildDescriptorHeaps()
@@ -436,10 +425,10 @@ void MyApp::BuildDescriptorHeaps()
 	staticSrvDesc.Texture2D.MostDetailedMip = 0;
 	staticSrvDesc.Texture2D.MipLevels = -1;
 
-	for (auto& tex: diffuseTextures)
+	for (auto& tex : diffuseTextures)
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(diffuseSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-		srvCPUHandle.Offset(tex.second->srvHeapIndex, cbs_srv_uavDescriptorSize *2);
+		srvCPUHandle.Offset(tex.second->srvHeapIndex, cbs_srv_uavDescriptorSize * 2);
 
 		staticSrvDesc.Format = tex.second->resource->GetDesc().Format;
 		d3dDevice->CreateShaderResourceView(tex.second->resource.Get(), &staticSrvDesc, srvCPUHandle);
@@ -457,7 +446,7 @@ void MyApp::BuildDescriptorHeaps()
 			staticSrvDesc.Format = defaultNormal->resource->GetDesc().Format;
 			d3dDevice->CreateShaderResourceView(defaultNormal->resource.Get(), &staticSrvDesc, srvCPUHandle);
 		}
-		
+
 	}
 }
 // 编译着色器
@@ -592,7 +581,7 @@ void MyApp::BuildImportedGeometryFromOBJ(const std::wstring& objPath)
 
 	auto geo = std::make_unique<MeshGeometry>();
 	geo->name = "objGeo";
-	
+
 	ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->vertexBufferCPU));
 	CopyMemory(geo->vertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->indexBufferCPU));
@@ -664,10 +653,10 @@ void MyApp::BuildRenderItems()
 	auto rightCylinderRenderItem = std::make_unique<RenderItem>();
 	auto rightBallRenderItem = std::make_unique<RenderItem>();
 
-	XMMATRIX leftCylinderWorld = XMMatrixTranslation(0.0f, +0.0f, -2.5f);
-	XMMATRIX leftBallWorld = XMMatrixTranslation(0.0f, +2.96f, -2.5f);
-	XMMATRIX rightCylinderWorld = XMMatrixTranslation(0.0f, +0.0f ,+2.5f );
-	XMMATRIX rightBallWorld = XMMatrixTranslation(0.0f, +2.96f, +2.5f);
+	XMMATRIX leftCylinderWorld = XMMatrixTranslation(-2.5f, +0.0f, 0.0f);
+	XMMATRIX leftBallWorld = XMMatrixTranslation(-2.5f, +2.96f, 0.0f);
+	XMMATRIX rightCylinderWorld = XMMatrixTranslation(+2.5f, +0.0f, 0.0f);
+	XMMATRIX rightBallWorld = XMMatrixTranslation(+2.5f, +2.96f, 0.0f);
 
 	XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
 	leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
@@ -714,7 +703,7 @@ void MyApp::BuildRenderItems()
 	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
 	auto nailongRenderItem = std::make_unique<RenderItem>();
-	XMMATRIX nailongWorld = XMMatrixScaling(0.2f, 0.2f, 0.2f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, MathHelper::Pi / 2) * XMMatrixTranslation(0.0f, -1.0f, -0.0f);
+	XMMATRIX nailongWorld = XMMatrixScaling(0.2f, 0.2f, 0.2f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, MathHelper::Pi) * XMMatrixTranslation(0.0f, -1.0f, -0.0f);
 
 	XMStoreFloat4x4(&nailongRenderItem->worldTransform, nailongWorld);
 	nailongRenderItem->objectConstBufferIndex = GeoObjectIndex++;
@@ -851,7 +840,7 @@ void MyApp::UpdateObjectsConstBuffers()
 			XMMATRIX textureTransform = XMLoadFloat4x4(&it->textureTransform);
 
 			ObjectConstants objectconstant;
-			XMStoreFloat4x4(&objectconstant.worldTransform,  XMMatrixTranspose(worldTransform));
+			XMStoreFloat4x4(&objectconstant.worldTransform, XMMatrixTranspose(worldTransform));
 			XMStoreFloat4x4(&objectconstant.textureTransform, XMMatrixTranspose(textureTransform));
 
 			currentObjectConstBuffer->CopyData(it->objectConstBufferIndex, objectconstant);
@@ -867,7 +856,7 @@ void MyApp::UpdatePassConstBuffers()
 
 	XMMATRIX view = camera.getViewMatrixXM();
 	XMMATRIX proj = camera.getProjMatrixXM();
-	XMMATRIX viewProj=XMMatrixMultiply(view,proj);
+	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
 	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
 	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
@@ -890,7 +879,7 @@ void MyApp::UpdatePassConstBuffers()
 
 	mRenderingPassConstantsBuffer.lights[0].end = 20.0f;
 	mRenderingPassConstantsBuffer.lights[0].rgbIntensity = { 2.0f,2.0f,2.0f };
-	mRenderingPassConstantsBuffer.lights[0].position = { 6.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi/16.0f),2.0f,6.0f*cosf(gameTimer.TotalTime()*MathHelper::Pi/16.0f) };
+	mRenderingPassConstantsBuffer.lights[0].position = { 6.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi / 16.0f),2.0f,6.0f*cosf(gameTimer.TotalTime()*MathHelper::Pi / 16.0f) };
 	mRenderingPassConstantsBuffer.lights[0].direction = { 1.0f,0.0f,0.0f };
 
 	auto currentPassConstsBuffer = currentFrameResource->passConstBuffer.get();
@@ -904,7 +893,7 @@ void MyApp::UpdateMaterialConstBuffers()
 	for (auto& it : materials)
 	{
 		Material* mat = it.second.get();
-		if(mat->numDirtyFrames > 0)
+		if (mat->numDirtyFrames > 0)
 		{
 			MaterialConstants materialConstant;
 			materialConstant.diffuseAlbedo = mat->diffuseAlbedo;
@@ -929,7 +918,7 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 	for (size_t itemIndex = 0; itemIndex < renderItems.size(); itemIndex++)
 	{
 		auto item = renderItems[itemIndex];
-		if(item->Geo == geos.at("Geo").get() && item->vertexBaseLocation == item->Geo->submeshList["Geo_Gird"].vertexBaseLocation)
+		if (item->Geo == geos.at("Geo").get() && item->vertexBaseLocation == item->Geo->submeshList["Geo_Gird"].vertexBaseLocation)
 			commandList->SetPipelineState(PSOs.at("Transparent").Get());
 
 		commandList->IASetVertexBuffers(0, 1, &item->Geo->VertexBufferView());
@@ -937,12 +926,12 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 		commandList->IASetPrimitiveTopology(item->primitiveType);
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(diffuseSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-		tex.Offset(item->diffuseTexture->srvHeapIndex, cbs_srv_uavDescriptorSize*2);
+		tex.Offset(item->diffuseTexture->srvHeapIndex, cbs_srv_uavDescriptorSize * 2);
 		commandList->SetGraphicsRootDescriptorTable(1, tex);
 
 		D3D12_GPU_VIRTUAL_ADDRESS objectConstBufferAddress = objectConstBuffer->GetGPUVirtualAddress() + item->objectConstBufferIndex * objectConstBufferByteSize;
 		D3D12_GPU_VIRTUAL_ADDRESS materialConstBufferAddress = materialConstBuffer->GetGPUVirtualAddress() + item->material->materialConstBufferIndex * materialConstBufferByteSize;
-		
+
 		commandList->SetGraphicsRootConstantBufferView(2, objectConstBufferAddress);
 		commandList->SetGraphicsRootConstantBufferView(3, materialConstBufferAddress);
 

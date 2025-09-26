@@ -1,4 +1,4 @@
-#ifndef NUM_DIRECTIONAL_LIGHTS
+ï»¿#ifndef NUM_DIRECTIONAL_LIGHTS
 #define NUM_DIRECTIONAL_LIGHTS 0
 #endif
 #ifndef NUM_POINT_LIGHTS
@@ -24,38 +24,38 @@ SamplerState gsamAnisotropicClamp : register(s5);
 
 cbuffer cbPerObject : register(b0)
 {
-	float4x4 gWorldTransform;		// ÎïÌåÊÀ½ç±ä»»¾ØÕó
-	float4x4 gTextureTransform;		// ÎÆÀí±ä»»¾ØÕó
+	float4x4 gWorldTransform;		// ç‰©ä½“ä¸–ç•Œå˜æ¢çŸ©é˜µ
+	float4x4 gTextureTransform;		// çº¹ç†å˜æ¢çŸ©é˜µ
 }
 cbuffer cbMaterial : register(b1)
 {
-	float4 gDiffuseAlbedo;			// Âş·´Éä·´ÕÕÂÊ
-	float3 gFresneRf0;				// ·ÆÄù¶ûĞ§Ó¦²ÄÖÊÊôĞÔRf£¨0¡ã£©
-	float gRoughness;				// ²ÄÖÊ´Ö²Ú¶È
+	float4 gDiffuseAlbedo;			// æ¼«åå°„åç…§ç‡
+	float3 gFresneRf0;				// è²æ¶…å°”æ•ˆåº”æè´¨å±æ€§Rfï¼ˆ0Â°ï¼‰
+	float gRoughness;				// æè´¨ç²—ç³™åº¦
 	float4x4 gMaterialTransform;
 }
 cbuffer cbPass : register(b2)
 {
-	float4x4 gView;					// ÉãÏñ»úÊÓÍ¼¾ØÕó
-	float4x4 gInvView;				// ÊÓÍ¼¾ØÕóµÄÄæ¾ØÕó
-	float4x4 gProj;					// Í¶Ó°£¨ÖÁÏÔÊ¾ÆÁÄ»£©¾ØÕó
-	float4x4 gInvProj;				// Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-	float4x4 gViewProj;				// ÊÓÍ¼Í¶Ó°¾ØÕó
-	float4x4 gInvViewProj;			// ÊÓÍ¼Í¶Ó°¾ØÕóµÄÄæ¾ØÕó
-	float3 gEyePosW;				// ÉãÏñ»úÎ»ÖÃ×ø±ê
-	float cbPerObjectPad1;			// Ìî³ä×Ö½ÚÒÔ±£Ö¤16×Ö½Ú¶ÔÆë
-	float2 gRenderTargetSize;		// äÖÈ¾Ä¿±êµÄ´óĞ¡
-	float2 gInvRenderTargetSize;	// äÖÈ¾Ä¿±ê´óĞ¡µÄµ¹Êı
-	float gNearZ;					// ½üÊÓÆ½Ãæ
-	float gFarZ;					// Ô¶ÊÓÆ½Ãæ
-	float gTotalTime;				// ³ÌĞòÔËĞĞ×ÜÊ±¼ä
-	float gDeltaTime;				// Á½´ÎtickÖ®¼äµÄÊ±¼ä²î
-	float4 gAmbientIlluminating;	// ÎïÌå×ÔÉí·¢¹â
+	float4x4 gView;					// æ‘„åƒæœºè§†å›¾çŸ©é˜µ
+	float4x4 gInvView;				// è§†å›¾çŸ©é˜µçš„é€†çŸ©é˜µ
+	float4x4 gProj;					// æŠ•å½±ï¼ˆè‡³æ˜¾ç¤ºå±å¹•ï¼‰çŸ©é˜µ
+	float4x4 gInvProj;				// æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+	float4x4 gViewProj;				// è§†å›¾æŠ•å½±çŸ©é˜µ
+	float4x4 gInvViewProj;			// è§†å›¾æŠ•å½±çŸ©é˜µçš„é€†çŸ©é˜µ
+	float3 gEyePosW;				// æ‘„åƒæœºä½ç½®åæ ‡
+	float cbPerObjectPad1;			// å¡«å……å­—èŠ‚ä»¥ä¿è¯16å­—èŠ‚å¯¹é½
+	float2 gRenderTargetSize;		// æ¸²æŸ“ç›®æ ‡çš„å¤§å°
+	float2 gInvRenderTargetSize;	// æ¸²æŸ“ç›®æ ‡å¤§å°çš„å€’æ•°
+	float gNearZ;					// è¿‘è§†å¹³é¢
+	float gFarZ;					// è¿œè§†å¹³é¢
+	float gTotalTime;				// ç¨‹åºè¿è¡Œæ€»æ—¶é—´
+	float gDeltaTime;				// ä¸¤æ¬¡tickä¹‹é—´çš„æ—¶é—´å·®
+	float4 gAmbientIlluminating;	// ç‰©ä½“è‡ªèº«å‘å…‰
 
 	Light gLights[MAX_NUM_LIGHTS];
 }
 
-// ÊäÈë¶¥µãÊı¾İ
+// è¾“å…¥é¡¶ç‚¹æ•°æ®
 struct VertexIn
 {
 	float3 pos      : POSITION;
@@ -63,11 +63,11 @@ struct VertexIn
 	float3 tangentU : TANGENT;
 	float2 texCoord : TEXCOORD;
 };
-// Êä³ö¶¥µãÊı¾İ
+// è¾“å‡ºé¡¶ç‚¹æ•°æ®
 struct VertexOut
 {
-	float4 posH     : SV_POSITION;	// ÆÁÄ»¿Õ¼ä×ø±ê
-	float3 posW     : POSITION;		// ÊÀ½ç¿Õ¼ä×ø±ê
+	float4 posH     : SV_POSITION;	// å±å¹•ç©ºé—´åæ ‡
+	float3 posW     : POSITION;		// ä¸–ç•Œç©ºé—´åæ ‡
 	float3 normalW  : NORMAL;
 	float3 tangentW : TANGENT;
 	float2 texCoord : TEXCOORD;

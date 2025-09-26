@@ -25,7 +25,7 @@ private:
 	void MouseUp(WPARAM ButtonState, int x, int y) override;
 	void MouseMove(WPARAM ButtonState, int x, int y) override;
 	void MouseWheel(short zDelta) override;
-	
+
 	void LoadTexture(); // 载入纹理
 	void BuildRootSignature(); // 创建根签名
 	void BuildDescriptorHeaps(); // 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
@@ -73,7 +73,7 @@ private:
 	std::unordered_map<std::string, std::unique_ptr<Texture>> diffuseTextures;			// 存储漫反射纹理的无序图
 	std::unordered_map<std::string, std::unique_ptr<Texture>> normalTextures;			// 存储法线纹理的无序图
 	std::unordered_map<std::string, std::unique_ptr<Texture>> heightTextures;			// 存储深度图的无序图
-	
+
 	std::vector<RenderItem*> allRenderItems;							// 储存有所有渲染项
 	std::vector<std::unique_ptr<RenderItem>> opaqueRenderItems;			// 储存不透明渲染项
 	std::vector<std::unique_ptr<RenderItem>> transparentRenderItems;	// 储存透明渲染项
@@ -88,4 +88,3 @@ private:
 
 	Camera camera;	//摄像机对象
 };
-

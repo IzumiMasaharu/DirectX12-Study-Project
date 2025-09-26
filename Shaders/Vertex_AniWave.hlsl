@@ -1,14 +1,14 @@
-#include "Basic.hlsl"
+ï»¿#include "Basic.hlsl"
 
 VertexOut VS_Wave(VertexIn vin)
 {
 	VertexOut vout;
 
-	// ÊÀ½ç¿Õ¼äÎ»ÖÃ
+	// ä¸–ç•Œç©ºé—´ä½ç½®
 	float4 posW = mul(float4(vin.pos, 1.0f), gWorldTransform);
 
-	// ==== ¶à²ãµş¼Ó²¨ÀË ====
-	// Ã¿²ã²¨ÀËÓĞ²»Í¬µÄ·½Ïò¡¢ÆµÂÊ¡¢·ù¶È¡¢ËÙ¶È
+	// ==== å¤šå±‚å åŠ æ³¢æµª ====
+	// æ¯å±‚æ³¢æµªæœ‰ä¸åŒçš„æ–¹å‘ã€é¢‘ç‡ã€å¹…åº¦ã€é€Ÿåº¦
 	float waveHeight = 0.0f;
 
 	float2 waveDirs[4] = {
@@ -24,16 +24,16 @@ VertexOut VS_Wave(VertexIn vin)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		float k = 2 * 3.1415926 / waveLengths[i]; // ²¨Êı
+		float k = 2 * 3.1415926 / waveLengths[i]; // æ³¢æ•°
 		float phase = dot(posW.xz, waveDirs[i]) * k + gTotalTime * speeds[i];
 		waveHeight += amplitudes[i] * sin(phase);
 	}
 
-	// µş¼Ó²¨ÀË
+	// å åŠ æ³¢æµª
 	posW.y += waveHeight;
 
-	// ==== ·¨ÏßÈÅ¶¯ ====
-	// ÓÃÓĞÏŞ²î·Ö½üËÆ·¨ÏßÆ«µ¼
+	// ==== æ³•çº¿æ‰°åŠ¨ ====
+	// ç”¨æœ‰é™å·®åˆ†è¿‘ä¼¼æ³•çº¿åå¯¼
 	float epsilon = 0.01f;
 	float heightX = 0.0f, heightZ = 0.0f;
 	for (int i = 0; i < 4; ++i)
@@ -54,21 +54,21 @@ VertexOut VS_Wave(VertexIn vin)
 	float3 tangent = normalize(approxTangent - normal * dot(normal, approxTangent));
 	vout.tangentW = mul(tangent, (float3x3)gWorldTransform);
 
-	// Êä³ö²Ã¼ô¿Õ¼ä
+	// è¾“å‡ºè£å‰ªç©ºé—´
 	vout.posH = mul(posW, gViewProj);
 
-	// ÊÀ½ç×ø±ê
+	// ä¸–ç•Œåæ ‡
 	vout.posW = posW.xyz;
 
-	// ==== UV Á÷¶¯ ====
+	// ==== UV æµåŠ¨ ====
 	vout.texCoord = vin.texCoord;
 
-	// Ö÷Á÷·½Ïò
+	// ä¸»æµæ–¹å‘
 	float2 flowDir = float2(1.0, 0.3);
 	float flowSpeed = 0.05;
 	vout.texCoord += flowDir * gTotalTime * flowSpeed;
 
-	// Ğ¡·ùËæ»úÈÅ¶¯Ä£ÄâÁ°äô
+	// å°å¹…éšæœºæ‰°åŠ¨æ¨¡æ‹Ÿæ¶Ÿæ¼ª
 	float waveUV = 0.02 * (sin(5.0 * posW.x + gTotalTime * 3.0) + cos(4.0 * posW.z + gTotalTime * 2.0));
 	vout.texCoord += waveUV;
 

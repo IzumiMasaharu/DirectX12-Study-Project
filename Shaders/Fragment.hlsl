@@ -1,6 +1,5 @@
-#include "Basic.hlsl"
+ï»¿#include "Basic.hlsl"
 
-// ÏñËØ×ÅÉ«Æ÷
 float4 PS(VertexOut pin) : SV_Target
 {
 	float4 diffuseAlbedo = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.texCoord) * gDiffuseAlbedo;

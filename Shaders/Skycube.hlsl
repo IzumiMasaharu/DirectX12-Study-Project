@@ -1,4 +1,4 @@
-// ÊäÈë¶¥µãÊı¾İ
+ï»¿// è¾“å…¥é¡¶ç‚¹æ•°æ®
 struct VertexIn
 {
 	float3 pos      : POSITION;
@@ -6,11 +6,11 @@ struct VertexIn
 	float3 tangentU : TANGENT;
 	float2 texCoord : TEXCOORD;
 };
-// Êä³ö¶¥µãÊı¾İ
+// è¾“å‡ºé¡¶ç‚¹æ•°æ®
 struct VertexOut
 {
-	float4 posH     : SV_POSITION;	// ÆÁÄ»¿Õ¼ä×ø±ê
-	float3 posW     : POSITION;		// ÊÀ½ç¿Õ¼ä×ø±ê
+	float4 posH     : SV_POSITION;	// å±å¹•ç©ºé—´åæ ‡
+	float3 posW     : POSITION;		// ä¸–ç•Œç©ºé—´åæ ‡
 	float3 normalW  : NORMAL;
 	float3 tangentW : TANGENT;
 	float2 texCoord : TEXCOORD;
