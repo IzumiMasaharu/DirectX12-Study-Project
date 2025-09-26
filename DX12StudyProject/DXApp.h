@@ -47,6 +47,7 @@ private:
 	virtual void Update(const GameTimer& GTimer) = 0;
 	virtual void Draw(const GameTimer& GTimer) = 0;
 
+	virtual void KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam);
 	virtual void MouseDown(WPARAM ButtonState, int x, int y);
 	virtual void MouseUp(WPARAM ButtonState, int x, int y);
 	virtual void MouseMove(WPARAM ButtonState, int x, int y);

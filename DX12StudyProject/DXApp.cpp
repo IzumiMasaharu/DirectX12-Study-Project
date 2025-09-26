@@ -455,6 +455,7 @@ void DXApp::Resize()
 }
 
 // 处理鼠标信息（可被派生类覆写）
+void DXApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam){ return; }
 void DXApp::MouseDown(WPARAM ButtonState, int x, int y){ return; }
 void DXApp::MouseUp(WPARAM ButtonState, int x, int y){ return; }
 void DXApp::MouseMove(WPARAM ButtonState, int x, int y){ return; }

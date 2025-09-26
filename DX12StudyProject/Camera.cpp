@@ -122,6 +122,45 @@ void Camera::move(float x, float y, float z)
 	XMStoreFloat3(&position, posV);
 	viewDirty = true;
 }
+void Camera::move(const XMFLOAT3& delta)
+{
+	XMVECTOR posV = XMLoadFloat3(&position);
+	posV = XMVectorAdd(posV, XMLoadFloat3(&delta));
+	XMStoreFloat3(&position, posV);
+	viewDirty = true;
+}
+void Camera::moveForward_Backward(float distance)
+{
+	XMVECTOR posV = XMLoadFloat3(&position);
+	XMVECTOR lookV = XMLoadFloat3(&lookDir);
+	posV = XMVectorAdd(posV, XMVectorScale(lookV, distance));
+	XMStoreFloat3(&position, posV);
+	viewDirty = true;
+}
+void Camera::moveRight_left(float distance)
+{
+	XMVECTOR posV = XMLoadFloat3(&position);
+	XMVECTOR rightV = XMLoadFloat3(&rightDir);
+	// 投影到 XZ 平面
+	XMVECTOR proj = XMVectorSet(XMVectorGetX(rightV), 0.0f, XMVectorGetZ(rightV), 0.0f);
+	if (XMVector3LengthSq(proj).m128_f32[0] < 1e-6f)
+	{
+		proj = XMVectorSet(1, 0, 0, 0); // fallback
+	}
+	proj = XMVector3Normalize(proj);
+
+	posV = XMVectorAdd(posV, XMVectorScale(proj, distance));
+	XMStoreFloat3(&position, posV);
+	viewDirty = true;
+}
+void Camera::fly_drop(float distance)
+{
+	XMVECTOR posV = XMLoadFloat3(&position);
+	XMVECTOR upV = XMVectorSet(0, 1, 0, 0);
+	posV = XMVectorAdd(posV, XMVectorScale(upV, distance));
+	XMStoreFloat3(&position, posV);
+	viewDirty = true;
+}
 
 // roll: 绕当前 lookDir
 void Camera::roll(float rollAngle)

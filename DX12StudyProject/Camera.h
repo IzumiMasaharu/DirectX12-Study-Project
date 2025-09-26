@@ -28,6 +28,10 @@ public:
 
     // 移动
     void move(float x, float y, float z);
+    void move(const DirectX::XMFLOAT3& delta);
+    void moveForward_Backward(float distance); // 向目前lookDir方向移动
+    void moveRight_left(float distance); // 向当前 right 在 XZ 平面投影方向移动
+    void fly_drop(float distance);    // 向 Y 轴方向移动
 
     // Getter
     const DirectX::XMFLOAT3& getPositionFloat3() const { return position; }
@@ -59,7 +63,7 @@ private:
     // 相机位置
     DirectX::XMFLOAT3 position;
 
-    // 方向基向量（由 orientation 推导）
+    // 方向基向量
     DirectX::XMFLOAT3 lookDir;
     DirectX::XMFLOAT3 upDir;
     DirectX::XMFLOAT3 rightDir;

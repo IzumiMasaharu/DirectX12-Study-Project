@@ -76,10 +76,17 @@ LRESULT MyApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEWHEEL:
 		MouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));
 		return 0;
+	case WM_KEYDOWN:
+		KeyboardMsgProc(msg, wParam, lParam);
+		return 0;
 	case WM_KEYUP:
 		if (wParam == VK_ESCAPE)
 		{
 			PostQuitMessage(0);
+		}
+		else
+		{
+			KeyboardMsgProc(msg, wParam, lParam);
 		}
 		return 0;
 	}
@@ -183,8 +190,6 @@ void MyApp::Resize()
 // 更新帧画面
 void MyApp::Update(const GameTimer& GTimer)
 {
-	ChangePSOstate();
-
 	currentFrameResourceIndex = (currentFrameResourceIndex + 1) % gNumFrameResources;
 	currentFrameResource = frameResources[currentFrameResourceIndex].get();
 
@@ -256,6 +261,91 @@ void MyApp::Draw(const GameTimer& GTimer)
 	commandQueue->Signal(fence.Get(), currentFenceValue);
 }
 
+void MyApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	// W : 前进 
+	// S : 后退 
+	// A : 左移 
+	// D : 右移 
+	// R : 上升 
+	// F : 下降
+	// Q : 逆时针旋转
+	// E : 顺时针旋转
+	// 1 : 切换线框模式
+	if (msg == WM_KEYDOWN)
+	{
+		switch (wParam)
+		{
+		case 'W':
+			isMoving = true;
+			moveDirection.z += 1;
+			break;
+		case 'S':
+			isMoving = true;
+			moveDirection.z -= 1;
+			break;
+		case 'A':
+			isMoving = true;
+			moveDirection.x -= 1;
+			break;	
+		case 'D':
+			isMoving = true;
+			moveDirection.x += 1;
+			break;
+		case 'R':
+			isMoving = true;
+			moveDirection.y += 1;
+			break;
+		case 'F':
+			isMoving = true;
+			moveDirection.y -= 1;
+			break;
+		case 'Q':
+			isRotating = true;
+			rotateDirection -= 1;
+			break;
+		case 'E':
+			isRotating = true;
+			rotateDirection += 1;
+			break;
+		case '1':
+			isWireframeEnabled = !isWireframeEnabled;
+			break;	
+	}
+	else if (msg == WM_KEYUP)
+	{
+		switch (wParam)
+		{
+		case 'W':
+			moveDirection.z -= 1;
+			break;
+		case 'S':
+			moveDirection.z += 1;
+			break;
+		case 'A':
+			moveDirection.x += 1;
+			break;
+		case 'D':
+			moveDirection.x -= 1;
+			break;
+		case 'R':
+			moveDirection.y -= 1;
+			break;
+		case 'F':
+			moveDirection.y += 1;
+			break;
+		case 'Q':
+			rotateDirection += 1;
+			break;
+		case 'E':
+			rotateDirection -= 1;
+			break;
+		}
+        const float len = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&moveDirection)));
+        if (len < 1e-3f) isMoving = false;
+        if (fabsf(rotateDirection) < 1e-3f) isRotating = false;
+	}
+}
 // 当鼠标按下时调用
 void MyApp::MouseDown(WPARAM ButtonState, int x, int y)
 {
@@ -652,11 +742,13 @@ void MyApp::BuildRenderItems()
 	auto leftBallRenderItem = std::make_unique<RenderItem>();
 	auto rightCylinderRenderItem = std::make_unique<RenderItem>();
 	auto rightBallRenderItem = std::make_unique<RenderItem>();
+	auto floorRenderItem = std::make_unique<RenderItem>();
 
 	XMMATRIX leftCylinderWorld = XMMatrixTranslation(-2.5f, +0.0f, 0.0f);
 	XMMATRIX leftBallWorld = XMMatrixTranslation(-2.5f, +2.96f, 0.0f);
 	XMMATRIX rightCylinderWorld = XMMatrixTranslation(+2.5f, +0.0f, 0.0f);
 	XMMATRIX rightBallWorld = XMMatrixTranslation(+2.5f, +2.96f, 0.0f);
+	XMMATRIX floorWorld = XMMatrixScaling(1.0f, 1.0f, 1.5f)* XMMatrixTranslation(0.0f, -2.0f, 0.0f);
 
 	XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
 	leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
@@ -702,6 +794,17 @@ void MyApp::BuildRenderItems()
 	rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
 	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
+	XMStoreFloat4x4(&floorRenderItem->worldTransform, floorWorld);
+	floorRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+	floorRenderItem->material = materials["Stone"].get();
+	floorRenderItem->diffuseTexture = diffuseTextures["floor"].get();
+	floorRenderItem->normalTexture = normalTextures["floor"].get();
+	floorRenderItem->Geo = geos["Geo"].get();
+	floorRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	floorRenderItem->indexCount = floorRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
+	floorRenderItem->indexStartLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
+	floorRenderItem->vertexBaseLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
+
 	auto nailongRenderItem = std::make_unique<RenderItem>();
 	XMMATRIX nailongWorld = XMMatrixScaling(0.2f, 0.2f, 0.2f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, MathHelper::Pi) * XMMatrixTranslation(0.0f, -1.0f, -0.0f);
 
@@ -716,26 +819,27 @@ void MyApp::BuildRenderItems()
 	nailongRenderItem->indexStartLocation = nailongRenderItem->Geo->submeshList["Nailong"].indexStartLocation;
 	nailongRenderItem->vertexBaseLocation = nailongRenderItem->Geo->submeshList["Nailong"].vertexBaseLocation;
 
-	auto gridRenderItem = std::make_unique<RenderItem>();
-	XMMATRIX gridWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	auto waveRenderItem = std::make_unique<RenderItem>();
+	XMMATRIX waveWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 
-	XMStoreFloat4x4(&gridRenderItem->worldTransform, gridWorld);
-	gridRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	gridRenderItem->material = materials["Water"].get();
-	gridRenderItem->diffuseTexture = diffuseTextures["wave"].get();
-	gridRenderItem->normalTexture = normalTextures["wave"].get();
-	gridRenderItem->Geo = geos["Geo"].get();
-	gridRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	gridRenderItem->indexCount = gridRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
-	gridRenderItem->indexStartLocation = gridRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
-	gridRenderItem->vertexBaseLocation = gridRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
+	XMStoreFloat4x4(&waveRenderItem->worldTransform, waveWorld);
+	waveRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+	waveRenderItem->material = materials["Water"].get();
+	waveRenderItem->diffuseTexture = diffuseTextures["wave"].get();
+	waveRenderItem->normalTexture = normalTextures["wave"].get();
+	waveRenderItem->Geo = geos["Geo"].get();
+	waveRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	waveRenderItem->indexCount = waveRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
+	waveRenderItem->indexStartLocation = waveRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
+	waveRenderItem->vertexBaseLocation = waveRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
 
 	opaqueRenderItems.push_back(std::move(leftCylinderRenderItem));
 	opaqueRenderItems.push_back(std::move(leftBallRenderItem));
 	opaqueRenderItems.push_back(std::move(rightCylinderRenderItem));
 	opaqueRenderItems.push_back(std::move(rightBallRenderItem));
+	opaqueRenderItems.push_back(std::move(floorRenderItem));
 	opaqueRenderItems.push_back(std::move(nailongRenderItem));
-	transparentRenderItems.push_back(std::move(gridRenderItem));
+	transparentRenderItems.push_back(std::move(waveRenderItem));
 
 	for (auto& item : opaqueRenderItems)
 		allRenderItems.push_back(item.get());
@@ -819,14 +923,22 @@ void MyApp::BuildPSOs()
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&PSOs["Wireframe"])));
 }
 
-// 更改PSO
-void MyApp::ChangePSOstate()
+void MyApp::UpdateCameraState(const GameTimer& GTimer)
 {
-	if (GetAsyncKeyState('1') & 0x8000)
-		isWireframeEnabled = true;
-	else
-		isWireframeEnabled = false;
+	if (isMoving)
+	{
+		float deltaTime = (float)GTimer.DeltaTime();
+		camera.moveForward_Backward(deltaTime * moveDirection.z * moveSpeed);
+		camera.moveRight_left(deltaTime * moveDirection.x * moveSpeed);
+		camera.moveUp_down(deltaTime * moveDirection.y * moveSpeed);
+	}
+	else if (isRotating)
+	{
+		float deltaTime = (float)GTimer.DeltaTime();
+		camera.roll(deltaTime * rotateDirection * rotateSpeed);
+	}
 }
+
 // 更新物体常量缓冲区（世界矩阵）
 void MyApp::UpdateObjectsConstBuffers()
 {
@@ -918,7 +1030,7 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 	for (size_t itemIndex = 0; itemIndex < renderItems.size(); itemIndex++)
 	{
 		auto item = renderItems[itemIndex];
-		if (item->Geo == geos.at("Geo").get() && item->vertexBaseLocation == item->Geo->submeshList["Geo_Gird"].vertexBaseLocation)
+		if (item->objectConstBufferIndex == 6)
 			commandList->SetPipelineState(PSOs.at("Transparent").Get());
 
 		commandList->IASetVertexBuffers(0, 1, &item->Geo->VertexBufferView());
@@ -937,7 +1049,7 @@ void MyApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::v
 
 		commandList->DrawIndexedInstanced(item->indexCount, 1, item->indexStartLocation, item->vertexBaseLocation, 0);
 
-		if (item->Geo == geos.at("Geo").get() && item->vertexBaseLocation == geos.at("Geo").get()->submeshList["Geo_Gird"].vertexBaseLocation)
+		if (item->objectConstBufferIndex == 6)
 			commandList->SetPipelineState(PSOs.at("Solid").Get());
 	}
 }

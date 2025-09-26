@@ -21,6 +21,7 @@ private:
 	void Update(const GameTimer& GTimer) override;
 	void Draw(const GameTimer& GTimer) override;
 
+	void KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam) override;
 	void MouseDown(WPARAM ButtonState, int x, int y) override;
 	void MouseUp(WPARAM ButtonState, int x, int y) override;
 	void MouseMove(WPARAM ButtonState, int x, int y) override;
@@ -38,7 +39,8 @@ private:
 	void BuildFrameResources(); // 创建帧资源
 	void BuildPSOs(); // 创建渲染管线状态对象
 
-	void ChangePSOstate();
+	void UpdateCameraState(const GameTimer& GTimer); // 移动摄像机
+
 	void UpdateObjectsConstBuffers(); // 更新常量缓冲区（世界矩阵）
 	void UpdatePassConstBuffers(); // 更新渲染过程常量缓冲区
 	void UpdateMaterialConstBuffers(); // 更新材质常量缓冲区
@@ -87,4 +89,11 @@ private:
 	bool isWireframeEnabled = false;
 
 	Camera camera;	//摄像机对象
+	bool isMoving = false;
+	DirectX::XMFLOAT3 moveDirection{0.0f, 0.0f, 0.0f};
+	float moveSpeed = 1.0f;
+
+	bool isRolling = false;
+	float rollingDirection = 0.0f;
+	float rollingSpeed = 0.1f;
 };
