@@ -11,6 +11,7 @@ According to the Dragon-Book(3D Game Programming With DirectX 12),the project ha
 - Ch.8 Lighting (Material)
 - Ch.9 Texture
 - Ch.10 Alpha Blending
+- Ch.15 Class Camera
 - Ch.19 Normal Mapping
 
 ## TODO:
