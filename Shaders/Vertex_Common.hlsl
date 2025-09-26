@@ -1,4 +1,4 @@
-﻿#include "Basic.hlsl"
+#include "Basic.hlsl"
 
 VertexOut VS(VertexIn vin)
 {

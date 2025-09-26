@@ -1,4 +1,4 @@
-﻿// 输入顶点数据
+// 输入顶点数据
 struct VertexIn
 {
 	float3 pos      : POSITION;
