@@ -190,6 +190,7 @@ void MyApp::Resize()
 // 更新帧画面
 void MyApp::Update(const GameTimer& GTimer)
 {
+	UpdateCameraState(GTimer);
 	currentFrameResourceIndex = (currentFrameResourceIndex + 1) % gNumFrameResources;
 	currentFrameResource = frameResources[currentFrameResourceIndex].get();
 
@@ -274,6 +275,10 @@ void MyApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 	// 1 : 切换线框模式
 	if (msg == WM_KEYDOWN)
 	{
+		bool isRepeat = (lParam & 0x40000000) != 0;
+		if (isRepeat)
+			return;
+
 		switch (wParam)
 		{
 		case 'W':
@@ -287,7 +292,7 @@ void MyApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		case 'A':
 			isMoving = true;
 			moveDirection.x -= 1;
-			break;	
+			break;
 		case 'D':
 			isMoving = true;
 			moveDirection.x += 1;
@@ -301,16 +306,17 @@ void MyApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 			moveDirection.y -= 1;
 			break;
 		case 'Q':
-			isRotating = true;
-			rotateDirection -= 1;
+			isRolling = true;
+			rollingDirection -= 1;
 			break;
 		case 'E':
-			isRotating = true;
-			rotateDirection += 1;
+			isRolling = true;
+			rollingDirection += 1;
 			break;
 		case '1':
 			isWireframeEnabled = !isWireframeEnabled;
-			break;	
+			break;
+		}
 	}
 	else if (msg == WM_KEYUP)
 	{
@@ -335,15 +341,15 @@ void MyApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 			moveDirection.y += 1;
 			break;
 		case 'Q':
-			rotateDirection += 1;
+			rollingDirection += 1;
 			break;
 		case 'E':
-			rotateDirection -= 1;
+			rollingDirection -= 1;
 			break;
 		}
         const float len = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&moveDirection)));
         if (len < 1e-3f) isMoving = false;
-        if (fabsf(rotateDirection) < 1e-3f) isRotating = false;
+        if (fabsf(rollingDirection) < 1e-3f) isRolling = false;
 	}
 }
 // 当鼠标按下时调用
@@ -794,7 +800,9 @@ void MyApp::BuildRenderItems()
 	rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
 	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
+	XMMATRIX floorTextureTransform = XMMatrixTranslation(4.0f, 6.0f, 0.0f);
 	XMStoreFloat4x4(&floorRenderItem->worldTransform, floorWorld);
+	XMStoreFloat4x4(&floorRenderItem->textureTransform, floorTextureTransform);
 	floorRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 	floorRenderItem->material = materials["Stone"].get();
 	floorRenderItem->diffuseTexture = diffuseTextures["floor"].get();
@@ -930,12 +938,12 @@ void MyApp::UpdateCameraState(const GameTimer& GTimer)
 		float deltaTime = (float)GTimer.DeltaTime();
 		camera.moveForward_Backward(deltaTime * moveDirection.z * moveSpeed);
 		camera.moveRight_left(deltaTime * moveDirection.x * moveSpeed);
-		camera.moveUp_down(deltaTime * moveDirection.y * moveSpeed);
+		camera.fly_drop(deltaTime * moveDirection.y * moveSpeed);
 	}
-	else if (isRotating)
+	else if (isRolling)
 	{
 		float deltaTime = (float)GTimer.DeltaTime();
-		camera.roll(deltaTime * rotateDirection * rotateSpeed);
+		camera.rotate(deltaTime * rollingDirection * rollingSpeed,0.0f,0.0f);
 	}
 }
 

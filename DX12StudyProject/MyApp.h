@@ -91,9 +91,9 @@ private:
 	Camera camera;	//摄像机对象
 	bool isMoving = false;
 	DirectX::XMFLOAT3 moveDirection{0.0f, 0.0f, 0.0f};
-	float moveSpeed = 1.0f;
+	float moveSpeed = 3.0f;
 
 	bool isRolling = false;
 	float rollingDirection = 0.0f;
-	float rollingSpeed = 0.1f;
+	float rollingSpeed = 0.2f;
 };
