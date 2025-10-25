@@ -8,14 +8,19 @@ struct ObjectConstants
 {
     DirectX::XMFLOAT4X4 worldTransform = MathHelper::Identity4x4(); // 物体的世界变换矩阵
 	DirectX::XMFLOAT4X4 textureTransform = MathHelper::Identity4x4(); // 纹理变换矩阵 
+	UINT diffuseTextureIndex[MAX_BINDING_TEXTURE];
+	UINT normalTextureIndex[MAX_BINDING_TEXTURE];
+    UINT materialIndex; // 该渲染项所使用的材质
 };
 
 // 与着色器绑定的材质结构体
-struct MaterialConstants
+struct MaterialData
 {
-    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f }; // 漫反射反照率
-    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f }; // 菲涅尔效应材质属性Rf（0°）
-    float roughness = 0.0f; // 材质粗糙度
+    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };	// 漫反射反照率
+    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };			// 菲涅尔效应材质属性Rf（0°）
+    float roughness = 0.0f;										// 材质粗糙度
+	DirectX::XMFLOAT3 emissive = { 0,0,0 };						// 自发光
+	float metallic = 0.0f;										// 金属度
     DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
 };
 
@@ -36,7 +41,7 @@ struct RenderingPassConstants
     float farZ = 0.0f; // 远视平面
     float totalTime = 0; // 程序运行总时间
     float deltaTime = 0; // 两次tick之间的时间差
-    DirectX::XMFLOAT4 ambientIlluminating= { 0.0f,0.0f,0.0f,1.0f }; // 物体自身发光
+    DirectX::XMFLOAT4 ambientIlluminating= { 0.0f,0.0f,0.0f,1.0f }; // 环境光项
 
     Light lights[MAX_NUM_LIGHTS];
 };
@@ -63,7 +68,8 @@ public:
     Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator; // 每个帧资源的命令分配器
     std::unique_ptr<UploadBuffer<RenderingPassConstants>> passConstBuffer = nullptr; // 每个帧资源的渲染过程常量缓冲区
     std::unique_ptr<UploadBuffer<ObjectConstants>> objectConstBuffer = nullptr; // 每个帧资源的物体常量缓冲区
-    std::unique_ptr<UploadBuffer<MaterialConstants>> materialConstBuffer = nullptr; // 每个帧资源的材质常量缓冲区
+
+    std::unique_ptr<UploadBuffer<MaterialData>> materialStructuredBuffer = nullptr; // 结构化材质常量缓冲区
     UINT64 fence = 0;
 };
 

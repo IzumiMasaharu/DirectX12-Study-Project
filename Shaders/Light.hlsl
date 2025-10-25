@@ -1,5 +1,7 @@
 #define MAX_NUM_LIGHTS 256
 
+#include "MaterialData.hlsl"
+
 struct Light
 {
     float3 rgbIntensity;
@@ -8,12 +10,6 @@ struct Light
     float end;
     float3 position;
     float spotPower;
-};
-struct Material
-{
-    float4 diffuseAlbedo;
-    float3 fresneRf0;
-    float roughness;
 };
 
 // 光学计算方法
@@ -32,7 +28,7 @@ float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
     return reflectPercent;
 }
 // 计算因漫反射与镜面反射而进入人眼的光量
-float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 normal, float3 toEyeVector, Material material)
+float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 normal, float3 toEyeVector, MaterialData material)
 {
     const float m = (1.0f - material.roughness) * 256.0f;
     float3 halfVector = normalize(toEyeVector + lightVector);
@@ -47,7 +43,7 @@ float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 norma
 
 // 光源生成方法
 // 生成平行光
-float3 ComputeDirectionalLight(Light light,Material material,float3 normal,float3 toEyeVector)
+float3 ComputeDirectionalLight(Light light,MaterialData material,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = -light.direction;
     float3 lightIntensity = light.rgbIntensity * max(dot(lightVector, normal), 0.0f);
@@ -56,7 +52,7 @@ float3 ComputeDirectionalLight(Light light,Material material,float3 normal,float
 }
 
 // 生成点光源
-float3 ComputePointLight(Light light,Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
+float3 ComputePointLight(Light light, MaterialData material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = light.position - illuminatedPosition;
     if (length(lightVector)>light.end)
@@ -71,7 +67,7 @@ float3 ComputePointLight(Light light,Material material,float3 illuminatedPositio
 }
 
 // 生成聚光灯
-float3 ComputeSpotLight(Light light,Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
+float3 ComputeSpotLight(Light light, MaterialData material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = -(illuminatedPosition - light.position);
     if (length(lightVector) > light.end)
@@ -87,7 +83,7 @@ float3 ComputeSpotLight(Light light,Material material,float3 illuminatedPosition
 }
 
 // 生成全部光源
-float4 ComputeAllLights(Light lights[MAX_NUM_LIGHTS],Material material,float3 illuminatedPosition,float3 normal,float3 toEyeVector,float3 shadowFactor)
+float4 ComputeAllLights(Light lights[MAX_NUM_LIGHTS], MaterialData material,float3 illuminatedPosition,float3 normal,float3 toEyeVector,float3 shadowFactor)
 {
     float3 result = 0.0f;
     int index = 0;

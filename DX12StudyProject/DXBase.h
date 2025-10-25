@@ -4,6 +4,8 @@
 #pragma comment(lib,"D3D12.lib")
 #pragma comment(lib,"dxgi.lib")
 
+#define MAX_BINDING_TEXTURE 8
+
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -255,12 +257,14 @@ struct Material
 {
     std::string name;
 
-    UINT materialConstBufferIndex = -1; // 该材质在常量缓冲区中的索引
+    UINT materialIndex = -1; // 该材质在常量缓冲区中的索引
     UINT numDirtyFrames = -1; // 待更新的帧资源数量
 
     DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f }; // 漫反射反照率
     DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f }; // 菲涅尔效应材质属性Rf（0°）
     float roughness = 0.0f; // 材质粗糙度
+	DirectX::XMFLOAT3 emissive = { 0,0,0 };						// 自发光
+	float metallic = 0.0f;										// 金属度
     DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
 };
 
@@ -279,7 +283,6 @@ struct Light
 struct Texture
 {
     std::string name;
-    std::wstring filename;
 	UINT srvHeapIndex = -1; // 纹理在SRV堆中的索引
 
     Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;

@@ -7,7 +7,7 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 #endif
     try
     {
-        MyApp myDXProject(hInstance);
+        Render myDXProject(hInstance);
         if (!myDXProject.Init())
             return 114;
 

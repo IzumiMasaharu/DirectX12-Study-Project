@@ -11,12 +11,12 @@ According to the Dragon-Book(3D Game Programming With DirectX 12),the project ha
 - Ch.8 Lighting(Material)
 - Ch.9 Texture
 - Ch.10 Alpha_Blending
-- Ch.15 Class_Camera
+- Ch.15 Class_Camera Dynamic_Index
 - Ch.19 Normal_Mapping
 
 ## TODO:
+- Ch.8 PBR
 - Ch.18 Skycube
-- Ch.15 Dynamic_Index
 - Ch.18 Dynamic_Texture
 - Ch.19 Displacement_Mapping
 - Ch.22 Quaternion

@@ -1,3 +1,7 @@
+#ifndef MAX_BINDING_TEXTURE
+#define MAX_BINDING_TEXTURE 8
+#endif
+
 #ifndef NUM_DIRECTIONAL_LIGHTS
 #define NUM_DIRECTIONAL_LIGHTS 0
 #endif
@@ -10,10 +14,9 @@
 
 #include "Light.hlsl"
 
-TextureCube gSkycubeMap : register(t0);
-Texture2D gDiffuseMap : register(t1);
-Texture2D gNormalMap : register(t2);
-Texture2D gHeightMap : register(t3);
+Texture2D gTextures[16] : register(t0, space0);
+StructuredBuffer<MaterialData> materialBuffer : register(t0, space1);
+TextureCube gSkycubeMap : register(t0, space2);
 
 SamplerState gsamPointWrap : register(s0);
 SamplerState gsamPointClamp : register(s1);
@@ -26,15 +29,11 @@ cbuffer cbPerObject : register(b0)
 {
 	float4x4 gWorldTransform;		// 物体世界变换矩阵
 	float4x4 gTextureTransform;		// 纹理变换矩阵
+	uint4 packedDiffuseTextureIndex[MAX_BINDING_TEXTURE/4];
+	uint4 packedNormalTextureIndex[MAX_BINDING_TEXTURE/4];
+	uint materialIndex;
 }
-cbuffer cbMaterial : register(b1)
-{
-	float4 gDiffuseAlbedo;			// 漫反射反照率
-	float3 gFresneRf0;				// 菲涅尔效应材质属性Rf（0°）
-	float gRoughness;				// 材质粗糙度
-	float4x4 gMaterialTransform;
-}
-cbuffer cbPass : register(b2)
+cbuffer cbPass : register(b1)
 {
 	float4x4 gView;					// 摄像机视图矩阵
 	float4x4 gInvView;				// 视图矩阵的逆矩阵
@@ -72,3 +71,6 @@ struct VertexOut
 	float3 tangentW : TANGENT;
 	float2 texCoord : TEXCOORD;
 };
+
+static uint diffuseTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedDiffuseTextureIndex;
+static uint normalTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedNormalTextureIndex; 

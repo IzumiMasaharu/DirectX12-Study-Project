@@ -9,8 +9,7 @@ VertexOut VS(VertexIn vin)
 	vout.normalW = mul(vin.normal, (float3x3) gWorldTransform);
 	vout.tangentW = mul(vin.tangentU, (float3x3) gWorldTransform);
 	vout.posH = mul(pos, gViewProj);
-	float4 texC = mul(float4(vin.texCoord, 0.0f, 1.0f), gTextureTransform);
-	vout.texCoord = mul(texC, gMaterialTransform).xy;
+	vout.texCoord = mul(float4(vin.texCoord, 0.0f, 1.0f), gTextureTransform).xy;
 
 	return vout;
 }

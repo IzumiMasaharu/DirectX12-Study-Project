@@ -1305,7 +1305,7 @@ static HRESULT CreateD3DResources12(
                 cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture.Get(),
                     D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
 
-                // Use Heap-allocating UpdateSubresources implementation for variable number of subresources (which is the case for diffuseTextures).
+                // Use Heap-allocating UpdateSubresources implementation for variable number of subresources (which is the case for textures).
                 UpdateSubresources(cmdList, texture.Get(), textureUploadHeap.Get(), 0, 0, num2DSubresources, initData);
 
                 cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture.Get(),
@@ -1382,7 +1382,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
         switch (d3d10ext->resourceDimension)
         {
         case D3D11_RESOURCE_DIMENSION_TEXTURE1D:
-            // D3DX writes 1D diffuseTextures with a fixed Height of 1
+            // D3DX writes 1D textures with a fixed Height of 1
             if ((header->flags & DDS_HEIGHT) && height != 1)
             {
                 return HRESULT_FROM_WIN32(ERROR_INVALID_DATA);
@@ -1510,7 +1510,7 @@ static HRESULT CreateTextureFromDDS(_In_ ID3D11Device* d3dDevice,
         hr = d3dDevice->CheckFormatSupport(format, &fmtSupport);
         if (SUCCEEDED(hr) && (fmtSupport & D3D11_FORMAT_SUPPORT_MIP_AUTOGEN))
         {
-            // 10level9 feature levels do not support auto-gen mipgen for volume diffuseTextures
+            // 10level9 feature levels do not support auto-gen mipgen for volume textures
             if ((resDim != D3D11_RESOURCE_DIMENSION_TEXTURE3D)
                 || (d3dDevice->GetFeatureLevel() >= D3D_FEATURE_LEVEL_10_0))
             {

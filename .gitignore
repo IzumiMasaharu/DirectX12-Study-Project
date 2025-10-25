@@ -1,5 +1,6 @@
 .vs/
 .vscode/
+Cache/
 x64/
 .DS_Store
 DX12StudyProject/x64/

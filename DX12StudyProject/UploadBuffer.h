@@ -51,8 +51,8 @@ public:
     }
 
 private:
-    Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer; // 指向所创建上传缓冲区的指针
-    BYTE* mMappedData = nullptr; // 指向上传缓冲区映射到的数据块的指针
-    uint32_t mElementByteSize = 0; // 上传缓冲区存储数据类型的大小
-    bool mIsConstantBuffer = false; // 是否为常量缓冲区
+    Microsoft::WRL::ComPtr<ID3D12Resource> mUploadBuffer;	// 指向所创建上传缓冲区的指针
+    BYTE* mMappedData = nullptr;							// 指向上传缓冲区映射到的数据块的指针
+    uint32_t mElementByteSize = 0;							// 上传缓冲区存储数据类型的大小
+    bool mIsConstantBuffer = false;							// 是否为常量缓冲区
 };

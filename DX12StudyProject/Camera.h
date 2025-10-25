@@ -10,7 +10,7 @@ public:
     // 位置设置
     void setPosition(float x, float y, float z);
     void setPosition(const DirectX::XMFLOAT3& position);
-
+    
     // 朝向设置
     void lookAt(const DirectX::XMFLOAT3& target);
     void lookAt(const DirectX::XMFLOAT3& target, float rollAngle);
