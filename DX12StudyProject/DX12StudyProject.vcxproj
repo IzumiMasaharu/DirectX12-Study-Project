@@ -140,7 +140,7 @@
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyApp.cpp" />
+    <ClCompile Include="Render.cpp" />
     <ClCompile Include="DDSTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
@@ -151,7 +151,7 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GeometryGenerator.h" />
-    <ClInclude Include="MyApp.h" />
+    <ClInclude Include="Render.h" />
     <ClInclude Include="RenderItem.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="UploadBuffer.h" />

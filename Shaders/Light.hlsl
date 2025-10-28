@@ -34,11 +34,11 @@ float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 norma
     float3 halfVector = normalize(toEyeVector + lightVector);
     
     float roughnessFactor = ((m + 8.0f) / 8.0f) * pow(max(dot(halfVector, normal), 0.0f), m);
-    float3 fresneFactor = SchlickFresnel(material.fresneRf0, halfVector, lightVector);
-    float3 mirrorReflectedAlbedo = roughnessFactor * fresneFactor;
+    float3 fresnelFactor = SchlickFresnel(material.fresnel, halfVector, lightVector);
+    float3 mirrorReflectedAlbedo = roughnessFactor * fresnelFactor;
     mirrorReflectedAlbedo = mirrorReflectedAlbedo / (mirrorReflectedAlbedo + 1.0f);
     
-    return (mirrorReflectedAlbedo + material.diffuseAlbedo.rgb) * rgbIntensity;
+    return (mirrorReflectedAlbedo + material.albedo.rgb) * rgbIntensity;
 }
 
 // 光源生成方法

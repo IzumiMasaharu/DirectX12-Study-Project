@@ -16,12 +16,10 @@ struct ObjectConstants
 // 与着色器绑定的材质结构体
 struct MaterialData
 {
-    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f,1.0f,1.0f,1.0f };	// 漫反射反照率
-    DirectX::XMFLOAT3 fresneRf0 = { 0.0f,0.0f,0.0f };			// 菲涅尔效应材质属性Rf（0°）
+    DirectX::XMFLOAT4 albedo = { 1.0f,1.0f,1.0f,1.0f };	// 漫反射反照率
+    DirectX::XMFLOAT3 fresnel;
     float roughness = 0.0f;										// 材质粗糙度
 	DirectX::XMFLOAT3 emissive = { 0,0,0 };						// 自发光
-	float metallic = 0.0f;										// 金属度
-    DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
 };
 
 // 与着色器绑定的渲染过程常量结构体

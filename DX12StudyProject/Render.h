@@ -11,7 +11,7 @@ class Render : public DXApp
 public:
 	explicit Render(HINSTANCE hInstace);
 	~Render();
-public:
+
 	LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 	bool Init() override;
 private:

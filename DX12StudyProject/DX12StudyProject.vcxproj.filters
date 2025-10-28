@@ -21,7 +21,7 @@
     <ClCompile Include="DXApp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MyApp.cpp">
+    <ClCompile Include="Render.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
@@ -50,7 +50,7 @@
     <ClInclude Include="DXApp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MyApp.h">
+    <ClInclude Include="Render.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DXBase.h">

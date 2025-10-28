@@ -1,4 +1,4 @@
-﻿#include "MyApp.h"
+﻿#include "Render.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -399,6 +399,7 @@ void Render::LoadTexture()
 		"brick",
 		"wave",
 		"floor",
+		"wood",
 
 		"defaultNormal",
 		"brickNormal",
@@ -411,6 +412,7 @@ void Render::LoadTexture()
 		L"../Resources/Textures/bricks.dds",
 		L"../Resources/Textures/water.dds",
 		L"../Resources/Textures/floor.dds",
+		L"../Resources/Textures/wood.dds",
 
 		L"../Resources/Textures/default_normal.dds",
 		L"../Resources/Textures/brick_normal.dds",
@@ -752,34 +754,37 @@ void Render::BuildMaterials()
 	matBrick->name = "Brick";
 	matBrick->materialIndex = MaterialIndex++;
 	matBrick->numDirtyFrames = gNumFrameResources;
-	matBrick->diffuseAlbedo = XMFLOAT4(0.5f, 0.45f, 0.4f, 1.0f);
-	matBrick->fresneRf0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	matBrick->roughness = 0.7f;
+	matBrick->albedo = XMFLOAT4(0.5f, 0.45f, 0.4f, 1.0f);
+	matBrick->metallic = 0.0f;
+	matBrick->roughness = 0.75f;
+	matBrick->ior = 1.5f;
 	auto matStone = std::make_unique<Material>();
 	matStone->name = "Stone";
 	matStone->materialIndex = MaterialIndex++;
 	matStone->numDirtyFrames = gNumFrameResources;
-	matStone->diffuseAlbedo = XMFLOAT4(0.9f, 0.9f, 0.85f, 1.0f);
-	matStone->fresneRf0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
+	matStone->albedo = XMFLOAT4(0.9f, 0.9f, 0.85f, 1.0f);
+	matStone->metallic = 0.0f;
 	matStone->roughness = 0.15f;
-	auto matBone = std::make_unique<Material>();
-	matBone->name = "Bone";
-	matBone->materialIndex = MaterialIndex++;
-	matBone->numDirtyFrames = gNumFrameResources;
-	matBone->diffuseAlbedo = XMFLOAT4(0.95f, 0.93f, 0.85f, 1.0f);
-	matBone->fresneRf0 = XMFLOAT3(0.03f, 0.03f, 0.03f);
-	matBone->roughness = 0.25f;
+	matStone->ior = 1.5f;
+	auto matWood = std::make_unique<Material>();
+	matWood->name = "Wood";
+	matWood->materialIndex = MaterialIndex++;
+	matWood->numDirtyFrames = gNumFrameResources;
+	matWood->albedo = XMFLOAT4(0.4f, 0.25f, 0.1f, 1.0f);
+	matWood->metallic = 0.0f;
+	matWood->roughness = 0.9f;
+	matWood->ior = 1.5f;
 	auto matWater = std::make_unique<Material>();
 	matWater->name = "Water";
 	matWater->materialIndex = MaterialIndex++;
 	matWater->numDirtyFrames = gNumFrameResources;
-	matWater->diffuseAlbedo = XMFLOAT4(0.3f, 0.5f, 0.7f, 0.7f);
-	matWater->fresneRf0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
+	matWater->albedo = XMFLOAT4(0.3f, 0.5f, 0.7f, 0.7f);
+	matWater->metallic = 0.0f;
 	matWater->roughness = 0.02f;
-
+	matWater->ior = 1.33f;
 	materials[matBrick->name] = std::move(matBrick);
 	materials[matStone->name] = std::move(matStone);
-	materials[matBone->name] = std::move(matBone);
+	materials[matWood->name] = std::move(matWood);
 	materials[matWater->name] = std::move(matWater);
 }
 
@@ -794,12 +799,19 @@ void Render::BuildMaterialStructuredBuffers()
 		if (mat->numDirtyFrames > 0)
 		{
 			MaterialData materialData;
-			materialData.diffuseAlbedo = mat->diffuseAlbedo;
-			materialData.fresneRf0 = mat->fresneRf0;
+			materialData.albedo = mat->albedo;
+
+			auto F0_dielectric_scalar = (float)pow((mat->ior - 1.0) / (mat->ior + 1.0), 2.0);
+			auto F0_dielectric = DirectX::XMFLOAT3(F0_dielectric_scalar, F0_dielectric_scalar, F0_dielectric_scalar);
+			auto F0_metal = DirectX::XMFLOAT3(mat->albedo.x, mat->albedo.y, mat->albedo.z);
+			XMVECTOR vDielectric = XMLoadFloat3(&F0_dielectric);
+			XMVECTOR vMetal = XMLoadFloat3(&F0_metal);
+			XMVECTOR vResult = XMVectorLerp(vDielectric, vMetal, mat->metallic);
+			XMStoreFloat3(&materialData.fresnel, vResult);
+
 			materialData.roughness = mat->roughness;
 			materialData.emissive = mat->emissive;
-			materialData.metallic = mat->metallic;
-			XMStoreFloat4x4(&materialData.materialTransform, XMMatrixTranspose(XMLoadFloat4x4(&mat->materialTransform)));
+
 			currentMaterialStructuredBuffer->CopyData(mat->materialIndex, materialData);
 
 			mat->numDirtyFrames--;
@@ -886,8 +898,8 @@ void Render::BuildRenderItems()
 
 	XMStoreFloat4x4(&nailongRenderItem->worldTransform, nailongWorld);
 	nailongRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	nailongRenderItem->materialIndex = materials["Bone"].get()->materialIndex;
-	nailongRenderItem->diffuseTextureIndex[0] = textures["stone"].get()->srvHeapIndex;
+	nailongRenderItem->materialIndex = materials["Wood"].get()->materialIndex;
+	nailongRenderItem->diffuseTextureIndex[0] = textures["wood"].get()->srvHeapIndex;
 	nailongRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
 	nailongRenderItem->Geo = geos["objGeo"].get();
 	nailongRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
