@@ -60,7 +60,7 @@ struct VertexIn
 {
 	float3 pos      : POSITION;
 	float3 normal   : NORMAL;
-	float3 tangentU : TANGENT;
+	float3 tangent : TANGENT;
 	float2 texCoord : TEXCOORD;
 };
 // 输出顶点数据

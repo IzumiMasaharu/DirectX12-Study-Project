@@ -1042,8 +1042,8 @@ void Render::UpdateObjectsConstBuffers()
 			ObjectConstants objectconstant = {};
 			// 转置矩阵以符合HLSL的列主序要求：C++默认是行主序，HLSL默认是列主序
 			XMStoreFloat4x4(&objectconstant.worldTransform, XMMatrixTranspose(worldTransform));
+			XMStoreFloat4x4(&objectconstant.normalTransform, XMMatrixInverse(&XMMatrixDeterminant(worldTransform), worldTransform));
 			XMStoreFloat4x4(&objectconstant.textureTransform, XMMatrixTranspose(textureTransform));
-			objectconstant.normalTransform = MathHelper::InverseTranspose(worldTransform);
 			objectconstant.materialIndex = it->materialIndex;
 			memcpy(objectconstant.diffuseTextureIndex,it->diffuseTextureIndex, MAX_BINDING_TEXTURE* sizeof(UINT));
 			memcpy(objectconstant.normalTextureIndex,it->normalTextureIndex, MAX_BINDING_TEXTURE * sizeof(UINT));
