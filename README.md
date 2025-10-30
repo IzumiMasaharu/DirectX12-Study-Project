@@ -8,14 +8,13 @@ According to the Dragon-Book(3D Game Programming With DirectX 12),the project ha
 - Ch.5 Pipeline_Build
 - Ch.6 DrawCall(Static)
 - Ch.7 DrawCall(Dynamic)
-- Ch.8 Lighting(Material)
+- Ch.8 Lighting(Material) PBR(Based-on-Disney-BRDF)
 - Ch.9 Texture
 - Ch.10 Alpha_Blending
 - Ch.15 Class_Camera Dynamic_Index
 - Ch.19 Normal_Mapping
 
 ## TODO:
-- Ch.8 PBR
 - Ch.18 Skycube
 - Ch.18 Dynamic_Texture
 - Ch.19 Displacement_Mapping
