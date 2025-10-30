@@ -27,7 +27,8 @@ SamplerState gsamAnisotropicClamp : register(s5);
 
 cbuffer cbPerObject : register(b0)
 {
-	float4x4 gWorldTransform;		// 物体世界变换矩阵
+	float4x4 worldTransform;		// 物体世界变换矩阵
+	float4x4 normalMatrix;			// 法线变换矩阵
 	float4x4 gTextureTransform;		// 纹理变换矩阵
 	uint4 packedDiffuseTextureIndex[MAX_BINDING_TEXTURE/4];
 	uint4 packedNormalTextureIndex[MAX_BINDING_TEXTURE/4];

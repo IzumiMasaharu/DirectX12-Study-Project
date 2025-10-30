@@ -7,6 +7,7 @@
 struct ObjectConstants
 {
     DirectX::XMFLOAT4X4 worldTransform = MathHelper::Identity4x4(); // 物体的世界变换矩阵
+    DirectX::XMFLOAT4X4 normalTransform = MathHelper::Identity4x4(); // 法线变换矩阵
 	DirectX::XMFLOAT4X4 textureTransform = MathHelper::Identity4x4(); // 纹理变换矩阵 
 	UINT diffuseTextureIndex[MAX_BINDING_TEXTURE];
 	UINT normalTextureIndex[MAX_BINDING_TEXTURE];

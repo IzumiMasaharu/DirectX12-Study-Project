@@ -27,17 +27,40 @@ float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
     
     return reflectPercent;
 }
+// Schlick-GGX 几何遮蔽函数
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float k = (roughness * roughness) / 2.0f;
+    return NdotV / (NdotV * (1.0f - k) + k);
+}
+// 几何遮蔽项 G
+float GeometrySmith(float3 normal, float3 viewDir, float3 lightDir, float roughness)
+{
+    float NdotV = max(dot(normal, viewDir), 0.0f);
+    float NdotL = max(dot(normal, lightDir), 0.0f);
+    float ggx1 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx2 = GeometrySchlickGGX(NdotL, roughness);
+    return ggx1 * ggx2;
+}
 // 计算因漫反射与镜面反射而进入人眼的光量
 float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 normal, float3 toEyeVector, MaterialData material)
 {
     const float m = (1.0f - material.roughness) * 256.0f;
     float3 halfVector = normalize(toEyeVector + lightVector);
-    
+
+    // 法线分布项（D）
     float roughnessFactor = ((m + 8.0f) / 8.0f) * pow(max(dot(halfVector, normal), 0.0f), m);
+
+    // 菲涅尔反射率（F）
     float3 fresnelFactor = SchlickFresnel(material.fresnel, halfVector, lightVector);
-    float3 mirrorReflectedAlbedo = roughnessFactor * fresnelFactor;
+
+    // 几何遮蔽项（G）
+    float geometryFactor = GeometrySmith(normal, toEyeVector, lightVector, material.roughness);
+
+    // 结合 D、F、G
+    float3 mirrorReflectedAlbedo = (roughnessFactor * fresnelFactor * geometryFactor);
     mirrorReflectedAlbedo = mirrorReflectedAlbedo / (mirrorReflectedAlbedo + 1.0f);
-    
+
     return (mirrorReflectedAlbedo + material.albedo.rgb) * rgbIntensity;
 }
 

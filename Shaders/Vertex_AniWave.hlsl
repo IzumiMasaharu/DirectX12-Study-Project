@@ -5,7 +5,7 @@ VertexOut VS_Wave(VertexIn vin)
 	VertexOut vout;
 
 	// 世界空间位置
-	float4 posW = mul(float4(vin.pos, 1.0f), gWorldTransform);
+	float4 posW = mul(float4(vin.pos, 1.0f), worldTransform);
 
 	// ==== 多层叠加波浪 ====
 	// 每层波浪有不同的方向、频率、幅度、速度
@@ -47,12 +47,12 @@ VertexOut VS_Wave(VertexIn vin)
 	float dx = (heightX - waveHeight) / epsilon;
 	float dz = (heightZ - waveHeight) / epsilon;
 	float3 normal = normalize(float3(-dx, 1.0f, -dz));
-	vout.normalW = mul(normal, (float3x3)gWorldTransform);
+	vout.normalW = mul(normal, normalMatrix);
 
 	// ==== Tangent ====
 	float3 approxTangent = float3(1.0f, 0.0f, 0.0f);
 	float3 tangent = normalize(approxTangent - normal * dot(normal, approxTangent));
-	vout.tangentW = mul(tangent, (float3x3)gWorldTransform);
+	vout.tangentW = mul(tangent, (float3x3)worldTransform);
 
 	// 输出裁剪空间
 	vout.posH = mul(posW, gViewProj);
