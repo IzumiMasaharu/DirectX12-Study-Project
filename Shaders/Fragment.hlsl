@@ -8,8 +8,8 @@ float4 PS(VertexOut pin) : SV_Target
 
 	material.albedo = diffuseMap.Sample(gsamAnisotropicWrap, pin.texCoord) * material.albedo;
 
-	float3 binormal = normalize(cross(pin.normalW, pin.tangentW));
-	float3x3 TBN = float3x3(pin.tangentW, binormal, pin.normalW);
+	float3 bitangent = normalize(cross(pin.normalW, pin.tangentW));
+	float3x3 TBN = float3x3(pin.tangentW, bitangent, pin.normalW);
 
 	float3 normalTex = normalMap.Sample(gsamAnisotropicWrap, pin.texCoord).rgb;
 	normalTex = normalize(normalTex * 2.0f - 1.0f);

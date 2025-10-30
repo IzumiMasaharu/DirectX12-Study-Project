@@ -756,7 +756,7 @@ void Render::BuildMaterials()
 	matBrick->numDirtyFrames = gNumFrameResources;
 	matBrick->albedo = XMFLOAT4(0.5f, 0.45f, 0.4f, 1.0f);
 	matBrick->metallic = 0.0f;
-	matBrick->roughness = 0.75f;
+	matBrick->roughness = 0.55f;
 	matBrick->ior = 1.5f;
 	auto matStone = std::make_unique<Material>();
 	matStone->name = "Stone";
@@ -1015,14 +1015,14 @@ void Render::UpdateCameraState(const GameTimer& GTimer)
 {
 	if (isMoving)
 	{
-		float deltaTime = (float)GTimer.DeltaTime();
+		float deltaTime = GTimer.DeltaTime();
 		camera.moveForward_Backward(deltaTime * moveDirection.z * moveSpeed);
 		camera.moveRight_left(deltaTime * moveDirection.x * moveSpeed);
 		camera.fly_drop(deltaTime * moveDirection.y * moveSpeed);
 	}
 	else if (isRolling)
 	{
-		float deltaTime = (float)GTimer.DeltaTime();
+		float deltaTime = GTimer.DeltaTime();
 		camera.rotate(deltaTime * rollingDirection * rollingSpeed,0.0f,0.0f);
 	}
 }
@@ -1076,7 +1076,7 @@ void Render::UpdatePassConstBuffers()
 
 	mRenderingPassConstantsBuffer.eyePosW = camera.getPositionFloat3();
 	mRenderingPassConstantsBuffer.renderTargetSize = XMFLOAT2((float)clientWidth, (float)clientHeight);
-	mRenderingPassConstantsBuffer.invRenderTargetSize = XMFLOAT2(1.0f / clientWidth, 1.0f / clientHeight);
+	mRenderingPassConstantsBuffer.invRenderTargetSize = XMFLOAT2(1.0f / static_cast<float>(clientWidth), 1.0f / static_cast<float>(clientHeight));
 	mRenderingPassConstantsBuffer.nearZ = camera.getNearZ();
 	mRenderingPassConstantsBuffer.farZ = camera.getFarZ();
 	mRenderingPassConstantsBuffer.totalTime = gameTimer.TotalTime();

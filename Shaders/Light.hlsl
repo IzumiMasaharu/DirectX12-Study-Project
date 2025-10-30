@@ -23,45 +23,70 @@ float SchlickFresnel(float3 Rf0, float3 normal, float3 lightVector)
 {
     float cosNormalLightAngle = saturate(dot(normal, lightVector));
     float r = 1.0f - cosNormalLightAngle;
-    float3 reflectPercent = Rf0 + (1.0f - Rf0) * pow(r, 5);
+    float3 schlickFresnel = Rf0 + (1.0f - Rf0) * pow(r, 5);
     
-    return reflectPercent;
+    return schlickFresnel;
+}
+// GTR1 法线分布函数
+float GTR1(float3 normal,float3 halfVector, float alpha)
+{
+    float NdotH = max(dot(normal, halfVector), 0.0f);
+    float alpha2 = alpha * alpha;
+    float t = 1 + (alpha2-1) * NdotH * NdotH;
+    return (alpha2 - 1) / (3.14159 * log(alpha2) * t);
+}
+// GTR2 法线分布函数
+float GTR2(float3 normal,float3 halfVector, float alpha)
+{
+    float NdotH = max(dot(normal, halfVector), 0.0f);
+    float alpha2 = alpha * alpha;
+    float t = 1 + (alpha2-1) * NdotH * NdotH;
+    return alpha2 / (3.14159 * t * t);
 }
 // Schlick-GGX 几何遮蔽函数
-float GeometrySchlickGGX(float NdotV, float roughness)
+float GeometrySchlickGGX(float XdotY, float roughness)
 {
-    float k = (roughness * roughness) / 2.0f;
-    return NdotV / (NdotV * (1.0f - k) + k);
+    float k = ( 0.5 + roughness / 2.0f) * (0.5 + roughness / 2.0f) / 2.0f;
+    return XdotY / (XdotY * (1.0f - k) + k);
+}
+// Disney-Smith 几何遮蔽函数
+float GeometryDisneySmithGGX(float XdotY, float roughness)
+{
+    float k = ( 0.5 + roughness / 2.0f) * (0.5 + roughness / 2.0f);
+    return (2 * XdotY) / (XdotY + sqrt( k*k + (1.0f - k * k) * XdotY * XdotY));
 }
 // 几何遮蔽项 G
 float GeometrySmith(float3 normal, float3 viewDir, float3 lightDir, float roughness)
 {
     float NdotV = max(dot(normal, viewDir), 0.0f);
     float NdotL = max(dot(normal, lightDir), 0.0f);
-    float ggx1 = GeometrySchlickGGX(NdotV, roughness);
-    float ggx2 = GeometrySchlickGGX(NdotL, roughness);
+    float ggx1 = GeometryDisneySmithGGX(NdotV, roughness);
+    float ggx2 = GeometryDisneySmithGGX(NdotL, roughness);
     return ggx1 * ggx2;
 }
 // 计算因漫反射与镜面反射而进入人眼的光量
 float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 normal, float3 toEyeVector, MaterialData material)
 {
-    const float m = (1.0f - material.roughness) * 256.0f;
     float3 halfVector = normalize(toEyeVector + lightVector);
-
-    // 法线分布项（D）
-    float roughnessFactor = ((m + 8.0f) / 8.0f) * pow(max(dot(halfVector, normal), 0.0f), m);
 
     // 菲涅尔反射率（F）
     float3 fresnelFactor = SchlickFresnel(material.fresnel, halfVector, lightVector);
-
+    // 法线分布项（D）
+    float roughnessFactor = GTR2(normal, halfVector, material.roughness);
     // 几何遮蔽项（G）
     float geometryFactor = GeometrySmith(normal, toEyeVector, lightVector, material.roughness);
-
-    // 结合 D、F、G
+    // 结合 D、F、G  实现Cook-Torrance模型
     float3 mirrorReflectedAlbedo = (roughnessFactor * fresnelFactor * geometryFactor);
-    mirrorReflectedAlbedo = mirrorReflectedAlbedo / (mirrorReflectedAlbedo + 1.0f);
+    mirrorReflectedAlbedo = mirrorReflectedAlbedo / (4* max(dot(normal, toEyeVector), 0.0f) * max(dot(normal, lightVector), 0.0f) + 0.001f);
 
-    return (mirrorReflectedAlbedo + material.albedo.rgb) * rgbIntensity;
+    // Disney-Diffuse漫反射模型
+    float fd90 = 0.5 + 2.0 * material.roughness * pow(1.0 - max(dot(normal, toEyeVector), 0.0f), 2.0);
+    float lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - max(dot(normal, lightVector), 0.0f), 5.0);
+    float viewScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - max(dot(normal, toEyeVector), 0.0f), 5.0);
+    float3 diffuseAlbedo = material.albedo.rgb / 3.14159;
+    float3 diffuseComponent = diffuseAlbedo * lightScatter * viewScatter;
+
+    return rgbIntensity * (diffuseComponent + mirrorReflectedAlbedo);
 }
 
 // 光源生成方法
