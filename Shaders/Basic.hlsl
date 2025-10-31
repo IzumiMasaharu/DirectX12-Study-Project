@@ -3,7 +3,7 @@
 #endif
 
 #ifndef NUM_DIRECTIONAL_LIGHTS
-#define NUM_DIRECTIONAL_LIGHTS 0
+#define NUM_DIRECTIONAL_LIGHTS 1
 #endif
 #ifndef NUM_POINT_LIGHTS
 #define NUM_POINT_LIGHTS 1
@@ -16,7 +16,6 @@
 
 Texture2D gTextures[16] : register(t0, space0);
 StructuredBuffer<MaterialData> materialBuffer : register(t0, space1);
-TextureCube gSkycubeMap : register(t0, space2);
 
 SamplerState gsamPointWrap : register(s0);
 SamplerState gsamPointClamp : register(s1);
@@ -61,15 +60,15 @@ struct VertexIn
 	float3 pos      : POSITION;
 	float3 normal   : NORMAL;
 	float3 tangent : TANGENT;
-	float2 texCoord : TEXCOORD;
+	float2 texCoord : TEXCOORD;		
 };
 // 输出顶点数据
 struct VertexOut
 {
 	float4 posH     : SV_POSITION;	// 屏幕空间坐标
 	float3 posW     : POSITION;		// 世界空间坐标
-	float3 normalW  : NORMAL;
-	float3 tangentW : TANGENT;
+	float3 normalW  : NORMAL;		// 世界空间法线
+	float3 tangentW : TANGENT;		// 世界空间切线
 	float2 texCoord : TEXCOORD;
 };
 

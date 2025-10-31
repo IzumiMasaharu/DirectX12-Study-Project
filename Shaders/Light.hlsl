@@ -142,7 +142,7 @@ float4 ComputeAllLights(Light lights[MAX_NUM_LIGHTS], MaterialData material,floa
 #endif
 
 #if (NUM_POINT_LIGHTS > 0)
-    for(index = NUM_DIRECTIONAL_LIGHTS; index < NUM_DIRECTIONAL_LIGHTS+NUM_POINT_LIGHTS; ++index)
+    for(index = NUM_DIRECTIONAL_LIGHTS; index < NUM_DIRECTIONAL_LIGHTS + NUM_POINT_LIGHTS; ++index)
         result += ComputePointLight(lights[index], material, illuminatedPosition, normal, toEyeVector);
 #endif
 

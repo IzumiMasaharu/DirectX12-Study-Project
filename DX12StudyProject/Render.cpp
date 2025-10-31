@@ -89,9 +89,9 @@ LRESULT Render::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			KeyboardMsgProc(msg, wParam, lParam);
 		}
 		return 0;
+	default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
-
-	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
 // 应用程序初始化
@@ -119,8 +119,8 @@ bool Render::Init()
 	BuildPSOs();
 
 	ThrowIfFailed(commandList->Close());
-	ID3D12CommandList* cmdsLists[] = { commandList.Get() };
-	commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+	std::array<ID3D12CommandList*, 1> cmdsLists = { commandList.Get() };
+	commandQueue->ExecuteCommandLists(static_cast<UINT>(cmdsLists.size()), cmdsLists.data());
 	FlushCommandQueue();
 
 	isAppRunning = true;
@@ -230,14 +230,14 @@ void Render::Draw(const GameTimer& GTimer)
 
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	const FLOAT clearScreenColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	commandList->ClearRenderTargetView(CurrentBackBufferView(), clearScreenColor, 0, nullptr);
+	const std::array<FLOAT, 4> clearScreenColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	commandList->ClearRenderTargetView(CurrentBackBufferView(), clearScreenColor.data(), 0, nullptr); 
 	commandList->ClearDepthStencilView(DepthStencilBufferView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	commandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilBufferView());
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap.Get() };
-	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	std::array<ID3D12DescriptorHeap*, 1> descriptorHeaps = { srvDescriptorHeap.Get() };
+	commandList->SetDescriptorHeaps(static_cast<UINT>(descriptorHeaps.size()), descriptorHeaps.data());
 
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 
@@ -245,17 +245,25 @@ void Render::Draw(const GameTimer& GTimer)
 	commandList->SetGraphicsRootConstantBufferView(1, passConstBuffer->GetGPUVirtualAddress());
 	auto materialStructedBuffer = currentFrameResource->materialStructuredBuffer->Resource();
 	commandList->SetGraphicsRootShaderResourceView(2, materialStructedBuffer->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootDescriptorTable(3, srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-	DrawRenderItems(commandList.Get(), allRenderItems);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE texDescriptor(srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	commandList->SetGraphicsRootDescriptorTable(3, texDescriptor);
+	texDescriptor.Offset(textures["skycube"].get()->srvHeapIndex, cbs_srv_uavDescriptorSize);
+	commandList->SetGraphicsRootDescriptorTable(4, texDescriptor);
+
+	DrawRenderItems(commandList.Get(), opaqueRenderItems);
+	commandList->SetPipelineState(PSOs["SkyCube"].Get());
+	DrawRenderItems(commandList.Get(), skycubeRenderItem);
+	commandList->SetPipelineState(PSOs["Wave"].Get());
+	DrawRenderItems(commandList.Get(), transparentRenderItems);
 
 	commandList->ResourceBarrier(1,
 		&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
 	ThrowIfFailed(commandList->Close());
 
-	ID3D12CommandList* CommandList[] = { commandList.Get() };
-	commandQueue->ExecuteCommandLists(_countof(CommandList), CommandList);
+	std::array<ID3D12CommandList*, 1> CommandList = { commandList.Get() };
+	commandQueue->ExecuteCommandLists(static_cast<UINT>(CommandList.size()), CommandList.data());
 
 	ThrowIfFailed(swapChain->Present(0, 0));
 
@@ -319,6 +327,8 @@ void Render::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		case '1':
 			isWireframeEnabled = !isWireframeEnabled;
 			break;
+		default:
+			break;
 		}
 	}
 	else if (msg == WM_KEYUP)
@@ -349,6 +359,8 @@ void Render::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		case 'E':
 			rollingDirection -= 1;
 			break;
+		default:
+			break;
 		}
         const float len = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&moveDirection)));
         if (len < 1e-3f) isMoving = false;
@@ -373,8 +385,8 @@ void Render::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
 	{
-		float pitch = (y - lastMousePosition.y) * 0.002f;
-		float yaw = (x - lastMousePosition.x) * 0.002f;
+		float pitch = static_cast<float>(y - lastMousePosition.y) * 0.002f;
+		float yaw = static_cast<float>(x - lastMousePosition.x) * 0.002f;
 
 		camera.rotate(0.0f,pitch,yaw);
 	}
@@ -463,7 +475,7 @@ void Render::BuildRootSignature()
 	skycubeSrvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 2);
 
 	const UINT numSlotRootParams = 5;
-	CD3DX12_ROOT_PARAMETER slotRootParameter[numSlotRootParams];
+	std::array<CD3DX12_ROOT_PARAMETER, numSlotRootParams> slotRootParameter;
 	slotRootParameter[0].InitAsConstantBufferView(0);												// 绑定物体常量缓冲区
 	slotRootParameter[1].InitAsConstantBufferView(1);												// 绑定渲染常量缓冲区
 	slotRootParameter[2].InitAsShaderResourceView(0, 1);											// 绑定结构化材质常量缓冲区
@@ -472,8 +484,13 @@ void Render::BuildRootSignature()
 
 	auto staticSamplers = DXBase::GetStaticSamplers();
 
-	CD3DX12_ROOT_SIGNATURE_DESC RootSignatureDesc(numSlotRootParams, slotRootParameter, (UINT)staticSamplers.size(), staticSamplers.data(),
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	CD3DX12_ROOT_SIGNATURE_DESC RootSignatureDesc(
+		numSlotRootParams,
+		slotRootParameter.data(),
+		(UINT)staticSamplers.size(),
+		staticSamplers.data(),
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+	);
 
 	ComPtr<ID3DBlob> serializedRootSignature = nullptr;
 	ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -493,11 +510,11 @@ void Render::BuildDescriptorHeaps()
 	D3D12_DESCRIPTOR_HEAP_DESC SRV_HEAP_DESC;
 	SRV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	SRV_HEAP_DESC.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	SRV_HEAP_DESC.NumDescriptors = textures.size();
+	SRV_HEAP_DESC.NumDescriptors = (UINT)textures.size();
 	SRV_HEAP_DESC.NodeMask = 0;
 	ThrowIfFailed(d3dDevice->CreateDescriptorHeap(&SRV_HEAP_DESC, IID_PPV_ARGS(&srvDescriptorHeap)));
 	
-	for (auto& tex : textures)
+	for (const auto& tex : textures)
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE srvCPUHandle(srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
@@ -594,18 +611,26 @@ void Render::BuildDescriptorHeaps()
 void Render::BuildShaders()
 {
 	shaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_Common.hlsl", nullptr, "VS", "vs_5_1");
-	shaders["VS_Wave"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_AniWave.hlsl", nullptr, "VS_Wave", "vs_5_1");
 	shaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Fragment.hlsl", nullptr, "PS", "ps_5_1");
+	shaders["VS_Wave"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_AniWave.hlsl", nullptr, "WaveVS", "vs_5_1");
+	shaders["VS_Skycube"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Skycube.hlsl", nullptr, "SkycubeVS", "vs_5_1");
+	shaders["PS_Skycube"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Skycube.hlsl", nullptr, "SkycubePS", "ps_5_1");
 }
 // 创建输入布局
 void Render::BuildInputLayout()
 {
-	inputLayout =
+	inputLayout["Default"] =
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 		{"TANGENT",0,DXGI_FORMAT_R32G32B32_FLOAT,0,24,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+	};
+	inputLayout["Skycube"] =
+	{
+		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},		
+		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 	};
 }
 // 创建网格体
@@ -754,7 +779,7 @@ void Render::BuildMaterials()
 	matBrick->name = "Brick";
 	matBrick->materialIndex = MaterialIndex++;
 	matBrick->numDirtyFrames = gNumFrameResources;
-	matBrick->albedo = XMFLOAT4(0.5f, 0.45f, 0.4f, 1.0f);
+	matBrick->albedo = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	matBrick->metallic = 0.0f;
 	matBrick->roughness = 0.55f;
 	matBrick->ior = 1.5f;
@@ -762,7 +787,7 @@ void Render::BuildMaterials()
 	matStone->name = "Stone";
 	matStone->materialIndex = MaterialIndex++;
 	matStone->numDirtyFrames = gNumFrameResources;
-	matStone->albedo = XMFLOAT4(0.9f, 0.9f, 0.85f, 1.0f);
+	matStone->albedo = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
 	matStone->metallic = 0.0f;
 	matStone->roughness = 0.15f;
 	matStone->ior = 1.5f;
@@ -770,30 +795,39 @@ void Render::BuildMaterials()
 	matWood->name = "Wood";
 	matWood->materialIndex = MaterialIndex++;
 	matWood->numDirtyFrames = gNumFrameResources;
-	matWood->albedo = XMFLOAT4(0.4f, 0.25f, 0.1f, 1.0f);
+	matWood->albedo = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	matWood->metallic = 0.0f;
-	matWood->roughness = 0.9f;
+	matWood->roughness = 0.4f;
 	matWood->ior = 1.5f;
 	auto matWater = std::make_unique<Material>();
 	matWater->name = "Water";
 	matWater->materialIndex = MaterialIndex++;
 	matWater->numDirtyFrames = gNumFrameResources;
-	matWater->albedo = XMFLOAT4(0.3f, 0.5f, 0.7f, 0.7f);
+	matWater->albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.6f);
 	matWater->metallic = 0.0f;
 	matWater->roughness = 0.02f;
 	matWater->ior = 1.33f;
+	auto matSkycube = std::make_unique<Material>();
+	matSkycube->name = "Skycube";
+	matSkycube->materialIndex = MaterialIndex++;
+	matSkycube->numDirtyFrames = gNumFrameResources;
+	matSkycube->albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	matSkycube->metallic = 0.0f;
+	matSkycube->roughness = 1.0f;
+	matSkycube->ior = 1.0f;
 	materials[matBrick->name] = std::move(matBrick);
 	materials[matStone->name] = std::move(matStone);
 	materials[matWood->name] = std::move(matWood);
 	materials[matWater->name] = std::move(matWater);
+	materials[matSkycube->name] = std::move(matSkycube);
 }
 
 // 创建结构化材质常量缓冲区
-void Render::BuildMaterialStructuredBuffers()
+void Render::BuildMaterialStructuredBuffers()const
 {
 	auto currentMaterialStructuredBuffer = currentFrameResource->materialStructuredBuffer.get();
 
-	for (auto& it : materials)
+	for (const auto& it : materials)
 	{
 		Material* mat = it.second.get();
 		if (mat->numDirtyFrames > 0)
@@ -822,124 +856,154 @@ void Render::BuildMaterialStructuredBuffers()
 // 创建渲染项
 void Render::BuildRenderItems()
 {
+	allRenderItems.clear();
+	opaqueRenderItems.clear();
+	skycubeRenderItem.clear();
+	transparentRenderItems.clear();
+
 	UINT GeoObjectIndex = 0;
 
-	auto leftCylinderRenderItem = std::make_unique<RenderItem>();
-	auto leftBallRenderItem = std::make_unique<RenderItem>();
-	auto rightCylinderRenderItem = std::make_unique<RenderItem>();
-	auto rightBallRenderItem = std::make_unique<RenderItem>();
-	auto floorRenderItem = std::make_unique<RenderItem>();
+	// 不透明渲染项
+	{
+		auto leftCylinderRenderItem = std::make_unique<RenderItem>();
+		auto leftBallRenderItem = std::make_unique<RenderItem>();
+		auto rightCylinderRenderItem = std::make_unique<RenderItem>();
+		auto rightBallRenderItem = std::make_unique<RenderItem>();
+		auto floorRenderItem = std::make_unique<RenderItem>();
 
-	XMMATRIX leftCylinderWorld = XMMatrixTranslation(-2.5f, +0.0f, 0.0f);
-	XMMATRIX leftBallWorld = XMMatrixTranslation(-2.5f, +2.96f, 0.0f);
-	XMMATRIX rightCylinderWorld = XMMatrixTranslation(+2.5f, +0.0f, 0.0f);
-	XMMATRIX rightBallWorld = XMMatrixTranslation(+2.5f, +2.96f, 0.0f);
-	XMMATRIX floorWorld = XMMatrixScaling(1.5f, 1.5f, 1.5f)* XMMatrixTranslation(0.0f, -2.0f, 0.0f);
+		XMMATRIX leftCylinderWorld = XMMatrixTranslation(-2.5f, +0.0f, 0.0f);
+		XMMATRIX leftBallWorld = XMMatrixTranslation(-2.5f, +2.96f, 0.0f);
+		XMMATRIX rightCylinderWorld = XMMatrixTranslation(+2.5f, +0.0f, 0.0f);
+		XMMATRIX rightBallWorld = XMMatrixTranslation(+2.5f, +2.96f, 0.0f);
+		XMMATRIX floorWorld = XMMatrixScaling(1.5f, 1.5f, 1.5f) * XMMatrixTranslation(0.0f, -2.0f, 0.0f);
 
-	XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
-	leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	leftCylinderRenderItem->materialIndex = materials["Brick"].get()->materialIndex;
-	leftCylinderRenderItem->diffuseTextureIndex[0] = textures["brick"].get()->srvHeapIndex;
-	leftCylinderRenderItem->normalTextureIndex[0] = textures["brickNormal"].get()->srvHeapIndex;
-	leftCylinderRenderItem->Geo = geos["Geo"].get();
-	leftCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	leftCylinderRenderItem->indexCount = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
-	leftCylinderRenderItem->indexStartLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
-	leftCylinderRenderItem->vertexBaseLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
+		XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
+		leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		leftCylinderRenderItem->materialIndex = materials["Brick"].get()->materialIndex;
+		leftCylinderRenderItem->diffuseTextureIndex[0] = textures["brick"].get()->srvHeapIndex;
+		leftCylinderRenderItem->normalTextureIndex[0] = textures["brickNormal"].get()->srvHeapIndex;
+		leftCylinderRenderItem->Geo = geos["Geo"].get();
+		leftCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		leftCylinderRenderItem->indexCount = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
+		leftCylinderRenderItem->indexStartLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
+		leftCylinderRenderItem->vertexBaseLocation = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
 
-	XMStoreFloat4x4(&leftBallRenderItem->worldTransform, leftBallWorld);
-	leftBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	leftBallRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
-	leftBallRenderItem->diffuseTextureIndex[0] = textures["stone"].get()->srvHeapIndex;
-	leftBallRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
-	leftBallRenderItem->Geo = geos["Geo"].get();
-	leftBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	leftBallRenderItem->indexCount = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
-	leftBallRenderItem->indexStartLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
-	leftBallRenderItem->vertexBaseLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
+		XMStoreFloat4x4(&leftBallRenderItem->worldTransform, leftBallWorld);
+		leftBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		leftBallRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
+		leftBallRenderItem->diffuseTextureIndex[0] = textures["stone"].get()->srvHeapIndex;
+		leftBallRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		leftBallRenderItem->Geo = geos["Geo"].get();
+		leftBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		leftBallRenderItem->indexCount = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
+		leftBallRenderItem->indexStartLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
+		leftBallRenderItem->vertexBaseLocation = leftBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
-	XMStoreFloat4x4(&rightCylinderRenderItem->worldTransform, rightCylinderWorld);
-	rightCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	rightCylinderRenderItem->materialIndex = materials["Brick"].get()->materialIndex;
-	rightCylinderRenderItem->diffuseTextureIndex[0] = textures["brick"].get()->srvHeapIndex;
-	rightCylinderRenderItem->normalTextureIndex[0] = textures["brickNormal"].get()->srvHeapIndex;
-	rightCylinderRenderItem->Geo = geos["Geo"].get();
-	rightCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	rightCylinderRenderItem->indexCount = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
-	rightCylinderRenderItem->indexStartLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
-	rightCylinderRenderItem->vertexBaseLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
+		XMStoreFloat4x4(&rightCylinderRenderItem->worldTransform, rightCylinderWorld);
+		rightCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		rightCylinderRenderItem->materialIndex = materials["Brick"].get()->materialIndex;
+		rightCylinderRenderItem->diffuseTextureIndex[0] = textures["brick"].get()->srvHeapIndex;
+		rightCylinderRenderItem->normalTextureIndex[0] = textures["brickNormal"].get()->srvHeapIndex;
+		rightCylinderRenderItem->Geo = geos["Geo"].get();
+		rightCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		rightCylinderRenderItem->indexCount = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
+		rightCylinderRenderItem->indexStartLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
+		rightCylinderRenderItem->vertexBaseLocation = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
 
-	XMStoreFloat4x4(&rightBallRenderItem->worldTransform, rightBallWorld);
-	rightBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	rightBallRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
-	rightBallRenderItem->diffuseTextureIndex[0] = textures["stone"].get()->srvHeapIndex;
-	rightBallRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
-	rightBallRenderItem->Geo = geos["Geo"].get();
-	rightBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	rightBallRenderItem->indexCount = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
-	rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
-	rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
+		XMStoreFloat4x4(&rightBallRenderItem->worldTransform, rightBallWorld);
+		rightBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		rightBallRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
+		rightBallRenderItem->diffuseTextureIndex[0] = textures["stone"].get()->srvHeapIndex;
+		rightBallRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		rightBallRenderItem->Geo = geos["Geo"].get();
+		rightBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		rightBallRenderItem->indexCount = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
+		rightBallRenderItem->indexStartLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
+		rightBallRenderItem->vertexBaseLocation = rightBallRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
-	XMMATRIX floorTextureTransform = XMMatrixScaling(5.0f, 5.0f, 5.0f);
-	XMStoreFloat4x4(&floorRenderItem->worldTransform, floorWorld);
-	XMStoreFloat4x4(&floorRenderItem->textureTransform, floorTextureTransform);
-	floorRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	floorRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
-	floorRenderItem->diffuseTextureIndex[0] = textures["floor"].get()->srvHeapIndex;
-	floorRenderItem->normalTextureIndex[0] = textures["floorNormal"].get()->srvHeapIndex;
-	floorRenderItem->Geo = geos["Geo"].get();
-	floorRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	floorRenderItem->indexCount = floorRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
-	floorRenderItem->indexStartLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
-	floorRenderItem->vertexBaseLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
+		XMMATRIX floorTextureTransform = XMMatrixScaling(5.0f, 5.0f, 5.0f);
+		XMStoreFloat4x4(&floorRenderItem->worldTransform, floorWorld);
+		XMStoreFloat4x4(&floorRenderItem->textureTransform, floorTextureTransform);
+		floorRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		floorRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
+		floorRenderItem->diffuseTextureIndex[0] = textures["floor"].get()->srvHeapIndex;
+		floorRenderItem->normalTextureIndex[0] = textures["floorNormal"].get()->srvHeapIndex;
+		floorRenderItem->Geo = geos["Geo"].get();
+		floorRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		floorRenderItem->indexCount = floorRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
+		floorRenderItem->indexStartLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
+		floorRenderItem->vertexBaseLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
 
-	auto nailongRenderItem = std::make_unique<RenderItem>();
-	XMMATRIX nailongWorld = XMMatrixScaling(0.2f, 0.2f, 0.2f)* XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, MathHelper::Pi) * XMMatrixTranslation(0.0f, -1.0f, -0.0f);
+		auto nailongRenderItem = std::make_unique<RenderItem>();
+		XMMATRIX nailongWorld = XMMatrixScaling(0.2f, 0.2f, 0.2f) * XMMatrixRotationNormal({ 0.0f,1.0f,0.0f }, MathHelper::Pi) * XMMatrixTranslation(0.0f, -1.0f, -0.0f);
 
-	XMStoreFloat4x4(&nailongRenderItem->worldTransform, nailongWorld);
-	nailongRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	nailongRenderItem->materialIndex = materials["Wood"].get()->materialIndex;
-	nailongRenderItem->diffuseTextureIndex[0] = textures["wood"].get()->srvHeapIndex;
-	nailongRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
-	nailongRenderItem->Geo = geos["objGeo"].get();
-	nailongRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	nailongRenderItem->indexCount = nailongRenderItem->Geo->submeshList["Nailong"].indexCount;
-	nailongRenderItem->indexStartLocation = nailongRenderItem->Geo->submeshList["Nailong"].indexStartLocation;
-	nailongRenderItem->vertexBaseLocation = nailongRenderItem->Geo->submeshList["Nailong"].vertexBaseLocation;
+		XMStoreFloat4x4(&nailongRenderItem->worldTransform, nailongWorld);
+		nailongRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		nailongRenderItem->materialIndex = materials["Wood"].get()->materialIndex;
+		nailongRenderItem->diffuseTextureIndex[0] = textures["wood"].get()->srvHeapIndex;
+		nailongRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		nailongRenderItem->Geo = geos["objGeo"].get();
+		nailongRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		nailongRenderItem->indexCount = nailongRenderItem->Geo->submeshList["Nailong"].indexCount;
+		nailongRenderItem->indexStartLocation = nailongRenderItem->Geo->submeshList["Nailong"].indexStartLocation;
+		nailongRenderItem->vertexBaseLocation = nailongRenderItem->Geo->submeshList["Nailong"].vertexBaseLocation;
 
-	auto waveRenderItem = std::make_unique<RenderItem>();
-	XMMATRIX waveWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+		opaqueRenderItems.emplace_back(std::move(leftCylinderRenderItem));
+		opaqueRenderItems.emplace_back(std::move(leftBallRenderItem));
+		opaqueRenderItems.emplace_back(std::move(rightCylinderRenderItem));
+		opaqueRenderItems.emplace_back(std::move(rightBallRenderItem));
+		opaqueRenderItems.emplace_back(std::move(floorRenderItem));
+		opaqueRenderItems.emplace_back(std::move(nailongRenderItem));
+	}
 
-	XMStoreFloat4x4(&waveRenderItem->worldTransform, waveWorld);
-	waveRenderItem->objectConstBufferIndex = GeoObjectIndex++;
-	waveRenderItem->materialIndex = materials["Water"].get()->materialIndex;
-	waveRenderItem->diffuseTextureIndex[0] = textures["wave"].get()->srvHeapIndex;
-	waveRenderItem->normalTextureIndex[0] = textures["waveNormal"].get()->srvHeapIndex;
-	waveRenderItem->Geo = geos["Geo"].get();
-	waveRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	waveRenderItem->indexCount = waveRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
-	waveRenderItem->indexStartLocation = waveRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
-	waveRenderItem->vertexBaseLocation = waveRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
+	// 天空盒渲染项
+	{
+		auto skyboxRenderItem = std::make_unique<RenderItem>();
+		XMMATRIX skyboxWorld = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+		XMStoreFloat4x4(&skyboxRenderItem->worldTransform, skyboxWorld);
+		skyboxRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		skyboxRenderItem->materialIndex = materials["Skycube"].get()->materialIndex;
+		skyboxRenderItem->diffuseTextureIndex[0] = textures["skycube"].get()->srvHeapIndex;
+		skyboxRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		skyboxRenderItem->Geo = geos["Geo"].get();
+		skyboxRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		skyboxRenderItem->indexCount = skyboxRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
+		skyboxRenderItem->indexStartLocation = skyboxRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
+		skyboxRenderItem->vertexBaseLocation = skyboxRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
-	opaqueRenderItems.push_back(std::move(leftCylinderRenderItem));
-	opaqueRenderItems.push_back(std::move(leftBallRenderItem));
-	opaqueRenderItems.push_back(std::move(rightCylinderRenderItem));
-	opaqueRenderItems.push_back(std::move(rightBallRenderItem));
-	opaqueRenderItems.push_back(std::move(floorRenderItem));
-	opaqueRenderItems.push_back(std::move(nailongRenderItem));
-	transparentRenderItems.push_back(std::move(waveRenderItem));
+		skycubeRenderItem.emplace_back(std::move(skyboxRenderItem));
+	}
 
-	for (auto& item : opaqueRenderItems)
-		allRenderItems.push_back(item.get());
+	// 透明渲染项
+	{
+		auto waveRenderItem = std::make_unique<RenderItem>();
+		XMMATRIX waveWorld = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+		XMStoreFloat4x4(&waveRenderItem->worldTransform, waveWorld);
+		waveRenderItem->objectConstBufferIndex = GeoObjectIndex++;
+		waveRenderItem->materialIndex = materials["Water"].get()->materialIndex;
+		waveRenderItem->diffuseTextureIndex[0] = textures["wave"].get()->srvHeapIndex;
+		waveRenderItem->normalTextureIndex[0] = textures["waveNormal"].get()->srvHeapIndex;
+		waveRenderItem->Geo = geos["Geo"].get();
+		waveRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		waveRenderItem->indexCount = waveRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
+		waveRenderItem->indexStartLocation = waveRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
+		waveRenderItem->vertexBaseLocation = waveRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
 
-	for (auto& item : transparentRenderItems)
-		allRenderItems.push_back(item.get());
+		transparentRenderItems.emplace_back(std::move(waveRenderItem));
+	}
+
+	for (const auto& item : opaqueRenderItems)
+		allRenderItems.emplace_back(item.get());
+	for (const auto& item : skycubeRenderItem)
+		allRenderItems.emplace_back(item.get());
+	for (const auto& item : transparentRenderItems)
+		allRenderItems.emplace_back(item.get());
 }
 // 创建帧资源
 void Render::BuildFrameResources()
 {
 	for (int i = 0; i < gNumFrameResources; ++i)
-		frameResources.push_back(std::make_unique<FrameResource>(d3dDevice.Get(), 1, (UINT)allRenderItems.size(), (UINT)materials.size()));
+		frameResources.emplace_back(std::make_unique<FrameResource>(d3dDevice.Get(), 1, (UINT)allRenderItems.size(), (UINT)materials.size()));
 }
 // 创建渲染管线状态对象
 void Render::BuildPSOs()
@@ -966,7 +1030,7 @@ void Render::BuildPSOs()
 	OpaquePSODesc.SampleMask = UINT_MAX;
 	OpaquePSODesc.RasterizerState = drd;
 	OpaquePSODesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	OpaquePSODesc.InputLayout = { inputLayout.data(),(UINT)inputLayout.size() };
+	OpaquePSODesc.InputLayout = { inputLayout["Default"].data(),(UINT)inputLayout["Default"].size()};
 	OpaquePSODesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	OpaquePSODesc.NumRenderTargets = 1;
 	OpaquePSODesc.RTVFormats[0] = backBufferFormat;
@@ -981,15 +1045,7 @@ void Render::BuildPSOs()
 	opaque4xPsoDesc.SampleDesc.Count = 4;	//采样数量设为4
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&opaque4xPsoDesc, IID_PPV_ARGS(&PSOs["opaque4x"])));
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC WavePSODesc = OpaquePSODesc;
-	WavePSODesc.VS =
-	{
-		reinterpret_cast<BYTE*>(shaders["VS_Wave"]->GetBufferPointer()),
-		shaders["VS_Wave"]->GetBufferSize()
-	};
-	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WavePSODesc, IID_PPV_ARGS(&PSOs["Wave"])));
-
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = WavePSODesc;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPSODesc = OpaquePSODesc;
 	D3D12_RENDER_TARGET_BLEND_DESC transparentBlendDesc;
 	transparentBlendDesc.BlendEnable = true;
 	transparentBlendDesc.LogicOpEnable = false;
@@ -1005,10 +1061,34 @@ void Render::BuildPSOs()
 	transparentPSODesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&transparentPSODesc, IID_PPV_ARGS(&PSOs["Transparent"])));
 
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC WavePSODesc = transparentPSODesc;
+	WavePSODesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaders["VS_Wave"]->GetBufferPointer()),
+		shaders["VS_Wave"]->GetBufferSize()
+	};
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WavePSODesc, IID_PPV_ARGS(&PSOs["Wave"])));
+
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC WireframePSODesc = OpaquePSODesc;
 	drd.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	WireframePSODesc.RasterizerState = drd;
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&WireframePSODesc, IID_PPV_ARGS(&PSOs["Wireframe"])));
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC skycubePsoDesc = OpaquePSODesc;
+	skycubePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	skycubePsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	skycubePsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaders["VS_Skycube"]->GetBufferPointer()),
+		shaders["VS_Skycube"]->GetBufferSize()
+	};
+	skycubePsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(shaders["PS_Skycube"]->GetBufferPointer()),
+		shaders["PS_Skycube"]->GetBufferSize()
+	};
+	skycubePsoDesc.InputLayout = { inputLayout["Skycube"].data(),(UINT)inputLayout["Skycube"].size() };
+	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&skycubePsoDesc, IID_PPV_ARGS(&PSOs["SkyCube"])));
 }
 
 void Render::UpdateCameraState(const GameTimer& GTimer)
@@ -1028,7 +1108,7 @@ void Render::UpdateCameraState(const GameTimer& GTimer)
 }
 
 // 更新物体常量缓冲区
-void Render::UpdateObjectsConstBuffers()
+void Render::UpdateObjectsConstBuffers()const
 {
 	auto currentObjectConstBuffer = currentFrameResource->objectConstBuffer.get();
 
@@ -1083,26 +1163,30 @@ void Render::UpdatePassConstBuffers()
 	mRenderingPassConstantsBuffer.deltaTime = gameTimer.DeltaTime();
 	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };
 
-	mRenderingPassConstantsBuffer.lights[0].end = 20.0f;
-	mRenderingPassConstantsBuffer.lights[0].rgbIntensity = { 2.0f,2.0f,2.0f };
-	mRenderingPassConstantsBuffer.lights[0].position = { 6.0f*sinf(gameTimer.TotalTime()*MathHelper::Pi / 16.0f),2.0f,6.0f*cosf(gameTimer.TotalTime()*MathHelper::Pi / 16.0f) };
-	mRenderingPassConstantsBuffer.lights[0].direction = { 1.0f,0.0f,0.0f };
+	Light dirLight;
+	dirLight.rgbIntensity = { 4.0f,4.0f,4.0f };
+	dirLight.direction = { -0.57735f,-0.57735f,-0.57735f };
+
+	Light pointLight;
+	pointLight.rgbIntensity = { 2.0f,2.0f,2.0f };
+	pointLight.position = { 6.0f * sinf(gameTimer.TotalTime() * MathHelper::Pi / 16.0f),2.0f,6.0f * cosf(gameTimer.TotalTime() * MathHelper::Pi / 16.0f) };
+	pointLight.direction = { 1.0f,0.0f,0.0f };
+
+	mRenderingPassConstantsBuffer.lights[0] = dirLight;
+	mRenderingPassConstantsBuffer.lights[1] = pointLight;
 
 	auto currentPassConstsBuffer = currentFrameResource->passConstBuffer.get();
 	currentPassConstsBuffer->CopyData(0, mRenderingPassConstantsBuffer);
 }
 
 // 绘制渲染项
-void Render::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<RenderItem*>& renderItems)const
+void Render::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<std::unique_ptr<RenderItem>>& renderItems)const
 {
 	UINT objectConstBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(ObjectConstants));
 	auto objectConstBuffer = currentFrameResource->objectConstBuffer->Resource();
 
-	for (auto item: renderItems)
+	for (const auto& item : renderItems)
 	{
-		if (item->objectConstBufferIndex == 6)
-			commandList->SetPipelineState(PSOs.at("Transparent").Get());
-
 		commandList->IASetVertexBuffers(0, 1, &item->Geo->VertexBufferView());
 		commandList->IASetIndexBuffer(&item->Geo->IndexBufferView());
 		commandList->IASetPrimitiveTopology(item->primitiveType);
@@ -1111,9 +1195,6 @@ void Render::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::
 		commandList->SetGraphicsRootConstantBufferView(0, objectConstBufferAddress);
 
 		commandList->DrawIndexedInstanced(item->indexCount, 1, item->indexStartLocation, item->vertexBaseLocation, 0);
-
-		if (item->objectConstBufferIndex == 6)
-			commandList->SetPipelineState(PSOs.at("Solid").Get());
 	}
 }
 

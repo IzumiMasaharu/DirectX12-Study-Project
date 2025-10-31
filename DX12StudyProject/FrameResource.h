@@ -1,5 +1,5 @@
 ﻿#pragma once
-#define MAX_NUM_LIGHTS 8
+#define MAX_NUM_LIGHTS 256
 #include "DXBase.h"
 #include "UploadBuffer.h"
 
@@ -61,7 +61,7 @@ public:
     FrameResource(ID3D12Device* device, UINT PassCount, UINT ObjectCount, UINT MaterialCount);
     FrameResource(const FrameResource& rhs) = delete;
     ~FrameResource() = default;
-public:
+
     FrameResource& operator=(const FrameResource& rhs) = delete;
 public:
     Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator; // 每个帧资源的命令分配器
