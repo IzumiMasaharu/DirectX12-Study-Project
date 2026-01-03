@@ -6,11 +6,11 @@
 #include "UploadBuffer.h"
 #include "Camera.h"
 
-class Render : public DXApp
+class RenderApp : public DXApp
 {
 public:
-	explicit Render(HINSTANCE hInstace);
-	~Render() final;
+	explicit RenderApp(HINSTANCE hInstace);
+	~RenderApp() final;
 
 	LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 	bool Init() override;
@@ -25,7 +25,6 @@ private:
 	void MouseDown(WPARAM ButtonState, int x, int y) override;
 	void MouseUp(WPARAM ButtonState, int x, int y) override;
 	void MouseMove(WPARAM ButtonState, int x, int y) override;
-	void MouseWheel(short zDelta) override;
 	 
 	void LoadTexture();								// 载入纹理
 	void BuildRootSignature();						// 创建根签名
@@ -47,7 +46,7 @@ private:
 
 	void DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<std::unique_ptr<RenderItem>>& renderItems)const; // 绘制渲染项
 public:
-	const Render* GetMyApp()const;					// 获取指向MyApp类自身的指针
+	const RenderApp* GetMyApp()const;					// 获取指向MyApp类自身的指针
 private:
 	WindowClass windowClass;
 	Window appMainWnd;
@@ -66,7 +65,7 @@ private:
 	std::unordered_map<std::string, std::vector<D3D12_INPUT_ELEMENT_DESC> > inputLayout; // 输入布局
 	UINT passCbvOffset = 0;		// 渲染过程常量缓冲区偏移量
 
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> shaders;			// 储存着色器的无序图
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> shaders;			// 储存着色器的无序图 
 	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> geos;				// 储存几何网格体的无序图
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOs;	// 储存不同PSO的无序图
 	std::unordered_map<std::string, std::unique_ptr<Material>> materials;				// 存储材质的无序图

@@ -264,7 +264,7 @@ struct Material
     float metallic = 0.0f;								// 金属度
     float roughness = 0.0f;                             // 材质粗糙度
     float ior = 1.0f;									// 折射率
-	DirectX::XMFLOAT3 emissive = { 0,0,0 };				// 自发光
+	DirectX::XMFLOAT3 emissive = { 0,0,0 };// 自发光
 };
 
 // 参数顺序不可改变，且与hlsl中顺序一一对应，以保证shader能对参数正确打包为4D向量

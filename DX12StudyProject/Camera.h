@@ -20,7 +20,6 @@ public:
 
     // 透镜设置
     void setLens(float fov, float aspectRatio, float nearZ, float farZ);
-    void zoom(float factor);
     void setFov(float fov);
     void setAspectRatio(float aspectRatio);
     void setNearZ(float nearZ);

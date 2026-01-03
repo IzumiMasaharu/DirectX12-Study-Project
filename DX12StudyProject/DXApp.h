@@ -19,7 +19,7 @@ protected:
 protected:
 	DXApp operator=(const DXApp& rhs) = delete;
 public:
-	virtual LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);//消息过程处理函数（需通过派生类覆写）
+	virtual LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);	// 消息过程处理函数（需通过派生类覆写）
 	virtual bool Init() = 0;
 	int Run();
 	void ControlLoop();
@@ -53,13 +53,13 @@ private:
 	virtual void MouseMove(WPARAM ButtonState, int x, int y);
 	virtual void MouseWheel(short zDelta);
 public:
-	HINSTANCE GetAppInst()const;//获取应用程序句柄
-	static DXApp* GetApp();//获取指向DXApp类的指针
-	HWND GetMainHwnd()const;//获取程序主窗口句柄
-	bool Get4xMSAAState()const;//查看是否开启4xMSAA功能
-	void Set4xMSAAState(bool On_Off);//更改4xMSAA功能开关状态
-	float W_H_Ratio()const;//返回缓冲区宽高比
-	void CalculateFPS_MSPF();//计算每秒帧数和帧渲染时长
+	HINSTANCE GetAppInst()const;		// 获取应用程序句柄
+	static DXApp* GetApp();				// 获取指向DXApp类的指针
+	HWND GetMainHwnd()const;			// 获取程序主窗口句柄
+	bool Get4xMSAAState()const;			// 查看是否开启4xMSAA功能
+	void Set4xMSAAState(bool On_Off);	// 更改4xMSAA功能开关状态
+	float W_H_Ratio()const;				// 返回缓冲区宽高比
+	void CalculateFPS_MSPF();			// 计算每秒帧数和帧渲染时长
 protected:
 	static DXApp* mApp;//指向DXApp类的指针
 

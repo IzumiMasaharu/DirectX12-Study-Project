@@ -9,9 +9,12 @@ struct ObjectConstants
     DirectX::XMFLOAT4X4 worldTransform = MathHelper::Identity4x4(); // 物体的世界变换矩阵
     DirectX::XMFLOAT4X4 normalTransform = MathHelper::Identity4x4(); // 法线变换矩阵
 	DirectX::XMFLOAT4X4 textureTransform = MathHelper::Identity4x4(); // 纹理变换矩阵 
-	UINT diffuseTextureIndex[MAX_BINDING_TEXTURE];
-	UINT normalTextureIndex[MAX_BINDING_TEXTURE];
+	
+    std::array<UINT, MAX_BINDING_TEXTURE> diffuseTextureIndex{};
+	std::array<UINT, MAX_BINDING_TEXTURE> normalTextureIndex{};
+	std::array<UINT, MAX_BINDING_TEXTURE> depthTextureIndex{};
     UINT materialIndex; // 该渲染项所使用的材质
+    UINT textureFlags;
 };
 
 // 与着色器绑定的材质结构体
@@ -42,7 +45,7 @@ struct RenderingPassConstants
     float deltaTime = 0; // 两次tick之间的时间差
     DirectX::XMFLOAT4 ambientIlluminating= { 0.0f,0.0f,0.0f,1.0f }; // 环境光项
 
-    Light lights[MAX_NUM_LIGHTS];
+	std::array<Light, MAX_NUM_LIGHTS> lights = {}; // 场景中的光源数组
 };
 
 // 输入到渲染管线的顶点结构体

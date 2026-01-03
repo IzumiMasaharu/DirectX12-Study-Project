@@ -1,9 +1,9 @@
-﻿#include "Render.h"
+﻿#include "RenderApp.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
-Render::Render(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
+RenderApp::RenderApp(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
 {
 	mainWndTitle = L"Mayohoshi Render";
 	d3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
@@ -12,7 +12,7 @@ Render::Render(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
 	clientWidth = 1000;
 	clientHeight = 600;
 }
-Render::~Render()
+RenderApp::~RenderApp()
 {
 	isAppRunning = false;
 	isAppPaused = true;
@@ -29,7 +29,7 @@ Render::~Render()
 }
 
 // 消息过程处理函数
-LRESULT Render::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT RenderApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -73,9 +73,8 @@ LRESULT Render::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 		MouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
-	case WM_MOUSEWHEEL:
-		MouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));
-		return 0;
+	// case WM_MOUSEWHEEL:
+	//    return 0;
 	case WM_KEYDOWN:
 		KeyboardMsgProc(msg, wParam, lParam);
 		return 0;
@@ -95,7 +94,7 @@ LRESULT Render::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 // 应用程序初始化
-bool Render::Init()
+bool RenderApp::Init()
 {
 	if (!DXApp::InitWindowClass(windowClass, L"Render Main Window Class"))
 		return false;
@@ -130,14 +129,14 @@ bool Render::Init()
 
 	gameTimer.Reset();
 
-	controlThread = std::thread(&Render::ControlLoop, this);
-	renderThread = std::thread(&Render::RenderLoop, this);
+	controlThread = std::thread(&RenderApp::ControlLoop, this);
+	renderThread = std::thread(&RenderApp::RenderLoop, this);
 
 	return true;
 }
 
 // 渲染线程循环
-void Render::RenderLoop()
+void RenderApp::RenderLoop()
 {
 	while (isRenderThreadRunning)
 	{
@@ -171,7 +170,7 @@ void Render::RenderLoop()
 }
 
 // 窗口大小重新适配
-void Render::Resize()
+void RenderApp::Resize()
 {
 	DXApp::Resize();
 
@@ -188,7 +187,7 @@ void Render::Resize()
 }
 
 // 更新帧画面
-void Render::Update(const GameTimer& GTimer)
+void RenderApp::Update(const GameTimer& GTimer)
 {
 	UpdateCameraState(GTimer);
 	currentFrameResourceIndex = (currentFrameResourceIndex + 1) % gNumFrameResources;
@@ -215,7 +214,7 @@ void Render::Update(const GameTimer& GTimer)
 }
 
 // 绘制帧画面
-void Render::Draw(const GameTimer& GTimer)
+void RenderApp::Draw(const GameTimer& GTimer)
 {
 	auto cmdListAllocator = currentFrameResource->commandAllocator;
 
@@ -273,7 +272,7 @@ void Render::Draw(const GameTimer& GTimer)
 }
 
 // 处理键盘输入
-void Render::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
+void RenderApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// W : 前进 
 	// S : 后退 
@@ -286,6 +285,7 @@ void Render::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 	// 1 : 切换线框模式
 	if (msg == WM_KEYDOWN)
 	{
+		// 检测当前按键消息是否是“按住产生的重复键”
 		bool isRepeat = (lParam & 0x40000000) != 0;
 		if (isRepeat)
 			return;
@@ -363,12 +363,14 @@ void Render::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
         const float len = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&moveDirection)));
-        if (len < 1e-3f) isMoving = false;
-        if (fabsf(rollingDirection) < 1e-3f) isRolling = false;
+        if (len < 1e-3f) 
+			isMoving = false;
+        if (fabsf(rollingDirection) < 1e-3f) 
+			isRolling = false;
 	}
 }
 // 当鼠标按下时调用
-void Render::MouseDown(WPARAM ButtonState, int x, int y)
+void RenderApp::MouseDown(WPARAM ButtonState, int x, int y)
 {
 	lastMousePosition.x = x;
 	lastMousePosition.y = y;
@@ -376,12 +378,12 @@ void Render::MouseDown(WPARAM ButtonState, int x, int y)
 	SetCapture(mainWndHwnd);
 }
 // 当鼠标抬起时调用
-void Render::MouseUp(WPARAM ButtonState, int x, int y)
+void RenderApp::MouseUp(WPARAM ButtonState, int x, int y)
 {
 	ReleaseCapture();
 }
 // 当鼠标移动时调用
-void Render::MouseMove(WPARAM ButtonState, int x, int y)
+void RenderApp::MouseMove(WPARAM ButtonState, int x, int y)
 {
 	if ((ButtonState & MK_LBUTTON) != 0)
 	{
@@ -394,14 +396,9 @@ void Render::MouseMove(WPARAM ButtonState, int x, int y)
 	lastMousePosition.x = x;
 	lastMousePosition.y = y;
 }
-// 当鼠标滚轮滚动时
-void Render::MouseWheel(short zDelta)
-{
-	camera.zoom(1.0f + (-zDelta) / 1200.0f);
-}
 
 // 载入纹理
-void Render::LoadTexture()
+void RenderApp::LoadTexture()
 {
 	UINT srvIndex = 0;
 
@@ -417,6 +414,10 @@ void Render::LoadTexture()
 		"brickNormal",
 		"waveNormal",
 		"floorNormal",
+
+		"defaultDepth",
+		"brickDepth",
+		"floorDepth",
 	};
 	std::vector<std::wstring> staticTexFilepathes =
 	{
@@ -430,6 +431,10 @@ void Render::LoadTexture()
 		L"../Resources/Textures/brick_normal.dds",
 		L"../Resources/Textures/wave.dds",
 		L"../Resources/Textures/floor_normal.dds",
+
+		L"../Resources/Textures/default_depth.dds",
+		L"../Resources/Textures/brick_depth.dds",
+		L"../Resources/Textures/floor_depth.dds",
 	};
 
 	std::vector<std::string> cubeTexNames =
@@ -466,7 +471,7 @@ void Render::LoadTexture()
 	}
 }
 // 创建根签名
-void Render::BuildRootSignature()
+void RenderApp::BuildRootSignature()
 {
 	// 描述符范围，一段连续、类型相同的描述符
 	CD3DX12_DESCRIPTOR_RANGE textureSrvRange;
@@ -505,7 +510,7 @@ void Render::BuildRootSignature()
 		serializedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 }
 // 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
-void Render::BuildDescriptorHeaps()
+void RenderApp::BuildDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC SRV_HEAP_DESC;
 	SRV_HEAP_DESC.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -608,7 +613,7 @@ void Render::BuildDescriptorHeaps()
 	}
 }
 // 编译着色器
-void Render::BuildShaders()
+void RenderApp::BuildShaders()
 {
 	shaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_Common.hlsl", nullptr, "VS", "vs_5_1");
 	shaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Fragment.hlsl", nullptr, "PS", "ps_5_1");
@@ -617,7 +622,7 @@ void Render::BuildShaders()
 	shaders["PS_Skycube"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Skycube.hlsl", nullptr, "SkycubePS", "ps_5_1");
 }
 // 创建输入布局
-void Render::BuildInputLayout()
+void RenderApp::BuildInputLayout()
 {
 	inputLayout["Default"] =
 	{
@@ -634,7 +639,7 @@ void Render::BuildInputLayout()
 	};
 }
 // 创建网格体
-void Render::BuildMeshGeometry()
+void RenderApp::BuildMeshGeometry()
 {
 	GeometryGenerator::MeshData cylinder = GeometryGenerator::CreateCylinder(1.0f, 0.56f, 4.0f, 100, 20);
 	GeometryGenerator::MeshData ball = GeometryGenerator::CreateBall(1.0f, 50, 50);
@@ -720,7 +725,7 @@ void Render::BuildMeshGeometry()
 
 	geos[Geo->name] = std::move(Geo);
 }
-void Render::BuildImportedGeometryFromOBJ()
+void RenderApp::BuildImportedGeometryFromOBJ()
 {
 	GeometryGenerator::MeshData nailong = GeometryGenerator::CreateImportedGeometryFromOBJ(L"../Resources/Models/Nailong.obj");
 
@@ -771,7 +776,7 @@ void Render::BuildImportedGeometryFromOBJ()
 	geos[geo->name] = std::move(geo);
 }
 // 创建材质
-void Render::BuildMaterials()
+void RenderApp::BuildMaterials()
 {
 	UINT MaterialIndex = 0;
 
@@ -823,7 +828,7 @@ void Render::BuildMaterials()
 }
 
 // 创建结构化材质常量缓冲区
-void Render::BuildMaterialStructuredBuffers()const
+void RenderApp::BuildMaterialStructuredBuffers()const
 {
 	auto currentMaterialStructuredBuffer = currentFrameResource->materialStructuredBuffer.get();
 
@@ -854,7 +859,7 @@ void Render::BuildMaterialStructuredBuffers()const
 }
 
 // 创建渲染项
-void Render::BuildRenderItems()
+void RenderApp::BuildRenderItems()
 {
 	allRenderItems.clear();
 	opaqueRenderItems.clear();
@@ -880,8 +885,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&leftCylinderRenderItem->worldTransform, leftCylinderWorld);
 		leftCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		leftCylinderRenderItem->materialIndex = materials["Brick"].get()->materialIndex;
+		leftCylinderRenderItem->textureFlags = TextureType::TEX_DIFFUSE | TextureType::TEX_NORMAL | TextureType::TEX_DEPTH;
 		leftCylinderRenderItem->diffuseTextureIndex[0] = textures["brick"].get()->srvHeapIndex;
 		leftCylinderRenderItem->normalTextureIndex[0] = textures["brickNormal"].get()->srvHeapIndex;
+		leftCylinderRenderItem->depthTextureIndex[0] = textures["brickDepth"].get()->srvHeapIndex;
 		leftCylinderRenderItem->Geo = geos["Geo"].get();
 		leftCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		leftCylinderRenderItem->indexCount = leftCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
@@ -891,8 +898,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&leftBallRenderItem->worldTransform, leftBallWorld);
 		leftBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		leftBallRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
+		leftBallRenderItem->textureFlags = TextureType::TEX_DIFFUSE;
 		leftBallRenderItem->diffuseTextureIndex[0] = textures["stone"].get()->srvHeapIndex;
 		leftBallRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		leftBallRenderItem->depthTextureIndex[0] = textures["defaultDepth"].get()->srvHeapIndex;
 		leftBallRenderItem->Geo = geos["Geo"].get();
 		leftBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		leftBallRenderItem->indexCount = leftBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
@@ -902,8 +911,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&rightCylinderRenderItem->worldTransform, rightCylinderWorld);
 		rightCylinderRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		rightCylinderRenderItem->materialIndex = materials["Brick"].get()->materialIndex;
+		rightCylinderRenderItem->textureFlags = TextureType::TEX_DIFFUSE | TextureType::TEX_NORMAL | TextureType::TEX_DEPTH;
 		rightCylinderRenderItem->diffuseTextureIndex[0] = textures["brick"].get()->srvHeapIndex;
 		rightCylinderRenderItem->normalTextureIndex[0] = textures["brickNormal"].get()->srvHeapIndex;
+		rightCylinderRenderItem->depthTextureIndex[0] = textures["brickDepth"].get()->srvHeapIndex;
 		rightCylinderRenderItem->Geo = geos["Geo"].get();
 		rightCylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		rightCylinderRenderItem->indexCount = rightCylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
@@ -913,8 +924,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&rightBallRenderItem->worldTransform, rightBallWorld);
 		rightBallRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		rightBallRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
+		rightBallRenderItem->textureFlags = TextureType::TEX_DIFFUSE;
 		rightBallRenderItem->diffuseTextureIndex[0] = textures["stone"].get()->srvHeapIndex;
 		rightBallRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		rightBallRenderItem->depthTextureIndex[0] = textures["defaultDepth"].get()->srvHeapIndex;
 		rightBallRenderItem->Geo = geos["Geo"].get();
 		rightBallRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		rightBallRenderItem->indexCount = rightBallRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
@@ -926,8 +939,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&floorRenderItem->textureTransform, floorTextureTransform);
 		floorRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		floorRenderItem->materialIndex = materials["Stone"].get()->materialIndex;
+		floorRenderItem->textureFlags = TextureType::TEX_DIFFUSE | TextureType::TEX_NORMAL | TextureType::TEX_DEPTH;
 		floorRenderItem->diffuseTextureIndex[0] = textures["floor"].get()->srvHeapIndex;
 		floorRenderItem->normalTextureIndex[0] = textures["floorNormal"].get()->srvHeapIndex;
+		floorRenderItem->depthTextureIndex[0] = textures["floorDepth"].get()->srvHeapIndex;
 		floorRenderItem->Geo = geos["Geo"].get();
 		floorRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		floorRenderItem->indexCount = floorRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
@@ -940,8 +955,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&nailongRenderItem->worldTransform, nailongWorld);
 		nailongRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		nailongRenderItem->materialIndex = materials["Wood"].get()->materialIndex;
+		nailongRenderItem->textureFlags = TextureType::TEX_DIFFUSE;
 		nailongRenderItem->diffuseTextureIndex[0] = textures["wood"].get()->srvHeapIndex;
 		nailongRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		nailongRenderItem->depthTextureIndex[0] = textures["defaultDepth"].get()->srvHeapIndex;
 		nailongRenderItem->Geo = geos["objGeo"].get();
 		nailongRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		nailongRenderItem->indexCount = nailongRenderItem->Geo->submeshList["Nailong"].indexCount;
@@ -963,8 +980,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&skyboxRenderItem->worldTransform, skyboxWorld);
 		skyboxRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		skyboxRenderItem->materialIndex = materials["Skycube"].get()->materialIndex;
+		skyboxRenderItem->textureFlags = TextureType::TEX_DIFFUSE;
 		skyboxRenderItem->diffuseTextureIndex[0] = textures["skycube"].get()->srvHeapIndex;
 		skyboxRenderItem->normalTextureIndex[0] = textures["defaultNormal"].get()->srvHeapIndex;
+		skyboxRenderItem->depthTextureIndex[0] = textures["defaultDepth"].get()->srvHeapIndex;
 		skyboxRenderItem->Geo = geos["Geo"].get();
 		skyboxRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		skyboxRenderItem->indexCount = skyboxRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
@@ -981,8 +1000,10 @@ void Render::BuildRenderItems()
 		XMStoreFloat4x4(&waveRenderItem->worldTransform, waveWorld);
 		waveRenderItem->objectConstBufferIndex = GeoObjectIndex++;
 		waveRenderItem->materialIndex = materials["Water"].get()->materialIndex;
+		waveRenderItem->textureFlags = TextureType::TEX_DIFFUSE;
 		waveRenderItem->diffuseTextureIndex[0] = textures["wave"].get()->srvHeapIndex;
 		waveRenderItem->normalTextureIndex[0] = textures["waveNormal"].get()->srvHeapIndex;
+		waveRenderItem->depthTextureIndex[0] = textures["defaultDepth"].get()->srvHeapIndex;
 		waveRenderItem->Geo = geos["Geo"].get();
 		waveRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		waveRenderItem->indexCount = waveRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
@@ -1000,13 +1021,13 @@ void Render::BuildRenderItems()
 		allRenderItems.emplace_back(item.get());
 }
 // 创建帧资源
-void Render::BuildFrameResources()
+void RenderApp::BuildFrameResources()
 {
 	for (int i = 0; i < gNumFrameResources; ++i)
 		frameResources.emplace_back(std::make_unique<FrameResource>(d3dDevice.Get(), 1, (UINT)allRenderItems.size(), (UINT)materials.size()));
 }
 // 创建渲染管线状态对象
-void Render::BuildPSOs()
+void RenderApp::BuildPSOs()
 {
 	CD3DX12_RASTERIZER_DESC drd(D3D12_DEFAULT);
 	drd.FillMode = D3D12_FILL_MODE_SOLID;
@@ -1091,7 +1112,7 @@ void Render::BuildPSOs()
 	ThrowIfFailed(d3dDevice->CreateGraphicsPipelineState(&skycubePsoDesc, IID_PPV_ARGS(&PSOs["SkyCube"])));
 }
 
-void Render::UpdateCameraState(const GameTimer& GTimer)
+void RenderApp::UpdateCameraState(const GameTimer& GTimer)
 {
 	if (isMoving)
 	{
@@ -1108,7 +1129,7 @@ void Render::UpdateCameraState(const GameTimer& GTimer)
 }
 
 // 更新物体常量缓冲区
-void Render::UpdateObjectsConstBuffers()const
+void RenderApp::UpdateObjectsConstBuffers()const
 {
 	auto currentObjectConstBuffer = currentFrameResource->objectConstBuffer.get();
 
@@ -1125,9 +1146,10 @@ void Render::UpdateObjectsConstBuffers()const
 			XMStoreFloat4x4(&objectconstant.normalTransform, XMMatrixInverse(&XMMatrixDeterminant(worldTransform), worldTransform));
 			XMStoreFloat4x4(&objectconstant.textureTransform, XMMatrixTranspose(textureTransform));
 			objectconstant.materialIndex = it->materialIndex;
-			memcpy(objectconstant.diffuseTextureIndex,it->diffuseTextureIndex, MAX_BINDING_TEXTURE* sizeof(UINT));
-			memcpy(objectconstant.normalTextureIndex,it->normalTextureIndex, MAX_BINDING_TEXTURE * sizeof(UINT));
-
+			objectconstant.textureFlags = static_cast<uint32_t>(it->textureFlags);
+			std::copy(it->diffuseTextureIndex.begin(), it->diffuseTextureIndex.end(), objectconstant.diffuseTextureIndex.begin());
+			std::copy(it->normalTextureIndex.begin(), it->normalTextureIndex.end(), objectconstant.normalTextureIndex.begin());
+			std::copy(it->depthTextureIndex.begin(), it->depthTextureIndex.end(), objectconstant.depthTextureIndex.begin());
 			currentObjectConstBuffer->CopyData(it->objectConstBufferIndex, objectconstant);
 
 			it->numDirtyFrames--;
@@ -1136,7 +1158,7 @@ void Render::UpdateObjectsConstBuffers()const
 }
 
 // 更新渲染过程常量
-void Render::UpdatePassConstBuffers()
+void RenderApp::UpdatePassConstBuffers()
 {
 	RenderingPassConstants mRenderingPassConstantsBuffer;
 
@@ -1164,13 +1186,13 @@ void Render::UpdatePassConstBuffers()
 	mRenderingPassConstantsBuffer.ambientIlluminating = { 0.2f,0.2f,0.2f,1.0f };
 
 	Light dirLight;
-	dirLight.rgbIntensity = { 4.0f,4.0f,4.0f };
-	dirLight.direction = { -0.57735f,-0.57735f,-0.57735f };
+	dirLight.rgbIntensity = { 1.0f,1.0f,1.0f };
+	dirLight.direction = { -0.57735f,-0.57735f,0.57735f };
 
 	Light pointLight;
 	pointLight.rgbIntensity = { 2.0f,2.0f,2.0f };
+	pointLight.end = 15.0f;
 	pointLight.position = { 6.0f * sinf(gameTimer.TotalTime() * MathHelper::Pi / 16.0f),2.0f,6.0f * cosf(gameTimer.TotalTime() * MathHelper::Pi / 16.0f) };
-	pointLight.direction = { 1.0f,0.0f,0.0f };
 
 	mRenderingPassConstantsBuffer.lights[0] = dirLight;
 	mRenderingPassConstantsBuffer.lights[1] = pointLight;
@@ -1180,7 +1202,7 @@ void Render::UpdatePassConstBuffers()
 }
 
 // 绘制渲染项
-void Render::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<std::unique_ptr<RenderItem>>& renderItems)const
+void RenderApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<std::unique_ptr<RenderItem>>& renderItems)const
 {
 	UINT objectConstBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(ObjectConstants));
 	auto objectConstBuffer = currentFrameResource->objectConstBuffer->Resource();
@@ -1199,7 +1221,7 @@ void Render::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::
 }
 
 // 获取指向MyApp类自身的指针
-const Render* Render::GetMyApp()const
+const RenderApp* RenderApp::GetMyApp()const
 {
 	return this;
 }

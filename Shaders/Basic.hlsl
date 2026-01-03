@@ -14,6 +14,11 @@
 
 #include "Light.hlsl"
 
+static const uint MAT_USE_NO_MAP = 0;
+static const uint MAT_USE_ALBEDO_MAP = 1 << 0;
+static const uint MAT_USE_NORMAL_MAP = 1 << 1;
+static const uint MAT_USE_DEPTH_MAP = 1 << 2;
+
 Texture2D gTextures[16] : register(t0, space0);
 StructuredBuffer<MaterialData> materialBuffer : register(t0, space1);
 
@@ -31,7 +36,9 @@ cbuffer cbPerObject : register(b0)
 	float4x4 gTextureTransform;		// 纹理变换矩阵
 	uint4 packedDiffuseTextureIndex[MAX_BINDING_TEXTURE/4];
 	uint4 packedNormalTextureIndex[MAX_BINDING_TEXTURE/4];
+	uint4 packedDepthTextureIndex[MAX_BINDING_TEXTURE/4];
 	uint materialIndex;
+	uint textureFlags;
 }
 cbuffer cbPass : register(b1)
 {
@@ -74,3 +81,4 @@ struct VertexOut
 
 static uint diffuseTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedDiffuseTextureIndex;
 static uint normalTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedNormalTextureIndex; 
+static uint depthTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedDepthTextureIndex;

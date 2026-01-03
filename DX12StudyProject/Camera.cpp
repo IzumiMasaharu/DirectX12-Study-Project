@@ -74,15 +74,6 @@ void Camera::setLens(float fov, float aspectRatio, float nearZ, float farZ)
 
 	projDirty = true;
 }
-void Camera::zoom(float factor)
-{
-	float newFov = fov * factor;
-	newFov = max(0.05f, min(newFov, XM_PI * 0.75f));
-	if (fabsf(newFov - fov) > 1e-6f) {
-		fov = newFov;
-		projDirty = true;
-	}
-}
 void Camera::setFov(float newFov)
 {
 	newFov = max(0.05f, min(newFov, XM_PI * 0.75f));
