@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "DXBase.h"
+#include "DxUtil.h"
 
 template<typename T>
 class UploadBuffer
@@ -11,7 +11,7 @@ public:
 
         // 如果是常量缓冲区，则调整大小以满足 256 字节对齐要求
         if (mIsConstantBuffer)
-            mElementByteSize = DXBase::ConstUploadBufferByteSize256Alignment(mElementByteSize);
+            mElementByteSize = DxUtil::ConstUploadBufferByteSize256Alignment(mElementByteSize);
 
         // 创建上传缓冲区资源（位于CPU）
         ThrowIfFailed(mDevice->CreateCommittedResource(

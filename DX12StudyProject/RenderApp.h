@@ -1,19 +1,21 @@
-﻿#include "DXApp.h"
-#include "DDSTextureLoader.h"
+﻿#include "DxApp.h"
+
+#include "MotionParam.h"
+#include "Material.h"
+#include "Texture.h"
+#include "Geometry.h"
 #include "FrameResource.h"
-#include "GeometryGenerator.h"
 #include "RenderItem.h"
-#include "UploadBuffer.h"
 #include "Camera.h"
 
-class RenderApp : public DXApp
+class RenderApp : public DxApp
 {
 public:
 	explicit RenderApp(HINSTANCE hInstace);
 	~RenderApp() final;
 
-	LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
-	bool Init() override;
+	LRESULT wndMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
+	bool init() override;
 private:
 	void RenderLoop() override;						// 渲染线程主循环
 
@@ -21,11 +23,11 @@ private:
 	void Update(const GameTimer& GTimer) override;
 	void Draw(const GameTimer& GTimer) override;
 
-	void KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam) override;
+	void KeyboardMsgProc(UINT vk, bool pressed) override;
 	void MouseDown(WPARAM ButtonState, int x, int y) override;
 	void MouseUp(WPARAM ButtonState, int x, int y) override;
 	void MouseMove(WPARAM ButtonState, int x, int y) override;
-	 
+
 	void LoadTexture();								// 载入纹理
 	void BuildRootSignature();						// 创建根签名
 	void BuildDescriptorHeaps();					// 创建程序所需的其他描述符堆（除初始化时创建的DSV、RTV描述符堆）
@@ -46,11 +48,8 @@ private:
 
 	void DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<std::unique_ptr<RenderItem>>& renderItems)const; // 绘制渲染项
 public:
-	const RenderApp* GetMyApp()const;					// 获取指向MyApp类自身的指针
+	const RenderApp* getAppPtr()const;					// 获取指向MyApp类自身的指针
 private:
-	WindowClass windowClass;
-	Window appMainWnd;
-
 	struct ResizeInfoForRenderThread {
 		std::atomic<bool> isResized{ false };
 		std::atomic<int>  newWidth{ 0 };
@@ -63,7 +62,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap = nullptr;	// SRV描述符堆
 
 	std::unordered_map<std::string, std::vector<D3D12_INPUT_ELEMENT_DESC> > inputLayout; // 输入布局
-	UINT passCbvOffset = 0;		// 渲染过程常量缓冲区偏移量
+	// UINT passCbvOffset = 0;		// 渲染过程常量缓冲区偏移量
 
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> shaders;			// 储存着色器的无序图 
 	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> geos;				// 储存几何网格体的无序图
@@ -80,17 +79,13 @@ private:
 	UINT currentFrameResourceIndex = 0;							// 当前帧资源索引
 	FrameResource* currentFrameResource = nullptr;				// 当前帧资源
 
-	POINT lastMousePosition;
+	POINT lastMousePosition = {0,0};
 
 	bool isWireframeEnabled = false;
 
 	//摄像机对象
-	Camera camera;	
-	bool isMoving = false;
-	DirectX::XMFLOAT3 moveDirection{0.0f, 0.0f, 0.0f};
-	float moveSpeed = 3.0f;
+	Camera camera;
+	MotionParam cameraMotionParam;
 
-	bool isRolling = false;
-	float rollingDirection = 0.0f;
-	float rollingSpeed = 0.2f;
+	std::array<bool, 256> keyDown = {};
 };

@@ -1,5 +1,7 @@
 ﻿#include "GameTimer.h"
 
+#include <Windows.h>
+
 GameTimer::GameTimer()
 {
 	__int64 CountsPerSeconcd;

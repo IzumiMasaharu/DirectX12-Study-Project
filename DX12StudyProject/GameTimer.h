@@ -1,12 +1,11 @@
 ﻿#pragma once
-#include <Windows.h>
 
 class GameTimer
 {
 public:
 	GameTimer();
 	~GameTimer() = default;
-public:
+
 	float TotalTime()const; // 游戏运行总时间（程序运行总时间-游戏暂停总时间）
 	float DeltaTime()const; // 返回帧时间差
 	void Reset(); // 重置计时器

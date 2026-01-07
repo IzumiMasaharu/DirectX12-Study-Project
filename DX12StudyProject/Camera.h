@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "DXBase.h"
+#include <DirectXMath.h>
 
 class Camera
 {
@@ -74,8 +74,8 @@ private:
     float aspectRatio = 0.0f;
 
     // 变换矩阵
-    DirectX::XMFLOAT4X4 viewTransform = MathHelper::Identity4x4();
-    DirectX::XMFLOAT4X4 projectionTransform = MathHelper::Identity4x4();
+    DirectX::XMFLOAT4X4 viewTransform;
+    DirectX::XMFLOAT4X4 projectionTransform;
 
     // 脏标记
     mutable bool viewDirty = true;

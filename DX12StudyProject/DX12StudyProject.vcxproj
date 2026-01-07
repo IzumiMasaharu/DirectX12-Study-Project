@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -48,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -134,27 +134,38 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
-    <ClCompile Include="DXApp.cpp" />
-    <ClCompile Include="DXBase.cpp" />
+    <ClCompile Include="DxApp.cpp" />
+    <ClCompile Include="DxTools.cpp" />
+    <ClCompile Include="DxUtil.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Render.cpp" />
+    <ClCompile Include="MotionParam.h" />
+    <ClCompile Include="RenderApp.cpp" />
     <ClCompile Include="DDSTextureLoader.h" />
+    <ClCompile Include="WindowsManager.cpp" />
+    <ClCompile Include="WindowsManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="DXApp.h" />
-    <ClInclude Include="DXBase.h" />
+    <ClInclude Include="DxApp.h" />
+    <ClInclude Include="DxTools.h" />
+    <ClInclude Include="DxUtil.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GeometryGenerator.h" />
-    <ClInclude Include="Render.h" />
+    <ClInclude Include="HandlerWndMsgProc.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="RenderApp.h" />
     <ClInclude Include="RenderItem.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ShaderResource.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="UploadBuffer.h" />
+    <ClInclude Include="Geometry.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DX12StudyProject.rc" />

@@ -18,16 +18,16 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DXApp.cpp">
+    <ClCompile Include="DxApp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Render.cpp">
+    <ClCompile Include="RenderApp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DXBase.cpp">
+    <ClCompile Include="DxUtil.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FrameResource.cpp">
@@ -45,15 +45,27 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="WindowsManager.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MotionParam.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DxTools.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DXApp.h">
+    <ClInclude Include="DxApp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Render.h">
+    <ClInclude Include="RenderApp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DXBase.h">
+    <ClInclude Include="DxUtil.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="d3dx12.h">
@@ -78,6 +90,27 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HandlerWndMsgProc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DxTools.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderResource.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

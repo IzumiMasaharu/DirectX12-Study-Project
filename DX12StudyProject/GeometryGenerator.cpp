@@ -1,4 +1,8 @@
 ﻿#include "GeometryGenerator.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <Windows.h>
 
 using namespace DirectX;
 

@@ -2,11 +2,7 @@
 #include <cstdint>
 #include <DirectXMath.h>
 #include <vector>
-#include <fstream>
-#include <iostream>
-#include <Windows.h>
 #include <string>
-#include <sstream>
 
 class GeometryGenerator
 {

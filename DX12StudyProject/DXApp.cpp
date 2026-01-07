@@ -1,34 +1,28 @@
-﻿#include "DXApp.h"
+﻿#include "DxApp.h"
 
 using namespace Microsoft::WRL;
 
-DXApp* DXApp::mApp = nullptr;
+DxApp* DxApp::appPtr = nullptr;
 
-// 窗口过程回调函数
-LRESULT CALLBACK DXAppWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+DxApp::DxApp(HINSTANCE hInstance) : windowsManager(hInstance,this), appInstance(hInstance)
 {
-    return DXApp::GetApp()->MessageProc(hwnd, msg, wParam, lParam);
+    assert(appPtr == nullptr);
+    appPtr = this;
 }
-
-DXApp::DXApp(HINSTANCE hInstance):appInstance(hInstance)
-{
-    assert(mApp == nullptr);
-    mApp = this;
-}
-DXApp::~DXApp()
+DxApp::~DxApp()
 {
     if (d3dDevice != nullptr)
         FlushCommandQueue();
 }
 
 // 派生类需覆写此虚函数以编写自己需要的窗口消息处理方式
-LRESULT DXApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT DxApp::wndMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
 // 应用运行
-int DXApp::Run()
+int DxApp::run() const
 {
     MSG msg = { nullptr };
 
@@ -44,7 +38,7 @@ int DXApp::Run()
     return (int)msg.wParam;
 }
 
-void DXApp::ControlLoop()
+void DxApp::ControlLoop()
 {
 	while (isAppRunning)
 	{
@@ -70,97 +64,8 @@ void DXApp::ControlLoop()
 	}
 }
 
-// 初始化窗口类
-bool DXApp::InitWindowClass(WindowClass& WC, LPCTSTR windowclassName)
-{
-    // 窗口类命名
-    WC.SetWCName(windowclassName);
-    // 填写窗口类结构体
-    WNDCLASSEX wc = { 0 };
-    wc.cbSize = sizeof(wc);
-    wc.hInstance = appInstance;
-    wc.lpszClassName = WC.GetWCName();
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hIconSm = nullptr;
-    wc.hIcon = static_cast<HICON>(LoadImage(appInstance, MAKEINTRESOURCE(RENDER), IMAGE_ICON, 512, 512, LR_VGACOLOR));
-    wc.hIconSm = nullptr;
-    wc.lpfnWndProc = DXAppWndProc;
-    wc.lpszMenuName = nullptr;
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-
-    // 注册所填写窗口类
-    if (!RegisterClassEx(&wc))
-    {
-        MessageBox(nullptr, L"RegisterWindowClass Failed.", nullptr, 0);
-        return false;
-    }
-
-    return true;
-}
-
-// 初始化窗口（两种重载形式）
-// 无指定大小的窗口
-bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC,const LPCTSTR pWndName)
-{
-    Wnd.SetWndName(pWndName);
-
-    RECT R = { 0, 0, clientWidth, clientHeight };
-    AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
-    int width = R.right - R.left;
-    int height = R.bottom - R.top;
-    // 创建窗口
-    Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
-        Wnd.windowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_VSCROLL,
-        CW_USEDEFAULT, CW_USEDEFAULT, width, height,
-        nullptr , nullptr, WC.GetInstance(),nullptr);
-
-    if (!Wnd.wndHwnd)
-    {
-        MessageBox(nullptr, L"CreateWindow Failed.", nullptr, 0);
-        return false;
-    }
-    if (!mainWndHwnd)
-        mainWndHwnd = Wnd.wndHwnd;
-
-    // 展示窗口
-    ShowWindow(mainWndHwnd, SW_SHOW);
-    UpdateWindow(mainWndHwnd);
-    
-    return true;
-}
-// 指定大小的窗口
-bool DXApp::InitWindow(DXApp::Window& Wnd,DXApp::WindowClass WC, const LPCTSTR pWndName, int x, int y, int wx, int wy)
-{
-    // 设置窗口名称与位置
-    Wnd.SetWndName(pWndName);
-    Wnd.SetWndPos(x, y, wx, wy);
-
-    RECT R = { 0, 0, Wnd.windowWidth, Wnd.windowHeight };
-    AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
-    // 创建窗口
-    Wnd.wndHwnd = CreateWindowEx(0, WC.GetWCName(),
-        Wnd.windowName, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_THICKFRAME,
-        Wnd.windowX, Wnd.windowY, Wnd.windowWidth, Wnd.windowHeight,nullptr, nullptr, WC.GetInstance(), nullptr);
-
-    if (!Wnd.wndHwnd)
-    {
-        MessageBox(nullptr, L"CreateWindow Failed.", nullptr, 0);
-        return false;
-    }
-    if (!mainWndHwnd) 
-        mainWndHwnd = Wnd.wndHwnd;
-    // 展示窗口
-    ShowWindow(mainWndHwnd, SW_SHOW);
-    UpdateWindow(mainWndHwnd);
-
-    return true;
-}
-
 // 初始化DirectX 3D
-bool DXApp::InitDirectX3D()
+bool DxApp::InitDirectX3D()
 {
 // 启动D3D调试层
 #if defined(DEBUG)||defined(_DEBUG)
@@ -210,7 +115,7 @@ bool DXApp::InitDirectX3D()
 }
 
 // 创建命令队列、命令分配器、命令列表
-void DXApp::CreateCmdObjects()
+void DxApp::CreateCmdObjects()
 {
     // 填写描述命令队列的结构体
     D3D12_COMMAND_QUEUE_DESC qd = {};
@@ -226,7 +131,7 @@ void DXApp::CreateCmdObjects()
 }
 
 // 创建交换链
-void DXApp::CreateSwapChain()
+void DxApp::CreateSwapChain()
 {
     // 释放之前所创建的的交换链，重新创建
     swapChain.Reset();
@@ -252,7 +157,7 @@ void DXApp::CreateSwapChain()
 }
 
 // 创建描述符堆(RTV和DSV)
-void DXApp::Create_DSV_RTV_DescriptorHeaps()
+void DxApp::Create_DSV_RTV_DescriptorHeaps()
 {
     // 创建RTV描述符堆
     D3D12_DESCRIPTOR_HEAP_DESC RTVHeapDesc ;
@@ -271,7 +176,7 @@ void DXApp::Create_DSV_RTV_DescriptorHeaps()
 }
 
 // 加载枚举所有显示适配器
-void DXApp::LogAdapters()
+void DxApp::LogAdapters()
 {
     IDXGIAdapter* Adapter = nullptr;
     std::vector<IDXGIAdapter*> AdapterList;
@@ -298,7 +203,7 @@ void DXApp::LogAdapters()
 }
 
 // 加载枚举所有显示输出
-void DXApp::LogAdapterOutputs(IDXGIAdapter* adapter)
+void DxApp::LogAdapterOutputs(IDXGIAdapter* adapter)
 {
     IDXGIOutput* Output = nullptr;
     for (UINT i = 0; adapter->EnumOutputs(i, &Output) != DXGI_ERROR_NOT_FOUND; i++)
@@ -318,7 +223,7 @@ void DXApp::LogAdapterOutputs(IDXGIAdapter* adapter)
 }
 
 // 加载枚举所有显示输出格式
-void DXApp::LogAdapterDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
+void DxApp::LogAdapterDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 {
     UINT count = 0;
     UINT flags = 0;
@@ -345,7 +250,7 @@ void DXApp::LogAdapterDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 }
 
 // 刷新命令队列
-void DXApp::FlushCommandQueue()
+void DxApp::FlushCommandQueue()
 {
     // 围栏法
     currentFenceValue++;
@@ -365,25 +270,25 @@ void DXApp::FlushCommandQueue()
 }
 
 // 获取指向当前缓冲区的指针
-ID3D12Resource* DXApp::CurrentBackBuffer()const
+ID3D12Resource* DxApp::CurrentBackBuffer()const
 {
     return swapChainBuffer[currentBackBuffer].Get();
 }
 // 获取当前后台缓冲区的RTV
-D3D12_CPU_DESCRIPTOR_HANDLE DXApp::CurrentBackBufferView()const
+D3D12_CPU_DESCRIPTOR_HANDLE DxApp::CurrentBackBufferView()const
 {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
         rtvHeap->GetCPUDescriptorHandleForHeapStart(),
         currentBackBuffer, rtvDescriptorSize);
 }
 // 获取当前后台缓冲区的DSV
-D3D12_CPU_DESCRIPTOR_HANDLE DXApp::DepthStencilBufferView()const
+D3D12_CPU_DESCRIPTOR_HANDLE DxApp::DepthStencilBufferView()const
 {
     return dsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
 // 重新设置DX相关尺寸属性
-void DXApp::Resize()
+void DxApp::Resize()
 {
     assert(d3dDevice);
     assert(commandAllocator);
@@ -455,35 +360,35 @@ void DXApp::Resize()
 }
 
 // 处理鼠标信息（可被派生类覆写）
-void DXApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam){ return; }
-void DXApp::MouseDown(WPARAM ButtonState, int x, int y){ return; }
-void DXApp::MouseUp(WPARAM ButtonState, int x, int y){ return; }
-void DXApp::MouseMove(WPARAM ButtonState, int x, int y){ return; }
-void DXApp::MouseWheel(short zDelta) { return; }
+void DxApp::KeyboardMsgProc(UINT vk, bool pressed){ return; }
+void DxApp::MouseDown(WPARAM ButtonState, int x, int y){ return; }
+void DxApp::MouseUp(WPARAM ButtonState, int x, int y){ return; }
+void DxApp::MouseMove(WPARAM ButtonState, int x, int y){ return; }
+void DxApp::MouseWheel(short zDelta) { return; }
 
-// 获取DXApp类实例的句柄
-HINSTANCE DXApp::GetAppInst()const
+// 获取DxApp类实例的句柄
+HINSTANCE DxApp::GetAppInst()const
 {
     return this->appInstance;
 }
-// 获取指向DXApp类的指针
-DXApp* DXApp::GetApp()
+// 获取指向DxApp类的指针
+DxApp* DxApp::GetApp()
 {
-    return mApp;
+    return appPtr;
 }
 // 获取程序主窗口句柄
-HWND DXApp::GetMainHwnd()const
+HWND DxApp::GetMainHwnd()const
 {
     return mainWndHwnd;
 }
 
 // 查看是否开启4xMSAA功能
-bool DXApp::Get4xMSAAState()const
+bool DxApp::Get4xMSAAState()const
 {
     return isMSAA4xOn;
 }
 // 更改4xMSAA功能开关状态
-void DXApp::Set4xMSAAState(bool state)
+void DxApp::Set4xMSAAState(bool state)
 {
     if (isMSAA4xOn != state)
     {
@@ -492,13 +397,13 @@ void DXApp::Set4xMSAAState(bool state)
 }
 
 // 返回缓冲区宽高比
-float DXApp::W_H_Ratio()const
+float DxApp::W_H_Ratio()const
 {
     return static_cast<float>(clientWidth) / static_cast<float>(clientHeight);
 }
 
 // 计算每秒帧数和帧渲染时长          
-void DXApp::CalculateFPS_MSPF()
+void DxApp::CalculateFPS_MSPF()
 {
     static int FrameCount = 0;
     static float RenderTime = 0.0f;
@@ -513,55 +418,4 @@ void DXApp::CalculateFPS_MSPF()
         FrameCount = 0;
         RenderTime += 1.0f;
     }
-}
-
-// 构造窗口类
-DXApp::WindowClass::WindowClass(HINSTANCE hInstance) :wndClassInstance(hInstance)
-{}
-// 注销窗口类
-DXApp::WindowClass::~WindowClass()
-{
-    UnregisterClass(windowClassName, GetInstance());
-}
-// 设置窗口类名称
-const wchar_t* DXApp::WindowClass::SetWCName(LPCWSTR WCName)
-{
-    windowClassName = WCName;
-    return windowClassName;
-}
-// 返回窗口类名称
-const wchar_t* DXApp::WindowClass::GetWCName()const
-{
-    return windowClassName;
-}
-// 返回窗口类实例句柄
-HINSTANCE DXApp::WindowClass::GetInstance()const
-{
-    return wndClassInstance;
-}
-
-// 销毁窗口
-DXApp::Window::~Window()
-{
-    if (wndHwnd != nullptr)
-        DestroyWindow(wndHwnd);
-}
-// 设置窗口名称
-const wchar_t* DXApp::Window::SetWndName(LPCWSTR WndName)
-{
-    windowName = WndName;
-    return windowName;
-}
-// 设置窗口坐标数据
-void DXApp::Window::SetWndPos(int x, int y, int wx, int wy)
-{
-    windowX = x;
-    windowY = y;
-    windowWidth = wx;
-    windowHeight = wy;
-}
-// 获取窗口句柄
-HWND DXApp::Window::GetWndHwnd()const
-{
-    return this->wndHwnd;
 }

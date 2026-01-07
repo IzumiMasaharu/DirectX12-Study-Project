@@ -1,6 +1,4 @@
 ﻿#pragma once
-#include "DXBase.h"
-
 enum class TextureType : uint32_t
 {
 	TEX_NONE = 0u,

@@ -1,34 +1,22 @@
-﻿#include "DXBase.h"
+﻿#include "WindowsManager.h"
 #include "GameTimer.h"
-#include "resource.h"
+#include "DxUtil.h"
 
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <atomic>
-
-class DXApp
+class DxApp : public HandlerWndMsgProc
 {
-protected:
-	class WindowClass;
-	class Window;
-protected:
-	explicit DXApp(HINSTANCE hInstance);
-	DXApp(const DXApp& rhs) = delete;
-	virtual ~DXApp();
-protected:
-	DXApp operator=(const DXApp& rhs) = delete;
 public:
-	virtual LRESULT MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);	// 消息过程处理函数（需通过派生类覆写）
-	virtual bool Init() = 0;
-	int Run();
+	explicit DxApp(HINSTANCE hInstance);
+	DxApp(const DxApp& rhs) = delete;
+	DxApp operator=(const DxApp& rhs) = delete;
+	virtual ~DxApp();
+
+	int run() const;
+	virtual LRESULT wndMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+	virtual bool init() = 0;
 	void ControlLoop();
-	virtual void RenderLoop()=0;
+	virtual void RenderLoop() = 0;
 protected:
-	// 初始化实现
-	bool InitWindowClass(WindowClass& WC,LPCTSTR windowclassName);//窗口类初始化
-	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);//窗口初始化重载1
-	bool InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName, int x, int y, int wx, int wy);//窗口初始化重载2
 	bool InitDirectX3D();//D3D初始化
 	void LogAdapters();//加载枚举所有显示适配器
 	void LogAdapterOutputs(IDXGIAdapter* adapter);//加载枚举所有显示输出
@@ -41,27 +29,33 @@ protected:
 	ID3D12Resource* CurrentBackBuffer()const;//获取指向当前缓冲区的指针
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView()const;//获取当前后台缓冲区的RTV
 	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilBufferView()const;//获取当前后台缓冲区的DSV
-protected:
+
 	virtual void Resize();
 private:
 	virtual void Update(const GameTimer& GTimer) = 0;
 	virtual void Draw(const GameTimer& GTimer) = 0;
 
-	virtual void KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam);
+	virtual void KeyboardMsgProc(UINT vk, bool pressed);
 	virtual void MouseDown(WPARAM ButtonState, int x, int y);
 	virtual void MouseUp(WPARAM ButtonState, int x, int y);
 	virtual void MouseMove(WPARAM ButtonState, int x, int y);
 	virtual void MouseWheel(short zDelta);
 public:
 	HINSTANCE GetAppInst()const;		// 获取应用程序句柄
-	static DXApp* GetApp();				// 获取指向DXApp类的指针
+	static DxApp* GetApp();				// 获取指向DxApp类的指针
 	HWND GetMainHwnd()const;			// 获取程序主窗口句柄
 	bool Get4xMSAAState()const;			// 查看是否开启4xMSAA功能
 	void Set4xMSAAState(bool On_Off);	// 更改4xMSAA功能开关状态
 	float W_H_Ratio()const;				// 返回缓冲区宽高比
 	void CalculateFPS_MSPF();			// 计算每秒帧数和帧渲染时长
 protected:
-	static DXApp* mApp;//指向DXApp类的指针
+	static DxApp* appPtr;//指向DxApp类的指针
+
+	GameTimer gameTimer;
+	float fps = 0.0f;
+	float mspf = 0.0f;
+
+	WindowsManager windowsManager;
 
 	std::thread controlThread;
 	std::atomic<bool> isAppRunning{ false };
@@ -75,15 +69,11 @@ protected:
 	std::atomic<bool> isRenderThreadRunning{ false };
 	std::atomic<bool> isRenderPaused{ false };
 
-	GameTimer gameTimer;
-	float fps = 0.0f;
-	float mspf = 0.0f;
-
-	HINSTANCE appInstance = nullptr;//应用程序实例句柄
-	HWND mainWndHwnd = nullptr;//指向程序窗口的句柄（一般指向主窗口）
-	bool isWindowMinimized = false;//是否最小化
-	bool isWindowMaximized = false;//是否最大化
-	bool isWindowFullScreen = false;//是否全屏
+	HINSTANCE appInstance = nullptr;	// 应用程序实例句柄
+	HWND mainWndHwnd = nullptr;			// 指向程序窗口的句柄（一般指向主窗口）
+	bool isWindowMinimized = false;		// 是否最小化
+	bool isWindowMaximized = false;		// 是否最大化
+	bool isWindowFullScreen = false;	// 是否全屏
 
 	Microsoft::WRL::ComPtr<IDXGIFactory4> dxgiFactory;//Factory接口指针（Factory接口提供了一套创建DXGI的方法）
 	Microsoft::WRL::ComPtr<ID3D12Device> d3dDevice;//D3D设备指针
@@ -100,7 +90,7 @@ protected:
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;//交换链指针
 	static const int SwapChainBufferCount = 2;//交换链缓冲区数量
 	int currentBackBuffer = 0;//当前后台缓冲区编号
-	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainBuffer[SwapChainBufferCount];//交换链缓冲区指针
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, SwapChainBufferCount> swapChainBuffer;//交换链缓冲区指针
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer; // 深度/模板缓冲区指针
 
 	UINT rtvDescriptorSize = 0;// RTV描述符大小
@@ -113,47 +103,13 @@ protected:
 	D3D12_RECT scissorRect = {};//裁剪矩形
 
 	// 以下变量可在派生类中自行定义
-	LPCWSTR mainWndTitle=L"DefaultTitle";
-	D3D_DRIVER_TYPE d3dDriverType= D3D_DRIVER_TYPE_HARDWARE;
-	DXGI_FORMAT backBufferFormat= DXGI_FORMAT_R8G8B8A8_UNORM;
+	WindowClassDesc wndClassDesc;
+	WindowDesc wndDesc;
+	
+	D3D_DRIVER_TYPE d3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
+	DXGI_FORMAT backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	int clientWidth=500;
-	int clientHeight=500;
-};
-// 类：窗口类的声明
-class DXApp::WindowClass
-{
-public:
-	WindowClass() = default;
-	explicit WindowClass(HINSTANCE hInstance);
-	~WindowClass();
-public:
-	const wchar_t* SetWCName(LPCWSTR WCName);//设置窗口类名称
-	const wchar_t* GetWCName()const;//返回窗口类名称
-	HINSTANCE GetInstance()const;//返回窗口类实例句柄
-private:
-	HINSTANCE wndClassInstance;
-	const wchar_t* windowClassName = nullptr;
-};
-// 类：窗口的声明
-class DXApp::Window
-{
-public:
-	friend bool DXApp::InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName);
-	friend bool DXApp::InitWindow(DXApp::Window& Wnd, DXApp::WindowClass WC, const LPCTSTR pWndName,
-							int x, int y, int wx, int wy);
-public:
-	Window() = default;
-	~Window();
-public:
-	const wchar_t* SetWndName(LPCWSTR WndName);// 设置窗口名称
-	void SetWndPos(int x, int y, int wx, int wy);// 设置窗口坐标数据
-	HWND GetWndHwnd() const;// 获取窗口句柄
-private:
-	HWND wndHwnd = nullptr;
-	LPCWSTR windowName = nullptr;
-	int32_t windowX = 0;
-	int32_t windowY = 0;
-	int32_t windowWidth = 0;
-	int32_t windowHeight = 0;
+
+	int clientWidth = 640;
+	int clientHeight = 360;
 };

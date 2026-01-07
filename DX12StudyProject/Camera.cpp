@@ -1,4 +1,6 @@
 ﻿#include "Camera.h"
+#include "DxTools.h"
+#include <algorithm>
 
 using namespace DirectX;
 
@@ -13,6 +15,9 @@ Camera::Camera()
 	aspectRatio = 1.0f;
 	nearZ = 0.1f;
 	farZ = 1000.0f;
+
+	viewTransform = MathHelper::Identity4x4();
+	projectionTransform = MathHelper::Identity4x4();
 
 	updateViewMatrix();
 	updateProjectionMatrix();
@@ -76,7 +81,7 @@ void Camera::setLens(float fov, float aspectRatio, float nearZ, float farZ)
 }
 void Camera::setFov(float newFov)
 {
-	newFov = max(0.05f, min(newFov, XM_PI * 0.75f));
+	newFov = std::max(0.05f, std::min(newFov, XM_PI * 0.75f));
 	if (fabsf(newFov - fov) > 1e-6f) {
 		fov = newFov;
 		projDirty = true;
@@ -91,7 +96,7 @@ void Camera::setAspectRatio(float aspectRatio)
 }
 void Camera::setNearZ(float nearZ)
 {
-	nearZ = max(0.01f, min(nearZ, farZ - 0.01f));
+	nearZ = std::max(0.01f, std::min(nearZ, farZ - 0.01f));
 	if (fabsf(nearZ - this->nearZ) > 1e-6f) {
 		this->nearZ = nearZ;
 		projDirty = true;

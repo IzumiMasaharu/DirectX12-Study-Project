@@ -1,4 +1,4 @@
-﻿#include "Render.h"
+﻿#include "RenderApp.h"
 
 int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR IpCmdLine, _In_ int nShowCmd)
 {
@@ -7,11 +7,11 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 #endif
     try
     {
-        RenderApp myDXProject(hInstance);
-        if (!myDXProject.Init())
+        RenderApp renderApp(hInstance);
+        if (!renderApp.init())
             return 114;
 
-        return myDXProject.Run();
+        return renderApp.run();
     }
     catch (DxException& error)
     {

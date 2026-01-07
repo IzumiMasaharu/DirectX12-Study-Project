@@ -1,16 +1,28 @@
 ﻿#include "RenderApp.h"
 
+#include "resource.h"
+#include "DDSTextureLoader.h"
+#include "GeometryGenerator.h"
+
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
-RenderApp::RenderApp(HINSTANCE hInstance) : DXApp(hInstance), windowClass(hInstance)
+RenderApp::RenderApp(HINSTANCE hInstance) : DxApp(hInstance)
 {
-	mainWndTitle = L"Mayohoshi Render";
+	wndClassDesc.className = L"MayohoshiRenderWndClass";
+	wndClassDesc.style = CS_HREDRAW | CS_VREDRAW;
+	wndClassDesc.icon = static_cast<HICON>(LoadImage(appInstance, MAKEINTRESOURCE(RENDER), IMAGE_ICON, 512, 512, LR_VGACOLOR));
+	
+	wndDesc.title = L"Mayohoshi Render";
+	wndDesc.clientWidth = 1280;
+	wndDesc.clientHeight = 720;
+
 	d3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
 	backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	clientWidth = 1000;
-	clientHeight = 600;
+
+	clientHeight = wndDesc.clientHeight;
+	clientWidth = wndDesc.clientWidth;
 }
 RenderApp::~RenderApp()
 {
@@ -29,7 +41,7 @@ RenderApp::~RenderApp()
 }
 
 // 消息过程处理函数
-LRESULT RenderApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT RenderApp::wndMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
@@ -75,32 +87,45 @@ LRESULT RenderApp::MessageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 		return 0;
 	// case WM_MOUSEWHEEL:
 	//    return 0;
-	case WM_KEYDOWN:
-		KeyboardMsgProc(msg, wParam, lParam);
-		return 0;
-	case WM_KEYUP:
-		if (wParam == VK_ESCAPE)
-		{
-			PostQuitMessage(0);
-		}
-		else
-		{
-			KeyboardMsgProc(msg, wParam, lParam);
-		}
-		return 0;
+	case WM_INPUT:
+	{
+	    UINT dwSize = 0;
+	    GetRawInputData((HRAWINPUT)lParam,RID_INPUT,nullptr,&dwSize,sizeof(RAWINPUTHEADER));
+
+	    if (dwSize == 0)
+	        return 0;
+
+	    std::vector<BYTE> buffer(dwSize);
+	    if (GetRawInputData((HRAWINPUT)lParam,RID_INPUT,buffer.data(),&dwSize,sizeof(RAWINPUTHEADER)) != dwSize)
+	        return 0;
+
+	    RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(buffer.data());
+	    if (raw->header.dwType != RIM_TYPEKEYBOARD)
+	        return 0;
+
+	    const RAWKEYBOARD& kb = raw->data.keyboard;
+
+	    bool pressed = !(kb.Flags & RI_KEY_BREAK);
+
+	    KeyboardMsgProc(kb.VKey, pressed);
+	    return 0;
+	}
+
 	default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
+		return DxApp::wndMsgProc(hwnd, msg, wParam, lParam);
 	}
 }
 
 // 应用程序初始化
-bool RenderApp::Init()
+bool RenderApp::init()
 {
-	if (!DXApp::InitWindowClass(windowClass, L"Render Main Window Class"))
+	if (!windowsManager.initWindowClass(wndClassDesc))
 		return false;
-	if (!DXApp::InitWindow(appMainWnd, windowClass, mainWndTitle, 100, 100, 800, 600))
+	if (!windowsManager.initWindow(L"MainWindow",wndDesc))
 		return false;
-	if (!DXApp::InitDirectX3D())
+	else
+		mainWndHwnd = windowsManager.getHwnd(L"MainWindow");
+	if (!DxApp::InitDirectX3D())
 		return false;
 	Resize();
 
@@ -172,7 +197,7 @@ void RenderApp::RenderLoop()
 // 窗口大小重新适配
 void RenderApp::Resize()
 {
-	DXApp::Resize();
+	DxApp::Resize();
 
 	// 设置视口
 	screenViewport.Height = static_cast<float>(clientHeight);
@@ -272,103 +297,17 @@ void RenderApp::Draw(const GameTimer& GTimer)
 }
 
 // 处理键盘输入
-void RenderApp::KeyboardMsgProc(UINT msg, WPARAM wParam, LPARAM lParam)
+void RenderApp::KeyboardMsgProc(UINT vk, bool pressed)
 {
-	// W : 前进 
-	// S : 后退 
-	// A : 左移 
-	// D : 右移 
-	// R : 上升 
-	// F : 下降
-	// Q : 逆时针旋转
-	// E : 顺时针旋转
-	// 1 : 切换线框模式
-	if (msg == WM_KEYDOWN)
-	{
-		// 检测当前按键消息是否是“按住产生的重复键”
-		bool isRepeat = (lParam & 0x40000000) != 0;
-		if (isRepeat)
-			return;
+	keyDown[vk] = pressed;
 
-		switch (wParam)
-		{
-		case 'W':
-			isMoving = true;
-			moveDirection.z += 1;
-			break;
-		case 'S':
-			isMoving = true;
-			moveDirection.z -= 1;
-			break;
-		case 'A':
-			isMoving = true;
-			moveDirection.x -= 1;
-			break;
-		case 'D':
-			isMoving = true;
-			moveDirection.x += 1;
-			break;
-		case 'R':
-			isMoving = true;
-			moveDirection.y += 1;
-			break;
-		case 'F':
-			isMoving = true;
-			moveDirection.y -= 1;
-			break;
-		case 'Q':
-			isRolling = true;
-			rollingDirection -= 1;
-			break;
-		case 'E':
-			isRolling = true;
-			rollingDirection += 1;
-			break;
-		case '1':
-			isWireframeEnabled = !isWireframeEnabled;
-			break;
-		default:
-			break;
-		}
-	}
-	else if (msg == WM_KEYUP)
-	{
-		switch (wParam)
-		{
-		case 'W':
-			moveDirection.z -= 1;
-			break;
-		case 'S':
-			moveDirection.z += 1;
-			break;
-		case 'A':
-			moveDirection.x += 1;
-			break;
-		case 'D':
-			moveDirection.x -= 1;
-			break;
-		case 'R':
-			moveDirection.y -= 1;
-			break;
-		case 'F':
-			moveDirection.y += 1;
-			break;
-		case 'Q':
-			rollingDirection += 1;
-			break;
-		case 'E':
-			rollingDirection -= 1;
-			break;
-		default:
-			break;
-		}
-        const float len = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&moveDirection)));
-        if (len < 1e-3f) 
-			isMoving = false;
-        if (fabsf(rollingDirection) < 1e-3f) 
-			isRolling = false;
-	}
+	if (vk == VK_ESCAPE && pressed)
+		PostQuitMessage(0);
+
+	if (vk == '1' && pressed)
+		isWireframeEnabled = !isWireframeEnabled;
 }
+
 // 当鼠标按下时调用
 void RenderApp::MouseDown(WPARAM ButtonState, int x, int y)
 {
@@ -487,7 +426,7 @@ void RenderApp::BuildRootSignature()
 	slotRootParameter[3].InitAsDescriptorTable(1, &textureSrvRange, D3D12_SHADER_VISIBILITY_PIXEL);	// 描述符表 存储一系列描述符范围
 	slotRootParameter[4].InitAsDescriptorTable(1, &skycubeSrvRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	auto staticSamplers = DXBase::GetStaticSamplers();
+	auto staticSamplers = DxUtil::GetStaticSamplers();
 
 	CD3DX12_ROOT_SIGNATURE_DESC RootSignatureDesc(
 		numSlotRootParams,
@@ -615,11 +554,11 @@ void RenderApp::BuildDescriptorHeaps()
 // 编译着色器
 void RenderApp::BuildShaders()
 {
-	shaders["VS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_Common.hlsl", nullptr, "VS", "vs_5_1");
-	shaders["PS"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Fragment.hlsl", nullptr, "PS", "ps_5_1");
-	shaders["VS_Wave"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Vertex_AniWave.hlsl", nullptr, "WaveVS", "vs_5_1");
-	shaders["VS_Skycube"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Skycube.hlsl", nullptr, "SkycubeVS", "vs_5_1");
-	shaders["PS_Skycube"] = DXBase::CompileShaderOnline(L"..\\Shaders\\Skycube.hlsl", nullptr, "SkycubePS", "ps_5_1");
+	shaders["VS"] = DxUtil::CompileShaderOnline(L"..\\Shaders\\Vertex_Common.hlsl", nullptr, "VS", "vs_5_1");
+	shaders["PS"] = DxUtil::CompileShaderOnline(L"..\\Shaders\\Fragment.hlsl", nullptr, "PS", "ps_5_1");
+	shaders["VS_Wave"] = DxUtil::CompileShaderOnline(L"..\\Shaders\\Vertex_AniWave.hlsl", nullptr, "WaveVS", "vs_5_1");
+	shaders["VS_Skycube"] = DxUtil::CompileShaderOnline(L"..\\Shaders\\Skycube.hlsl", nullptr, "SkycubeVS", "vs_5_1");
+	shaders["PS_Skycube"] = DxUtil::CompileShaderOnline(L"..\\Shaders\\Skycube.hlsl", nullptr, "SkycubePS", "ps_5_1");
 }
 // 创建输入布局
 void RenderApp::BuildInputLayout()
@@ -711,8 +650,8 @@ void RenderApp::BuildMeshGeometry()
 	ThrowIfFailed(D3DCreateBlob(indexBufferByteSize, &Geo->indexBufferCPU));
 	CopyMemory(Geo->indexBufferCPU->GetBufferPointer(), indices.data(), indexBufferByteSize);
 
-	Geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), vertices.data(), vertexBufferByteSize, Geo->vertexBufferUploader);
-	Geo->indexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), indices.data(), indexBufferByteSize, Geo->indexBufferUploader);
+	Geo->vertexBufferGPU = DxUtil::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), vertices.data(), vertexBufferByteSize, Geo->vertexBufferUploader);
+	Geo->indexBufferGPU = DxUtil::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), indices.data(), indexBufferByteSize, Geo->indexBufferUploader);
 
 	Geo->vertexByteStride = sizeof(VertexConstants);
 	Geo->vertexBufferByteSize = vertexBufferByteSize;
@@ -758,8 +697,8 @@ void RenderApp::BuildImportedGeometryFromOBJ()
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->indexBufferCPU));
 	CopyMemory(geo->indexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-	geo->vertexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), vertices.data(), vbByteSize, geo->vertexBufferUploader);
-	geo->indexBufferGPU = DXBase::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), indices.data(), ibByteSize, geo->indexBufferUploader);
+	geo->vertexBufferGPU = DxUtil::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), vertices.data(), vbByteSize, geo->vertexBufferUploader);
+	geo->indexBufferGPU = DxUtil::CreateDefaultBuffer(d3dDevice.Get(), commandList.Get(), indices.data(), ibByteSize, geo->indexBufferUploader);
 
 	geo->vertexByteStride = sizeof(VertexConstants);
 	geo->vertexBufferByteSize = vbByteSize;
@@ -1114,17 +1053,31 @@ void RenderApp::BuildPSOs()
 
 void RenderApp::UpdateCameraState(const GameTimer& GTimer)
 {
-	if (isMoving)
+	cameraMotionParam.moveDirection = { 0,0,0 };
+	cameraMotionParam.rollingDirection = 0;
+
+	if (keyDown['W']) cameraMotionParam.moveDirection.z += 1;
+	if (keyDown['S']) cameraMotionParam.moveDirection.z -= 1;
+	if (keyDown['A']) cameraMotionParam.moveDirection.x -= 1;
+	if (keyDown['D']) cameraMotionParam.moveDirection.x += 1;
+	if (keyDown['R']) cameraMotionParam.moveDirection.y += 1;
+	if (keyDown['F']) cameraMotionParam.moveDirection.y -= 1;
+
+	if (keyDown['Q']) cameraMotionParam.rollingDirection -= 1;
+	if (keyDown['E']) cameraMotionParam.rollingDirection += 1;
+
+	if (DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&cameraMotionParam.moveDirection))) > 1e-3f)
 	{
 		float deltaTime = GTimer.DeltaTime();
-		camera.moveForward_Backward(deltaTime * moveDirection.z * moveSpeed);
-		camera.moveRight_left(deltaTime * moveDirection.x * moveSpeed);
-		camera.fly_drop(deltaTime * moveDirection.y * moveSpeed);
+		camera.moveForward_Backward(deltaTime * cameraMotionParam.moveDirection.z * cameraMotionParam.moveSpeed);
+		camera.moveRight_left(deltaTime * cameraMotionParam.moveDirection.x * cameraMotionParam.moveSpeed);
+		camera.fly_drop(deltaTime * cameraMotionParam.moveDirection.y * cameraMotionParam.moveSpeed);
+		camera.rotate(deltaTime * cameraMotionParam.rollingDirection * cameraMotionParam.rollingSpeed, 0.0f, 0.0f);
 	}
-	else if (isRolling)
+	else if (fabsf(cameraMotionParam.rollingDirection) > 1e-3f)
 	{
 		float deltaTime = GTimer.DeltaTime();
-		camera.rotate(deltaTime * rollingDirection * rollingSpeed,0.0f,0.0f);
+		camera.rotate(deltaTime * cameraMotionParam.rollingDirection * cameraMotionParam.rollingSpeed,0.0f,0.0f);
 	}
 }
 
@@ -1204,7 +1157,7 @@ void RenderApp::UpdatePassConstBuffers()
 // 绘制渲染项
 void RenderApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<std::unique_ptr<RenderItem>>& renderItems)const
 {
-	UINT objectConstBufferByteSize = DXBase::ConstUploadBufferByteSize256Alignment(sizeof(ObjectConstants));
+	UINT objectConstBufferByteSize = DxUtil::ConstUploadBufferByteSize256Alignment(sizeof(ObjectConstants));
 	auto objectConstBuffer = currentFrameResource->objectConstBuffer->Resource();
 
 	for (const auto& item : renderItems)
@@ -1221,7 +1174,7 @@ void RenderApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const st
 }
 
 // 获取指向MyApp类自身的指针
-const RenderApp* RenderApp::GetMyApp()const
+const RenderApp* RenderApp::getAppPtr()const
 {
 	return this;
 }
