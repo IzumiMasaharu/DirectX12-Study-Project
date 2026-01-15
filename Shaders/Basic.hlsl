@@ -12,73 +12,102 @@
 #define NUM_SPOT_LIGHTS 0
 #endif
 
-#include "Light.hlsl"
+struct Light
+{
+    float3 rgbIntensity;
+    float start;
+    float3 direction;
+    float end;
+    float3 position;
+    float spotPower;
+};
 
-static const uint MAT_USE_NO_MAP = 0;
-static const uint MAT_USE_ALBEDO_MAP = 1 << 0;
-static const uint MAT_USE_NORMAL_MAP = 1 << 1;
-static const uint MAT_USE_DEPTH_MAP = 1 << 2;
+static const uint MAT_USE_NO_MAP      = 0;
+static const uint MAT_USE_ALBEDO_MAP  = 1 << 0;
+static const uint MAT_USE_NORMAL_MAP  = 1 << 1;
+static const uint MAT_USE_DEPTH_MAP   = 1 << 2;
 
-Texture2D gTextures[16] : register(t0, space0);
-StructuredBuffer<MaterialData> materialBuffer : register(t0, space1);
-
-SamplerState gsamPointWrap : register(s0);
-SamplerState gsamPointClamp : register(s1);
-SamplerState gsamLinearWrap : register(s2);
-SamplerState gsamLinearClamp : register(s3);
-SamplerState gsamAnisotropicWrap : register(s4);
+SamplerState gsamPointWrap        : register(s0);
+SamplerState gsamPointClamp       : register(s1);
+SamplerState gsamLinearWrap       : register(s2);
+SamplerState gsamLinearClamp      : register(s3);
+SamplerState gsamAnisotropicWrap  : register(s4);
 SamplerState gsamAnisotropicClamp : register(s5);
 
-cbuffer cbPerObject : register(b0)
+struct MaterialData
 {
-	float4x4 worldTransform;		// 物体世界变换矩阵
-	float4x4 normalMatrix;			// 法线变换矩阵
-	float4x4 gTextureTransform;		// 纹理变换矩阵
-	uint4 packedDiffuseTextureIndex[MAX_BINDING_TEXTURE/4];
-	uint4 packedNormalTextureIndex[MAX_BINDING_TEXTURE/4];
-	uint4 packedDepthTextureIndex[MAX_BINDING_TEXTURE/4];
-	uint materialIndex;
-	uint textureFlags;
-}
-cbuffer cbPass : register(b1)
+    float4  	albedo;
+    float3  	fresnel;
+    float   	roughness;
+    float3  	emissive;
+    float   	padding0;
+    float4x4 	materialTransform; // TODO: FIX-在光照计算时没有使用
+};
+StructuredBuffer<MaterialData> materialDataBuffer : register(t0, space1);
+
+Texture2D textures[] : register(t0, space0);
+struct TextureTable
 {
-	float4x4 gView;					// 摄像机视图矩阵
-	float4x4 gInvView;				// 视图矩阵的逆矩阵
-	float4x4 gProj;					// 投影（至显示屏幕）矩阵
-	float4x4 gInvProj;				// 投影矩阵的逆矩阵
-	float4x4 gViewProj;				// 视图投影矩阵
-	float4x4 gInvViewProj;			// 视图投影矩阵的逆矩阵
-	float3 gEyePosW;				// 摄像机位置坐标
-	float cbPerObjectPad1;			// 填充字节以保证16字节对齐
-	float2 gRenderTargetSize;		// 渲染目标的大小
-	float2 gInvRenderTargetSize;	// 渲染目标大小的倒数
-	float gNearZ;					// 近视平面
-	float gFarZ;					// 远视平面
-	float gTotalTime;				// 程序运行总时间
-	float gDeltaTime;				// 两次tick之间的时间差
-	float4 gAmbientIlluminating;	// 物体自身发光
+    uint diffuseIndex;
+    uint normalIndex;
+    uint depthIndex;
+    uint padding0;
+};
+StructuredBuffer<TextureTable> textureTableBuffer : register(t1, space1);
 
-	Light gLights[MAX_NUM_LIGHTS];
+struct InstanceData
+{
+    float4x4 worldTransform;
+    float4x4 textureTransform;
+
+    uint materialIndex;
+    uint textureTableIndex;
+    uint textureFlags;
+    uint padding;
+};
+StructuredBuffer<InstanceData> instanceDataBuffer : register(t2, space1);
+
+cbuffer cbPass : register(b0)
+{
+    float4x4 gView;
+    float4x4 gInvView;
+    float4x4 gProj;
+    float4x4 gInvProj;
+    float4x4 gViewProj;
+    float4x4 gInvViewProj;
+
+    float3 gEyePosW;
+    float  cbPerObjectPad1;
+
+    float2 gRenderTargetSize;
+    float2 gInvRenderTargetSize;
+
+    float gNearZ;
+    float gFarZ;
+    float gTotalTime;
+    float gDeltaTime;
+
+    float4 gAmbientIlluminating;
+
+    Light gLights[MAX_NUM_LIGHTS];
 }
 
-// 输入顶点数据
+
 struct VertexIn
 {
-	float3 pos      : POSITION;
-	float3 normal   : NORMAL;
-	float3 tangent : TANGENT;
-	float2 texCoord : TEXCOORD;		
-};
-// 输出顶点数据
-struct VertexOut
-{
-	float4 posH     : SV_POSITION;	// 屏幕空间坐标
-	float3 posW     : POSITION;		// 世界空间坐标
-	float3 normalW  : NORMAL;		// 世界空间法线
-	float3 tangentW : TANGENT;		// 世界空间切线
-	float2 texCoord : TEXCOORD;
+    float3 pos      : POSITION;
+    float3 normal   : NORMAL;
+    float3 tangent  : TANGENT;
+    float2 texCoord : TEXCOORD;
 };
 
-static uint diffuseTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedDiffuseTextureIndex;
-static uint normalTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedNormalTextureIndex; 
-static uint depthTextureIndex[MAX_BINDING_TEXTURE] = (uint[MAX_BINDING_TEXTURE])packedDepthTextureIndex;
+struct VertexOut
+{
+    float4 posH      : SV_POSITION;
+    float3 posW      : POSITION;
+    float3 normalW   : NORMAL;
+    float3 tangentW  : TANGENT;
+    float2 texCoord  : TEXCOORD;
+
+    nointerpolation uint materialIndex : MATINDEX;
+};

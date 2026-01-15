@@ -1,4 +1,5 @@
 #include "Basic.hlsl"
+
 TextureCube gSkycubeMap : register(t0, space2);
 // 输入顶点数据
 struct SkycubeVertexIn

@@ -67,11 +67,11 @@ float4 PS(VertexOut pin) : SV_Target
     float disToEye = length(toEyeW);
     toEyeW /= disToEye; // 复用 disToEye
     
-    MaterialData material = materialBuffer[materialIndex];
+    MaterialData material = materialDataBuffer[pin.materialIndex];
     
-    if(textureFlags & MAT_USE_DEPTH_MAP)
+    if(pin.textureFlags & MAT_USE_DEPTH_MAP)
     {
-        Texture2D heightMap = gTextures[depthTextureIndex[0]];
+        Texture2D heightMap = textures[textureTableBuffer[pin.textureTableIndex].depthIndex];
 
         // TBN 与切空间视线
         float3x3 TBN = BuildTBN(pin.normalW, pin.tangentW);
@@ -90,16 +90,16 @@ float4 PS(VertexOut pin) : SV_Target
         }
     }
 
-    if(textureFlags & MAT_USE_ALBEDO_MAP)
+    if(pin.textureFlags & MAT_USE_ALBEDO_MAP)
     {
-        material.albedo *= gTextures[diffuseTextureIndex[0]].Sample(gsamAnisotropicWrap, pin.texCoord);
+        material.albedo *= textures[textureTableBuffer[pin.textureTableIndex].diffuseIndex].Sample(gsamAnisotropicWrap, pin.texCoord);
     }
     
-    if(textureFlags & MAT_USE_NORMAL_MAP)
+    if(pin.textureFlags & MAT_USE_NORMAL_MAP)
     {
         // 优化的 TBN 变换
         float3 bitangent = cross(pin.normalW, pin.tangentW);
-        float3 normalTex = gTextures[normalTextureIndex[0]].Sample(gsamAnisotropicWrap, pin.texCoord).rgb;
+        float3 normalTex = textures[textureTableBuffer[pin.textureTableIndex].normalIndex].Sample(gsamAnisotropicWrap, pin.texCoord).rgb;
         normalTex = normalTex * 2.0f - 1.0f;
         
         // 直接展开矩阵乘法

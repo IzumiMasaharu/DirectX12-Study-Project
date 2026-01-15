@@ -1,16 +1,6 @@
 #define MAX_NUM_LIGHTS 256
 
-#include "MaterialData.hlsl"
-
-struct Light
-{
-    float3 rgbIntensity;
-    float start;
-    float3 direction;
-    float end;
-    float3 position;
-    float spotPower;
-};
+#include "Basic.hlsl"
 
 // 光学计算方法
 // 计算线性衰减因子
