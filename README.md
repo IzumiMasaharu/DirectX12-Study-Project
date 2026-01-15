@@ -1,4 +1,4 @@
-# DirectX12 Study Project
+# Mayohoshi Render (DirectX12 Study Project)
 
 According to the Dragon-Book(3D Game Programming With DirectX 12),the project has implemented the Ch.10.
 
@@ -14,10 +14,10 @@ According to the Dragon-Book(3D Game Programming With DirectX 12),the project ha
 - Ch.15 Class_Camera Dynamic_Index
 - Ch.19 Normal_Mapping
 - Ch.18 Skycube
+- Ch.19 Displacement_Mapping
 
 ## TODO:
 - Ch.18 Dynamic_Texture
-- Ch.19 Displacement_Mapping
 - Ch.22 Quaternion
 - Ch.21 AO/SSAO
 - Ch.20 Shadowmapping
