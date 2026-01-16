@@ -28,7 +28,6 @@ struct MaterialData
     float               roughness = 0.0f;
     DirectX::XMFLOAT3   emissive = { 0,0,0 };
     float               padding0;
-    DirectX::XMFLOAT4X4 materialTransform = MathHelper::Identity4x4();
 };
 
 // 与着色器绑定的纹理表结构体

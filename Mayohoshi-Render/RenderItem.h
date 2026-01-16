@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "DxUtil.h"
 const UINT gNumFrameResources = 3;	// 程序所用帧资源总数
 
 struct RenderItem

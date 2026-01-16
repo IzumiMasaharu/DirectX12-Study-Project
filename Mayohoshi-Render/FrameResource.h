@@ -3,6 +3,8 @@
 #include "ShaderResource.h"
 #include "UploadBuffer.h"
 
+const UINT gNumFrameResources = 3;	// 程序所用帧资源总数
+
 // 帧资源
 struct FrameResource
 {

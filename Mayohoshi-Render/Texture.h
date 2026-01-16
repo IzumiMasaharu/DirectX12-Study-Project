@@ -23,22 +23,15 @@ enum class TextureType : uint32_t
 
 inline TextureType operator|(TextureType a, TextureType b)
 {
-	return static_cast<TextureType>(
-		static_cast<uint32_t>(a) |
-		static_cast<uint32_t>(b)
-		);
+	return static_cast<TextureType>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
 
 inline TextureType operator&(TextureType a, TextureType b)
 {
-	return static_cast<TextureType>(
-		static_cast<uint32_t>(a) &
-		static_cast<uint32_t>(b)
-		);
+	return static_cast<TextureType>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 }
 
 inline bool HasFlag(TextureType value, TextureType flag)
 {
-	return (static_cast<uint32_t>(value) &
-		static_cast<uint32_t>(flag)) != 0;
+	return (static_cast<uint32_t>(value) & static_cast<uint32_t>(flag)) != 0;
 }

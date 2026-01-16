@@ -663,7 +663,7 @@ void RenderApp::BuildMeshGeometry()
 	Geo->submeshList[Geo_Ball.name] = Geo_Ball;
 	Geo->submeshList[Geo_Gird.name] = Geo_Gird;
 
-	geos[Geo->name] = std::move(Geo);
+	meshes[Geo->name] = std::move(Geo);
 }
 void RenderApp::BuildImportedGeometryFromOBJ()
 {
@@ -713,7 +713,7 @@ void RenderApp::BuildImportedGeometryFromOBJ()
 	nailongSubMesh.indexCount = (UINT)indices.size();
 
 	geo->submeshList[nailongSubMesh.name] = nailongSubMesh;
-	geos[geo->name] = std::move(geo);
+	meshes[geo->name] = std::move(geo);
 }
 // 创建材质
 void RenderApp::BuildMaterials()
@@ -809,28 +809,28 @@ void RenderApp::BuildRenderItems()
 	// 不透明渲染项
 	{
 		auto cylinderRenderItem = std::make_unique<RenderItem>();
-		cylinderRenderItem->Geo = geos["Geo"].get();
+		cylinderRenderItem->Geo = meshes["Geo"].get();
 		cylinderRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		cylinderRenderItem->indexCount = cylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexCount;
 		cylinderRenderItem->indexStartLocation = cylinderRenderItem->Geo->submeshList["Geo_Cylinder"].indexStartLocation;
 		cylinderRenderItem->vertexBaseLocation = cylinderRenderItem->Geo->submeshList["Geo_Cylinder"].vertexBaseLocation;
 
 		auto ballRenderItem = std::make_unique<RenderItem>();
-		ballRenderItem->Geo = geos["Geo"].get();
+		ballRenderItem->Geo = meshes["Geo"].get();
 		ballRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		ballRenderItem->indexCount = ballRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
 		ballRenderItem->indexStartLocation = ballRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
 		ballRenderItem->vertexBaseLocation = ballRenderItem->Geo->submeshList["Geo_Ball"].vertexBaseLocation;
 
 		auto floorRenderItem = std::make_unique<RenderItem>();
-		floorRenderItem->Geo = geos["Geo"].get();
+		floorRenderItem->Geo = meshes["Geo"].get();
 		floorRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		floorRenderItem->indexCount = floorRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
 		floorRenderItem->indexStartLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;
 		floorRenderItem->vertexBaseLocation = floorRenderItem->Geo->submeshList["Geo_Gird"].vertexBaseLocation;
 
 		auto nailongRenderItem = std::make_unique<RenderItem>();
-		nailongRenderItem->Geo = geos["objGeo"].get();
+		nailongRenderItem->Geo = meshes["objGeo"].get();
 		nailongRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		nailongRenderItem->indexCount = nailongRenderItem->Geo->submeshList["Nailong"].indexCount;
 		nailongRenderItem->indexStartLocation = nailongRenderItem->Geo->submeshList["Nailong"].indexStartLocation;
@@ -845,7 +845,7 @@ void RenderApp::BuildRenderItems()
 	// 天空盒渲染项
 	{
 		auto skyboxRenderItem = std::make_unique<RenderItem>();
-		skyboxRenderItem->Geo = geos["Geo"].get();
+		skyboxRenderItem->Geo = meshes["Geo"].get();
 		skyboxRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		skyboxRenderItem->indexCount = skyboxRenderItem->Geo->submeshList["Geo_Ball"].indexCount;
 		skyboxRenderItem->indexStartLocation = skyboxRenderItem->Geo->submeshList["Geo_Ball"].indexStartLocation;
@@ -857,7 +857,7 @@ void RenderApp::BuildRenderItems()
 	// 透明渲染项
 	{
 		auto waveRenderItem = std::make_unique<RenderItem>();
-		waveRenderItem->Geo = geos["Geo"].get();
+		waveRenderItem->Geo = meshes["Geo"].get();
 		waveRenderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		waveRenderItem->indexCount = waveRenderItem->Geo->submeshList["Geo_Gird"].indexCount;
 		waveRenderItem->indexStartLocation = waveRenderItem->Geo->submeshList["Geo_Gird"].indexStartLocation;

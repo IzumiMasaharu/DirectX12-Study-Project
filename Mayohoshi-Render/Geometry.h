@@ -64,5 +64,5 @@ public:
     UINT indexBufferByteSize = 0; // 索引缓冲区大小
     DXGI_FORMAT indexFormat = DXGI_FORMAT_R16_UINT; // 资源格式
 
-    std::unordered_map<std::string, SubmeshGeometry> submeshList; // 将全部网格体拆分为若干单个网格体，存储到无序图中
+    std::unordered_map<std::string, SubmeshGeometry> submeshList; // 将整个网格体拆分为若干单个网格体，存储到无序图中
 };

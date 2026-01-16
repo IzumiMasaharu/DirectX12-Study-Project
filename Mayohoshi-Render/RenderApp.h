@@ -55,7 +55,7 @@ private:
 	};
 	ResizeInfoForRenderThread resizeInfo;
 
-	RenderSourceManager renderSourceManager;
+	RenderResourceManager renderSourceManager;
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;	// 根签名
 
@@ -65,7 +65,7 @@ private:
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> shaders;			// 储存着色器的无序图 
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> PSOs;	// 储存不同PSO的无序图
 
-	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> geos;				// 储存几何网格体的无序图
+	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> meshes;				// 储存几何网格体的无序图
 	std::unordered_map<std::string, std::unique_ptr<Material>> materials;				// 存储材质的无序图
 	std::unordered_map<std::string, std::unique_ptr<Texture>> textures;					// 存储纹理的无序图
 

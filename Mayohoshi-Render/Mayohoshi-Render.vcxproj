@@ -141,10 +141,14 @@
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
+    <ClCompile Include="GraphicsDeviceManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MotionParam.h" />
+    <ClCompile Include="PipelineResourceManager.cpp" />
     <ClCompile Include="RenderApp.cpp" />
     <ClCompile Include="DDSTextureLoader.h" />
+    <ClCompile Include="RenderResourceManager.cpp" />
+    <ClCompile Include="RenderSceneManager.cpp" />
     <ClCompile Include="WindowsManager.cpp" />
     <ClCompile Include="WindowsManager.h" />
   </ItemGroup>
@@ -157,6 +161,7 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GeometryGenerator.h" />
+    <ClInclude Include="GraphicsDeviceManager.h" />
     <ClInclude Include="HandlerWndMsgProc.h" />
     <ClInclude Include="InstanceManager.h" />
     <ClInclude Include="Light.h" />
@@ -166,6 +171,7 @@
     <ClInclude Include="RenderApp.h" />
     <ClInclude Include="RenderItem.h" />
     <ClInclude Include="RenderResourceManager.h" />
+    <ClInclude Include="RenderSceneManager.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderResource.h" />
     <ClInclude Include="Texture.h" />

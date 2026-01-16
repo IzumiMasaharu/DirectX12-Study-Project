@@ -41,7 +41,6 @@ struct MaterialData
     float   	roughness;
     float3  	emissive;
     float   	padding0;
-    float4x4 	materialTransform; // TODO: FIX-在光照计算时没有使用
 };
 StructuredBuffer<MaterialData> materialDataBuffer : register(t0, space1);
 
