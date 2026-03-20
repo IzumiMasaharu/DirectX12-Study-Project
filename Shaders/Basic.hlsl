@@ -40,9 +40,10 @@ struct MaterialData
     float3  	fresnel;
     float   	roughness;
     float3  	emissive;
-    float   	padding0;
+    float   	renderLayer;
+    float       textureTableIndex;
 };
-StructuredBuffer<MaterialData> materialDataBuffer : register(t0, space1);
+StructuredBuffer<MaterialData> materialDataPool : register(t0, space1);
 
 Texture2D textures[] : register(t0, space0);
 struct TextureTable
@@ -52,17 +53,16 @@ struct TextureTable
     uint depthIndex;
     uint padding0;
 };
-StructuredBuffer<TextureTable> textureTableBuffer : register(t1, space1);
+StructuredBuffer<TextureTable> textureTablePool : register(t1, space1);
 
 struct InstanceData
 {
     float4x4 worldTransform;
-    float4x4 textureTransform;
 
     uint materialIndex;
-    uint textureTableIndex;
-    uint textureFlags;
-    uint padding;
+    uint padding0;
+    uint padding1;
+    uint padding2;
 };
 StructuredBuffer<InstanceData> instanceDataBuffer : register(t2, space1);
 

@@ -13,6 +13,8 @@ public:
 	UINT instanceBufferOffset = 0;				// 实例在缓冲区中的起始偏移
 	
 	MeshGeometry* Geo = nullptr;				// 该渲染项所使用的网格体集
+
+	RenderLayer renderLayer = RenderLayers::Opaque;     // 渲染层
 	D3D12_PRIMITIVE_TOPOLOGY primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;	// 指定渲染项的图元拓扑格式
 
 	// 以下三个变量均与Geo所绑定的网格体相关

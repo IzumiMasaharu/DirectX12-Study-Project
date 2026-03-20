@@ -1,132 +1,82 @@
 #pragma once
 
-#include "DxUtil.h"
 #include "RenderResourceManager.h"
 #include "RenderItem.h"
+#include <DirectXMath.h>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-enum class RenderItemType
+struct RenderItemDesc
 {
-	OpaqueRenderItem,
-	TransparentRenderItem,
-	SkycubeRenderItem,
+    std::string name;
+    std::string geoName;
+    std::string submeshName;
+	RenderLayer renderLayer = RenderLayers::Opaque;
 };
 
-struct RenderItemAttributes
+struct InstanceDesc
 {
-	std::string renderItemName;
-	std::string geoName;
-	std::string submeshName;
-	D3D12_PRIMITIVE_TOPOLOGY primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	RenderItemType type;
+    DirectX::XMFLOAT4X4 worldTransform = MathHelper::Identity4x4();
+	std::string materialName;
 };
 
 class RenderSceneManager
 {
 public:
-	RenderSceneManager() = default;
-	~RenderSceneManager() = default;
-private:
-	RenderScene renderScene;
-};
+    RenderSceneManager() = default;
+    ~RenderSceneManager() = default;
 
-class RenderScene
-{
-	friend class RenderItemManager;
-	friend class InstanceManager;
-public:
-	RenderScene() = default;
-	~RenderScene() = default;
-protected:
-	bool addRenderItem(RenderItemType type, std::unique_ptr<RenderItem> renderItem)
-	{
-		switch (type)
-		{
-		case RenderItemType::OpaqueRenderItem:
-			renderItemManager.addOpaqueRenderItem(std::move(renderItem));
-			break;
-		case RenderItemType::SkycubeRenderItem:
-			skycubeRenderItem.push_back(std::move(renderItem));
-			allRenderItems.push_back(skycubeRenderItem.back().get());
-			break;
-		case RenderItemType::TransparentRenderItem:
-			transparentRenderItems.push_back(std::move(renderItem));
-			allRenderItems.push_back(transparentRenderItems.back().get());
-			break;
-		default:
-			return false;
-		}
+    RenderItem* createRenderItem(const RenderItemDesc& desc, const RenderResourceManager& resourceManager);
+    bool removeRenderItem(const std::string& name);
 
-		return true;
-	}
-	bool addInstanceData(const InstanceData& instanceData)
-	{
-		instancePool.instanceDatas.push_back(instanceData);
-		return true;
-	}
+    RenderItem* getRenderItem(const std::string& name);
+
+    bool addInstance(const std::string& renderItemName, const InstanceDesc& instanceDesc);
+    bool clearInstances(const std::string& renderItemName);
+    void clearAllInstances();
+
+    // 每帧绘制前调用：构建排序结果（可选地对透明层实例排序）
+    void buildRenderQueue(const DirectX::XMFLOAT3& cameraPos, bool sortTransparentInstances = true);
+
+    const std::vector<RenderItem*>& getSortedRenderItems() const { return sortedRenderItems; }
+    const std::vector<RenderItem*>& getRenderItemsByLayer(RenderLayer layer) const;
+
+    void forEachRenderItem(const std::function<void(RenderItem*, RenderLayer)>& callback) const;
+
+    void clear();
+
+    size_t getRenderItemCount() const { return renderItems.size(); }
+    size_t getTotalInstanceCount() const;
 
 private:
-	RenderItemLibrary renderItemManager;
-	InstancePool instancePool;
-};
+    struct SortEntry
+    {
+        RenderItem* item = nullptr;
+        RenderLayer layer = RenderLayers::Opaque;
+        float distanceSq = 0.0f;
+        uint64_t createOrder = 0;
+    };
 
-class RenderItemLibrary
-{
-	friend class RenderScene;
+    static DirectX::XMFLOAT3 extractTranslation(const DirectX::XMFLOAT4X4& m);
+    static float calcDistanceSq(const DirectX::XMFLOAT3& a, const DirectX::XMFLOAT3& b);
+    static float calcInstanceDistanceSq(const InstanceData& instance, const DirectX::XMFLOAT3& cameraPos);
+    static float calcItemDistanceSq(const RenderItem& item, const DirectX::XMFLOAT3& cameraPos);
 
-public:
-	RenderItemLibrary() = default;
-	~RenderItemLibrary() = default;
-
-protected:
-	bool addOpaqueRenderItem(std::unique_ptr<RenderItem> renderItem)
-	{
-		opaqueRenderItems.push_back(std::move(renderItem));
-		allRenderItems.push_back(opaqueRenderItems.back().get());
-
-		return true;
-	}
-private:
-	std::vector<RenderItem*> allRenderItems;							// ������������Ⱦ��
-};
-
-class InstancePool
-{
-public:
-	InstancePool() = default;
-	~InstancePool() = default;
-
-
-public:
-	std::vector<InstanceData> instanceDatas;
-};
-
-class RenderItemManager
-{
-	friend class RenderSceneManager;
-public:
-	RenderItemManager() = default;
-	~RenderItemManager() = default;
-protected:
-	static bool buildRenderItem(RenderItemAttributes attributes, RenderScene& renderScene ,const RenderResourceManager& renderResourceManager)
-	{
-		auto renderItem = std::make_unique<RenderItem>();
-		renderItem->Geo = renderResourceManager.getMeshGeometry(attributes.geoName);
-		renderItem->primitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		renderItem->indexCount = renderItem->Geo->submeshList[attributes.submeshName].indexCount;
-		renderItem->indexStartLocation = renderItem->Geo->submeshList[attributes.submeshName].indexStartLocation;
-		renderItem->vertexBaseLocation = renderItem->Geo->submeshList[attributes.submeshName].vertexBaseLocation;
-
-		return renderScene.addRenderItem(attributes.type, std::move(renderItem));
-	}
+    RenderLayer resolveLayer(const RenderItem& item) const;
+    bool isTransparentLikeLayer(RenderLayer layer) const;
 
 private:
+    std::vector<std::unique_ptr<RenderItem>> renderItems;
+    std::vector<std::string> indexToName;
+    std::unordered_map<std::string, size_t> nameToIndex;
 
-};
+    std::vector<SortEntry> sortedEntries;
+    std::vector<RenderItem*> sortedRenderItems;
+    std::unordered_map<RenderLayer, std::vector<RenderItem*>> layerBuckets;
 
-class InstanceManager
-{
-public:
-	InstanceManager() = default;
-	~InstanceManager() = default;
-
+    uint64_t createSequence = 0;
 };

@@ -8,16 +8,24 @@
 #include <array>
 #include <Windows.h>
 
+// 与着色器绑定的纹理表结构体
+struct TextureTable
+{
+    UINT diffuseIndex;
+    UINT normalIndex;
+    UINT depthIndex;
+    UINT padding0;
+};
+
 // 与着色器绑定的世界视图投影矩阵
 struct InstanceData
 {
     DirectX::XMFLOAT4X4 worldTransform = MathHelper::Identity4x4();
-    DirectX::XMFLOAT4X4 textureTransform = MathHelper::Identity4x4();
 
-    UINT materialIndex;        // 对应 materialBuffer
-    UINT textureTableIndex;    // 指向 gTextureTables
-    UINT textureFlags;
-    UINT padding;              // 16字节对齐
+    UINT materialIndex;         // 对应 materialBuffer
+    UINT padding0;              // 16字节对齐
+    UINT padding1;              // 16字节对齐
+    UINT padding2;              // 16字节对齐
 };
 
 // 与着色器绑定的材质结构体
@@ -27,16 +35,8 @@ struct MaterialData
     DirectX::XMFLOAT3   fresnel;
     float               roughness = 0.0f;
     DirectX::XMFLOAT3   emissive = { 0,0,0 };
-    float               padding0;
-};
-
-// 与着色器绑定的纹理表结构体
-struct TextureTable
-{
-    UINT diffuseIndex;
-    UINT normalIndex;
-    UINT depthIndex;
-    UINT padding0;
+    float               renderLayer;
+    float               textureTableIndex;
 };
 
 // 与着色器绑定的渲染过程常量结构体

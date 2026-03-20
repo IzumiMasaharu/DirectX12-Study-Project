@@ -39,7 +39,7 @@ float GeometrySchlickGGX(float XdotY, float roughness)
     float k = ( 0.5 + roughness / 2.0f) * (0.5 + roughness / 2.0f) / 2.0f;
     return XdotY / (XdotY * (1.0f - k) + k);
 }
-// Disney-Smith 几何遮蔽函数
+// Disney-Smith GGX 几何遮蔽函数
 float GeometryDisneySmithGGX(float XdotY, float roughness)
 {
     float k = ( 0.5 + roughness / 2.0f) * (0.5 + roughness / 2.0f);

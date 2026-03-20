@@ -150,6 +150,7 @@ bool MaterialManager::createMaterial(
     auto mat = std::make_unique<Material>();
     mat->name = matDesc.name;
     mat->albedo = matDesc.albedo;
+	mat->opacity = matDesc.opacity;
     mat->metallic = matDesc.metallic;
     mat->roughness = matDesc.roughness;
     mat->ior = matDesc.ior;

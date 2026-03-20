@@ -3,6 +3,7 @@
 #include "DxUtil.h"
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
+#include "RenderLayer.h"
 #include <winnt.h>
 #include <string>
 #include <unordered_map>
@@ -257,12 +258,12 @@ protected:
     static GeometryGenerator::MeshData buildMeshData(const SubmeshGeometryParams& params);
 };
 
-
 struct MaterialDesc
 {
     std::string name;
 
-    DirectX::XMFLOAT4 albedo = { 1.0f,1.0f,1.0f,1.0f }; // 漫反射反照率
+    DirectX::XMFLOAT3 albedo = { 1.0f,1.0f,1.0f };      // 漫反射反照率
+	float opacity = 1.0f;                               // 透明度
     float metallic = 0.0f;								// 金属度
     float roughness = 0.0f;                             // 材质粗糙度
     float ior = 1.0f;									// 折射率
