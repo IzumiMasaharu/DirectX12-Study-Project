@@ -1,15 +1,12 @@
-#ifndef MAX_BINDING_TEXTURE
-#define MAX_BINDING_TEXTURE 8
+#ifndef MAYOHOSHI_BASIC_INCLUDED
+#define MAYOHOSHI_BASIC_INCLUDED
+
+#ifndef MAX_NUM_LIGHTS
+#define MAX_NUM_LIGHTS 256
 #endif
 
-#ifndef NUM_DIRECTIONAL_LIGHTS
-#define NUM_DIRECTIONAL_LIGHTS 1
-#endif
-#ifndef NUM_POINT_LIGHTS
-#define NUM_POINT_LIGHTS 1
-#endif
-#ifndef NUM_SPOT_LIGHTS
-#define NUM_SPOT_LIGHTS 0
+#ifndef MAX_BINDING_TEXTURE
+#define MAX_BINDING_TEXTURE 8
 #endif
 
 struct Light
@@ -41,9 +38,10 @@ struct MaterialData
     float   	roughness;
     float3  	emissive;
     float   	renderLayer;
-    float       textureTableIndex;
+    float3      padding;
+    float4x4    materialTransform;
 };
-StructuredBuffer<MaterialData> materialDataPool : register(t0, space1);
+StructuredBuffer<MaterialData> materialDataBuffer : register(t0, space1);
 
 Texture2D textures[] : register(t0, space0);
 struct TextureTable
@@ -53,16 +51,18 @@ struct TextureTable
     uint depthIndex;
     uint padding0;
 };
-StructuredBuffer<TextureTable> textureTablePool : register(t1, space1);
+StructuredBuffer<TextureTable> textureTableBuffer : register(t1, space1);
 
 struct InstanceData
 {
     float4x4 worldTransform;
+    float4x4 normalMatrix;
+    float4x4 textureTransform;
 
     uint materialIndex;
+    uint textureTableIndex;
+    uint textureFlags;
     uint padding0;
-    uint padding1;
-    uint padding2;
 };
 StructuredBuffer<InstanceData> instanceDataBuffer : register(t2, space1);
 
@@ -88,6 +88,11 @@ cbuffer cbPass : register(b0)
 
     float4 gAmbientIlluminating;
 
+    uint gDirectionalLightCount;
+    uint gPointLightCount;
+    uint gSpotLightCount;
+    uint gLightPadding0;
+
     Light gLights[MAX_NUM_LIGHTS];
 }
 
@@ -109,4 +114,8 @@ struct VertexOut
     float2 texCoord  : TEXCOORD;
 
     nointerpolation uint materialIndex : MATINDEX;
+    nointerpolation uint textureTableIndex : TEXINDEX;
+    nointerpolation uint textureFlags : TEXFLAGS;
 };
+
+#endif

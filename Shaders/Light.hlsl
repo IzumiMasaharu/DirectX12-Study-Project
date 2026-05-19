@@ -83,7 +83,7 @@ float3 reflectedLightColor(float3 rgbIntensity, float3 lightVector, float3 norma
 // 生成平行光
 float3 ComputeDirectionalLight(Light light,MaterialData material,float3 normal,float3 toEyeVector)
 {
-    float3 lightVector = -light.direction;
+    float3 lightVector = normalize(-light.direction);
     float3 lightIntensity = light.rgbIntensity * max(dot(lightVector, normal), 0.0f);
     
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
@@ -93,12 +93,13 @@ float3 ComputeDirectionalLight(Light light,MaterialData material,float3 normal,f
 float3 ComputePointLight(Light light, MaterialData material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = light.position - illuminatedPosition;
-    if (length(lightVector)>light.end)
-        return 0.0f;
-    lightVector /= length(lightVector);
+    float distanceToLight = length(lightVector);
+    if (distanceToLight > light.end || distanceToLight <= 0.001f)
+        return float3(0.0f, 0.0f, 0.0f);
+    lightVector /= distanceToLight;
     
     float3 lightIntensity = light.rgbIntensity;
-    lightIntensity *= CalculatorAttenuatiohn(length(lightVector), light.start, light.end);
+    lightIntensity *= CalculatorAttenuatiohn(distanceToLight, light.start, light.end);
     lightIntensity *= max(dot(lightVector, normal), 0.0f);
 
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
@@ -108,14 +109,15 @@ float3 ComputePointLight(Light light, MaterialData material,float3 illuminatedPo
 float3 ComputeSpotLight(Light light, MaterialData material,float3 illuminatedPosition,float3 normal,float3 toEyeVector)
 {
     float3 lightVector = -(illuminatedPosition - light.position);
-    if (length(lightVector) > light.end)
-        return 0.0f;
-    lightVector /= length(lightVector);
+    float distanceToLight = length(lightVector);
+    if (distanceToLight > light.end || distanceToLight <= 0.001f)
+        return float3(0.0f, 0.0f, 0.0f);
+    lightVector /= distanceToLight;
     
     float3 lightIntensity = light.rgbIntensity;
     lightIntensity *= max(dot(lightVector, normal), 0.0f);
-    lightIntensity *= pow(max(dot(-lightVector, light.direction), 0.0f), light.spotPower);
-    lightIntensity *= CalculatorAttenuatiohn(length(lightVector), light.start, light.end);
+    lightIntensity *= pow(max(dot(-lightVector, normalize(light.direction)), 0.0f), light.spotPower);
+    lightIntensity *= CalculatorAttenuatiohn(distanceToLight, light.start, light.end);
     
     return reflectedLightColor(lightIntensity, lightVector, normal, toEyeVector, material);
 }
@@ -124,22 +126,19 @@ float3 ComputeSpotLight(Light light, MaterialData material,float3 illuminatedPos
 float4 ComputeAllLights(Light lights[MAX_NUM_LIGHTS], MaterialData material,float3 illuminatedPosition,float3 normal,float3 toEyeVector,float3 shadowFactor)
 {
     float3 result = 0.0f;
-    int index = 0;
 
-#if (NUM_DIRECTIONAL_LIGHTS > 0)
-    for(index = 0; index < NUM_DIRECTIONAL_LIGHTS; ++index)
-        result += shadowFactor[index] * ComputeDirectionalLight(lights[index], material, normal, toEyeVector);
-#endif
+    uint index = 0;
+    uint lightEnd = min(gDirectionalLightCount, MAX_NUM_LIGHTS);
+    for (; index < lightEnd; ++index)
+        result += ComputeDirectionalLight(lights[index], material, normal, toEyeVector);
 
-#if (NUM_POINT_LIGHTS > 0)
-    for(index = NUM_DIRECTIONAL_LIGHTS; index < NUM_DIRECTIONAL_LIGHTS + NUM_POINT_LIGHTS; ++index)
+    lightEnd = min(index + gPointLightCount, MAX_NUM_LIGHTS);
+    for (; index < lightEnd; ++index)
         result += ComputePointLight(lights[index], material, illuminatedPosition, normal, toEyeVector);
-#endif
 
-#if (NUM_SPOT_LIGHTS > 0)
-    for(index = NUM_DIRECTIONAL_LIGHTS + NUM_POINT_LIGHTS; index < NUM_DIRECTIONAL_LIGHTS + NUM_POINT_LIGHTS + NUM_SPOT_LIGHTS; ++index)
+    lightEnd = min(index + gSpotLightCount, MAX_NUM_LIGHTS);
+    for (; index < lightEnd; ++index)
         result += ComputeSpotLight(lights[index], material, illuminatedPosition, normal, toEyeVector);
-#endif 
 
     return float4(result, 0.0f);
 }

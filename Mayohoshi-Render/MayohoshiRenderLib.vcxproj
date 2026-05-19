@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{7F20F437-B03B-4A06-A3B5-73323ED59F5B}</ProjectGuid>
+    <RootNamespace>MayohoshiRenderLib</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>MayohoshiRenderLib</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)lib\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\MayohoshiRenderLib\</IntDir>
+    <TargetName>MayohoshiRender</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Public;$(ProjectDir)Runtime;$(ProjectDir)D3D12;$(ProjectDir)Platform;$(ProjectDir)Scene;$(ProjectDir)RenderData;$(ProjectDir)Geometry;$(ProjectDir)WinResources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="D3D12\DDSTextureLoader.cpp" />
+    <ClCompile Include="D3D12\MathUtilities.cpp" />
+    <ClCompile Include="D3D12\D3D12Utility.cpp" />
+    <ClCompile Include="D3D12\GraphicsDeviceManager.cpp" />
+    <ClCompile Include="Geometry\GeometryGenerator.cpp" />
+    <ClCompile Include="Platform\D3D12RenderHost.cpp" />
+    <ClCompile Include="Platform\GameTimer.cpp" />
+    <ClCompile Include="Platform\WindowsManager.cpp" />
+    <ClCompile Include="RenderData\DescriptorHeapManager.cpp" />
+    <ClCompile Include="RenderData\FrameResource.cpp" />
+    <ClCompile Include="RenderData\PipelineResourceManager.cpp" />
+    <ClCompile Include="RenderData\RenderResourceManager.cpp" />
+    <ClCompile Include="Runtime\MayohoshiRender.cpp" />
+    <ClCompile Include="Runtime\RenderRuntime.cpp" />
+    <ClCompile Include="Scene\Camera.cpp" />
+    <ClCompile Include="Scene\RenderSceneManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D3D12\d3dx12.h" />
+    <ClInclude Include="D3D12\DDSTextureLoader.h" />
+    <ClInclude Include="D3D12\MathUtilities.h" />
+    <ClInclude Include="D3D12\D3D12Utility.h" />
+    <ClInclude Include="D3D12\GraphicsDeviceManager.h" />
+    <ClInclude Include="Geometry\GeometryGenerator.h" />
+    <ClInclude Include="Platform\D3D12RenderHost.h" />
+    <ClInclude Include="Platform\GameTimer.h" />
+    <ClInclude Include="Platform\HandlerWndMsgProc.h" />
+    <ClInclude Include="Platform\WindowsManager.h" />
+    <ClInclude Include="Public\Mayohoshi.h" />
+    <ClInclude Include="Public\MayohoshiRender.h" />
+    <ClInclude Include="Public\MayohoshiTypes.h" />
+    <ClInclude Include="RenderData\DescriptorHeapManager.h" />
+    <ClInclude Include="RenderData\FrameResource.h" />
+    <ClInclude Include="RenderData\Geometry.h" />
+    <ClInclude Include="RenderData\Material.h" />
+    <ClInclude Include="RenderData\PipelineResourceManager.h" />
+    <ClInclude Include="RenderData\RenderResourceManager.h" />
+    <ClInclude Include="RenderData\ShaderResource.h" />
+    <ClInclude Include="RenderData\Texture.h" />
+    <ClInclude Include="RenderData\UploadBuffer.h" />
+    <ClInclude Include="Runtime\RenderRuntime.h" />
+    <ClInclude Include="Scene\Camera.h" />
+    <ClInclude Include="Scene\InstanceManager.h" />
+    <ClInclude Include="Scene\Light.h" />
+    <ClInclude Include="Scene\MotionParam.h" />
+    <ClInclude Include="Scene\Render.h" />
+    <ClInclude Include="Scene\RenderItem.h" />
+    <ClInclude Include="Scene\RenderLayer.h" />
+    <ClInclude Include="Scene\RenderSceneManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shaders\Basic.hlsl" />
+    <None Include="..\Shaders\Fragment.hlsl" />
+    <None Include="..\Shaders\Fragment_NPR.hlsl" />
+    <None Include="..\Shaders\Light.hlsl" />
+    <None Include="..\Shaders\Skycube.hlsl" />
+    <None Include="..\Shaders\Vertex_AniWave.hlsl" />
+    <None Include="..\Shaders\Vertex_Common.hlsl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

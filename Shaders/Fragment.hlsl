@@ -1,4 +1,4 @@
-#include "Basic.hlsl"
+#include "Light.hlsl"
 
 // ==== POM 辅助函数 ====
 // 构建正交化的 TBN，确保 T 与 N 正交

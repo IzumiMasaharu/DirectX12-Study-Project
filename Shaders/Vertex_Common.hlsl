@@ -4,13 +4,15 @@ VertexOut VS(VertexIn vin, uint instanceID : SV_InstanceID)
 {
 	VertexOut vout = (VertexOut)0.0f;
 
-	InstanceData instance = gInstanceData[instanceID];
+	InstanceData instance = instanceDataBuffer[instanceID];
 	float4x4 worldTransform = instance.worldTransform;
 	float4x4 normalMatrix = instance.normalMatrix;
 	float4x4 textureTransform = instance.textureTransform;
 	uint materialIndex = instance.materialIndex;
 
 	vout.materialIndex = materialIndex;
+	vout.textureTableIndex = instance.textureTableIndex;
+	vout.textureFlags = instance.textureFlags;
 
 	MaterialData materialData = materialDataBuffer[materialIndex];
 

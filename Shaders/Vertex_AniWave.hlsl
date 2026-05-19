@@ -1,8 +1,19 @@
 #include "Basic.hlsl"
 
-VertexOut WaveVS(VertexIn vin)
+VertexOut WaveVS(VertexIn vin, uint instanceID : SV_InstanceID)
 {
 	VertexOut vout;
+	InstanceData instance = instanceDataBuffer[instanceID];
+	float4x4 worldTransform = instance.worldTransform;
+	float4x4 normalMatrix = instance.normalMatrix;
+	float4x4 textureTransform = instance.textureTransform;
+	uint materialIndex = instance.materialIndex;
+
+	vout.materialIndex = materialIndex;
+	vout.textureTableIndex = instance.textureTableIndex;
+	vout.textureFlags = instance.textureFlags;
+
+	MaterialData materialData = materialDataBuffer[materialIndex];
 
 	// 世界空间位置
 	float4 posW = mul(float4(vin.pos, 1.0f), worldTransform);
@@ -47,7 +58,7 @@ VertexOut WaveVS(VertexIn vin)
 	float dx = (heightX - waveHeight) / epsilon;
 	float dz = (heightZ - waveHeight) / epsilon;
 	float3 normal = normalize(float3(-dx, 1.0f, -dz));
-	vout.normalW = mul(normal, normalMatrix);
+	vout.normalW = mul(normal, (float3x3)normalMatrix);
 
 	// ==== Tangent ====
 	float3 approxTangent = float3(1.0f, 0.0f, 0.0f);
@@ -61,7 +72,8 @@ VertexOut WaveVS(VertexIn vin)
 	vout.posW = posW.xyz;
 
 	// ==== UV 流动 ====
-	vout.texCoord = vin.texCoord;
+	float4 texCoord = mul(float4(vin.texCoord, 0.0f, 1.0f), materialData.materialTransform);
+	vout.texCoord = mul(texCoord, textureTransform).xy;
 
 	// 主流方向
 	float2 flowDir = float2(1.0, 0.3);

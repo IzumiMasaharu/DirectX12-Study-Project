@@ -15,12 +15,13 @@ struct SkycubeVertexOut
 	float3 posL     : POSITION;		// 局部空间坐标
 };
 
-SkycubeVertexOut SkycubeVS(SkycubeVertexIn vin)
+SkycubeVertexOut SkycubeVS(SkycubeVertexIn vin, uint instanceID : SV_InstanceID)
 {
 	SkycubeVertexOut vout = (SkycubeVertexOut)0.0f;
+	InstanceData instance = instanceDataBuffer[instanceID];
 
 	vout.posL = vin.pos;
-	float4 posW = mul(float4(vin.pos, 1.0f), worldTransform);
+	float4 posW = mul(float4(vin.pos, 1.0f), instance.worldTransform);
 	posW.xyz += gEyePosW;	// 让天空盒跟随摄像机位置移动
 	vout.posH = mul(posW, gViewProj).xyww;
 

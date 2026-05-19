@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mayohoshi-Render", "Mayohoshi-Render\Mayohoshi-Render.vcxproj", "{F40D8A30-DBB3-409B-A209-AC82A4293724}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MayohoshiRenderLib", "Mayohoshi-Render\MayohoshiRenderLib.vcxproj", "{7F20F437-B03B-4A06-A3B5-73323ED59F5B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{F40D8A30-DBB3-409B-A209-AC82A4293724}.Release|x64.Build.0 = Release|x64
 		{F40D8A30-DBB3-409B-A209-AC82A4293724}.Release|x86.ActiveCfg = Release|Win32
 		{F40D8A30-DBB3-409B-A209-AC82A4293724}.Release|x86.Build.0 = Release|Win32
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Debug|x64.ActiveCfg = Debug|x64
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Debug|x64.Build.0 = Debug|x64
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Debug|x86.ActiveCfg = Debug|Win32
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Debug|x86.Build.0 = Debug|Win32
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Release|x64.ActiveCfg = Release|x64
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Release|x64.Build.0 = Release|x64
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Release|x86.ActiveCfg = Release|Win32
+		{7F20F437-B03B-4A06-A3B5-73323ED59F5B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

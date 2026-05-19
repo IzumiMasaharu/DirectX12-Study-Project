@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -43,13 +43,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -78,6 +78,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>$(ProjectDir)Public;$(SolutionDir)Examples;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -93,6 +94,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>$(ProjectDir)Public;$(SolutionDir)Examples;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,6 +111,7 @@
       <ConformanceMode>false</ConformanceMode>
       <FloatingPointModel>Precise</FloatingPointModel>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir)Public;$(SolutionDir)Examples;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,6 +127,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>$(ProjectDir)Public;$(SolutionDir)Examples;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,50 +137,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="DDSTextureLoader.cpp" />
-    <ClCompile Include="DxApp.cpp" />
-    <ClCompile Include="DxTools.cpp" />
-    <ClCompile Include="DxUtil.cpp" />
-    <ClCompile Include="FrameResource.cpp" />
-    <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="GeometryGenerator.cpp" />
-    <ClCompile Include="GraphicsDeviceManager.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="MotionParam.h" />
-    <ClCompile Include="PipelineResourceManager.cpp" />
-    <ClCompile Include="RenderApp.cpp" />
-    <ClCompile Include="DDSTextureLoader.h" />
-    <ClCompile Include="RenderResourceManager.cpp" />
-    <ClCompile Include="RenderSceneManager.cpp" />
-    <ClCompile Include="WindowsManager.cpp" />
-    <ClCompile Include="WindowsManager.h" />
+    <ClCompile Include="Demo\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="DxApp.h" />
-    <ClInclude Include="DxTools.h" />
-    <ClInclude Include="DxUtil.h" />
-    <ClInclude Include="FrameResource.h" />
-    <ClInclude Include="GameTimer.h" />
-    <ClInclude Include="GeometryGenerator.h" />
-    <ClInclude Include="GraphicsDeviceManager.h" />
-    <ClInclude Include="HandlerWndMsgProc.h" />
-    <ClInclude Include="InstanceManager.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="PipelineResourceManager.h" />
-    <ClInclude Include="Render.h" />
-    <ClInclude Include="RenderApp.h" />
-    <ClInclude Include="RenderItem.h" />
-    <ClInclude Include="RenderResourceManager.h" />
-    <ClInclude Include="RenderSceneManager.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="ShaderResource.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="UploadBuffer.h" />
-    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="..\Examples\DemoScene.h" />
+    <ClInclude Include="WinResources\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Resources\Icon\Render.ico" />
@@ -195,22 +160,22 @@
     <Image Include="..\Resources\Textures\wood.dds" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Shaders\Basic.hlsl" />
-    <FxCompile Include="..\Shaders\Fragment.hlsl" />
-    <FxCompile Include="..\Shaders\Fragment_NPR.hlsl" />
-    <FxCompile Include="..\Shaders\Light.hlsl" />
-    <FxCompile Include="..\Shaders\Skycube.hlsl" />
-    <FxCompile Include="..\Shaders\Vertex_AniWave.hlsl" />
-    <FxCompile Include="..\Shaders\Vertex_Common.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\Resources\Models\Nailong.obj" />
+    <None Include="..\Examples\ExternalWindowDemo.cpp" />
+    <None Include="..\Resources\Models\Nailong.obj" />
+    <None Include="..\Resources\Textures\normalToDepth.py" />
+    <None Include="..\Resources\Textures\pngTodds.py" />
+    <None Include="..\Resources\Textures\texconv.exe" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\Models\skull.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Mayohoshi-Render.rc" />
+    <ResourceCompile Include="WinResources\Mayohoshi-Render.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="MayohoshiRenderLib.vcxproj">
+      <Project>{7F20F437-B03B-4A06-A3B5-73323ED59F5B}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
