@@ -391,8 +391,16 @@ void RenderApp::LoadTexture()
 		tex->name = staticTexNames[i];
 		tex->srvHeapIndex = srvIndex++;
 
-		ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
-			d3dDevice.Get(), commandList.Get(), staticTexFilepathes[i].c_str(), tex->resource, tex->uploadHeap));
+		HRESULT hr = DirectX::CreateDDSTextureFromFile12(
+			d3dDevice.Get(), commandList.Get(), staticTexFilepathes[i].c_str(), tex->resource, tex->uploadHeap);
+		if (FAILED(hr))
+		{
+			throw DxException(
+				hr,
+				L"LoadTexture: " + AnsiToWstring(tex->name) + L" (" + staticTexFilepathes[i] + L")",
+				AnsiToWstring(__FILE__),
+				__LINE__);
+		}
 
 		textures[tex->name] = std::move(tex);
 	}
@@ -403,8 +411,16 @@ void RenderApp::LoadTexture()
 		tex->name = cubeTexNames[i];
 		tex->srvHeapIndex = srvIndex++;
 
-		ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(
-			d3dDevice.Get(), commandList.Get(), cubeTexFilepathes[i].c_str(), tex->resource, tex->uploadHeap));
+		HRESULT hr = DirectX::CreateDDSTextureFromFile12(
+			d3dDevice.Get(), commandList.Get(), cubeTexFilepathes[i].c_str(), tex->resource, tex->uploadHeap);
+		if (FAILED(hr))
+		{
+			throw DxException(
+				hr,
+				L"LoadTexture: " + AnsiToWstring(tex->name) + L" (" + cubeTexFilepathes[i] + L")",
+				AnsiToWstring(__FILE__),
+				__LINE__);
+		}
 
 		textures[tex->name] = std::move(tex);
 	}

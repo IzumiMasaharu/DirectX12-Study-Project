@@ -1244,7 +1244,10 @@ static HRESULT CreateD3DResources12(
     ComPtr<ID3D12Resource>& textureUploadHeap
 )
 {
-    if (device == nullptr)
+    if (device == nullptr || cmdList == nullptr)
+        return E_POINTER;
+
+    if (initData == nullptr)
         return E_POINTER;
 
     if (forceSRGB)
@@ -2155,7 +2158,7 @@ HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
         *alphaMode = DDS_ALPHA_MODE_UNKNOWN;
     }
 
-    if (!device || !szFileName)
+    if (!device || !cmdList || !szFileName)
     {
         return E_INVALIDARG;
     }
