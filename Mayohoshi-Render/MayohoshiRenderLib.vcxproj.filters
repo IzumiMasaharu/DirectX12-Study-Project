@@ -1,73 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Public"><UniqueIdentifier>{4D18BF88-95A8-4F1D-8298-58E87F54ED46}</UniqueIdentifier></Filter>
-    <Filter Include="Runtime"><UniqueIdentifier>{BB1D5EF5-D499-4357-8981-C9B2C88E9074}</UniqueIdentifier></Filter>
-    <Filter Include="D3D12"><UniqueIdentifier>{27F4EAFE-F34E-4BA8-9662-A8ED57168640}</UniqueIdentifier></Filter>
-    <Filter Include="Platform"><UniqueIdentifier>{67429F12-813C-4C2B-A2B4-17448B52BC27}</UniqueIdentifier></Filter>
-    <Filter Include="Scene"><UniqueIdentifier>{DD42BE3E-A8F4-4B3B-97C6-CB37B0888A32}</UniqueIdentifier></Filter>
-    <Filter Include="RenderData"><UniqueIdentifier>{29E05E7C-91C1-4694-9075-276A4EC743CB}</UniqueIdentifier></Filter>
-    <Filter Include="Geometry"><UniqueIdentifier>{E4BDF805-C754-48C6-9309-571B74650423}</UniqueIdentifier></Filter>
-    <Filter Include="Shaders"><UniqueIdentifier>{AA7B334E-C7DB-45B9-859A-A606F18F6B08}</UniqueIdentifier></Filter>
+    <Filter Include="Public">
+      <UniqueIdentifier>{4D18BF88-95A8-4F1D-8298-58E87F54ED46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Runtime">
+      <UniqueIdentifier>{BB1D5EF5-D499-4357-8981-C9B2C88E9074}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D3D12">
+      <UniqueIdentifier>{27F4EAFE-F34E-4BA8-9662-A8ED57168640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{67429F12-813C-4C2B-A2B4-17448B52BC27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{DD42BE3E-A8F4-4B3B-97C6-CB37B0888A32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RenderData">
+      <UniqueIdentifier>{29E05E7C-91C1-4694-9075-276A4EC743CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Geometry">
+      <UniqueIdentifier>{E4BDF805-C754-48C6-9309-571B74650423}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{AA7B334E-C7DB-45B9-859A-A606F18F6B08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3D12\DDSTextureLoader.cpp"><Filter>D3D12</Filter></ClCompile>
-    <ClCompile Include="D3D12\MathUtilities.cpp"><Filter>D3D12</Filter></ClCompile>
-    <ClCompile Include="D3D12\D3D12Utility.cpp"><Filter>D3D12</Filter></ClCompile>
-    <ClCompile Include="D3D12\GraphicsDeviceManager.cpp"><Filter>D3D12</Filter></ClCompile>
-    <ClCompile Include="Geometry\GeometryGenerator.cpp"><Filter>Geometry</Filter></ClCompile>
-    <ClCompile Include="Platform\D3D12RenderHost.cpp"><Filter>Platform</Filter></ClCompile>
-    <ClCompile Include="Platform\GameTimer.cpp"><Filter>Platform</Filter></ClCompile>
-    <ClCompile Include="Platform\WindowsManager.cpp"><Filter>Platform</Filter></ClCompile>
-    <ClCompile Include="RenderData\DescriptorHeapManager.cpp"><Filter>RenderData</Filter></ClCompile>
-    <ClCompile Include="RenderData\FrameResource.cpp"><Filter>RenderData</Filter></ClCompile>
-    <ClCompile Include="RenderData\PipelineResourceManager.cpp"><Filter>RenderData</Filter></ClCompile>
-    <ClCompile Include="RenderData\RenderResourceManager.cpp"><Filter>RenderData</Filter></ClCompile>
-    <ClCompile Include="Runtime\MayohoshiRender.cpp"><Filter>Runtime</Filter></ClCompile>
-    <ClCompile Include="Runtime\RenderRuntime.cpp"><Filter>Runtime</Filter></ClCompile>
-    <ClCompile Include="Scene\Camera.cpp"><Filter>Scene</Filter></ClCompile>
-    <ClCompile Include="Scene\RenderSceneManager.cpp"><Filter>Scene</Filter></ClCompile>
+    <ClCompile Include="D3D12\DDSTextureLoader.cpp">
+      <Filter>D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\MathUtilities.cpp">
+      <Filter>D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12\D3D12Utility.cpp">
+      <Filter>D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\GeometryGenerator.cpp">
+      <Filter>Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform\D3D12RenderHost.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform\GameTimer.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform\WindowsManager.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderData\DescriptorHeapManager.cpp">
+      <Filter>RenderData</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderData\FrameResource.cpp">
+      <Filter>RenderData</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderData\PipelineResourceManager.cpp">
+      <Filter>RenderData</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderData\RenderResourceManager.cpp">
+      <Filter>RenderData</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\MayohoshiRender.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\RenderRuntime.cpp">
+      <Filter>Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Camera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\RenderSceneManager.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3D12\d3dx12.h"><Filter>D3D12</Filter></ClInclude>
-    <ClInclude Include="D3D12\DDSTextureLoader.h"><Filter>D3D12</Filter></ClInclude>
-    <ClInclude Include="D3D12\MathUtilities.h"><Filter>D3D12</Filter></ClInclude>
-    <ClInclude Include="D3D12\D3D12Utility.h"><Filter>D3D12</Filter></ClInclude>
-    <ClInclude Include="D3D12\GraphicsDeviceManager.h"><Filter>D3D12</Filter></ClInclude>
-    <ClInclude Include="Geometry\GeometryGenerator.h"><Filter>Geometry</Filter></ClInclude>
-    <ClInclude Include="Platform\D3D12RenderHost.h"><Filter>Platform</Filter></ClInclude>
-    <ClInclude Include="Platform\GameTimer.h"><Filter>Platform</Filter></ClInclude>
-    <ClInclude Include="Platform\HandlerWndMsgProc.h"><Filter>Platform</Filter></ClInclude>
-    <ClInclude Include="Platform\WindowsManager.h"><Filter>Platform</Filter></ClInclude>
-    <ClInclude Include="Public\Mayohoshi.h"><Filter>Public</Filter></ClInclude>
-    <ClInclude Include="Public\MayohoshiRender.h"><Filter>Public</Filter></ClInclude>
-    <ClInclude Include="Public\MayohoshiTypes.h"><Filter>Public</Filter></ClInclude>
-    <ClInclude Include="RenderData\DescriptorHeapManager.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\FrameResource.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\Geometry.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\Material.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\PipelineResourceManager.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\RenderResourceManager.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\ShaderResource.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\Texture.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="RenderData\UploadBuffer.h"><Filter>RenderData</Filter></ClInclude>
-    <ClInclude Include="Runtime\RenderRuntime.h"><Filter>Runtime</Filter></ClInclude>
-    <ClInclude Include="Scene\Camera.h"><Filter>Scene</Filter></ClInclude>
-    <ClInclude Include="Scene\InstanceManager.h"><Filter>Scene</Filter></ClInclude>
-    <ClInclude Include="Scene\Light.h"><Filter>Scene</Filter></ClInclude>
-    <ClInclude Include="Scene\MotionParam.h"><Filter>Scene</Filter></ClInclude>
-    <ClInclude Include="Scene\Render.h"><Filter>Scene</Filter></ClInclude>
-    <ClInclude Include="Scene\RenderItem.h"><Filter>Scene</Filter></ClInclude>
-    <ClInclude Include="Scene\RenderLayer.h"><Filter>Scene</Filter></ClInclude>
-    <ClInclude Include="Scene\RenderSceneManager.h"><Filter>Scene</Filter></ClInclude>
+    <ClInclude Include="D3D12\d3dx12.h">
+      <Filter>D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\DDSTextureLoader.h">
+      <Filter>D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\MathUtilities.h">
+      <Filter>D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12\D3D12Utility.h">
+      <Filter>D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\GeometryGenerator.h">
+      <Filter>Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform\D3D12RenderHost.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform\GameTimer.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform\HandlerWndMsgProc.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform\WindowsManager.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Mayohoshi.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\MayohoshiRender.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\MayohoshiTypes.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\DescriptorHeapManager.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\FrameResource.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\Geometry.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\Material.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\PipelineResourceManager.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\RenderResourceManager.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\ShaderResource.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\Texture.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData\UploadBuffer.h">
+      <Filter>RenderData</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\RenderRuntime.h">
+      <Filter>Runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Camera.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\InstanceManager.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Light.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\MotionParam.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Render.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\RenderItem.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\RenderLayer.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\RenderSceneManager.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Shaders\Basic.hlsl"><Filter>Shaders</Filter></None>
-    <None Include="..\Shaders\Fragment.hlsl"><Filter>Shaders</Filter></None>
-    <None Include="..\Shaders\Fragment_NPR.hlsl"><Filter>Shaders</Filter></None>
-    <None Include="..\Shaders\Light.hlsl"><Filter>Shaders</Filter></None>
-    <None Include="..\Shaders\Skycube.hlsl"><Filter>Shaders</Filter></None>
-    <None Include="..\Shaders\Vertex_AniWave.hlsl"><Filter>Shaders</Filter></None>
-    <None Include="..\Shaders\Vertex_Common.hlsl"><Filter>Shaders</Filter></None>
+    <None Include="..\Shaders\Basic.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Fragment.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Fragment_NPR.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Light.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Skycube.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Vertex_AniWave.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Vertex_Common.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

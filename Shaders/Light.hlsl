@@ -142,5 +142,3 @@ float4 ComputeAllLights(Light lights[MAX_NUM_LIGHTS], MaterialData material,floa
 
     return float4(result, 0.0f);
 }
-
-

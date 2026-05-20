@@ -89,7 +89,6 @@
     <ClCompile Include="D3D12\DDSTextureLoader.cpp" />
     <ClCompile Include="D3D12\MathUtilities.cpp" />
     <ClCompile Include="D3D12\D3D12Utility.cpp" />
-    <ClCompile Include="D3D12\GraphicsDeviceManager.cpp" />
     <ClCompile Include="Geometry\GeometryGenerator.cpp" />
     <ClCompile Include="Platform\D3D12RenderHost.cpp" />
     <ClCompile Include="Platform\GameTimer.cpp" />
@@ -108,7 +107,6 @@
     <ClInclude Include="D3D12\DDSTextureLoader.h" />
     <ClInclude Include="D3D12\MathUtilities.h" />
     <ClInclude Include="D3D12\D3D12Utility.h" />
-    <ClInclude Include="D3D12\GraphicsDeviceManager.h" />
     <ClInclude Include="Geometry\GeometryGenerator.h" />
     <ClInclude Include="Platform\D3D12RenderHost.h" />
     <ClInclude Include="Platform\GameTimer.h" />
